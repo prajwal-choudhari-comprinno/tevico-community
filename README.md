@@ -1,12 +1,91 @@
 # Tevico
 
-Extensible infrastructure auditing framework
+Tevico is an extensible open-source, Python-based auditing framework that empowers users to comprehensively scan their infrastructure and apps for compliance adherence, security vulnerabilities, and custom operational checks.
 
-# Community Code of Conduct
+## Table of Contents
 
-Tevico follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/master/code-of-conduct.md).
+- [Getting Started](#getting-started)
+- [CLI Examples](#cli-examples)
+    - [init](#init-getting-started-with-the-project)
+    - [install](#install-install-framework-entities-from-remote-repos)
+    - [add](#add-add-an-entity-to-the-project)
+    - [run](#run-run-the-project-with-given-configuration)
+- [Community Code of Conduct](#community-code-of-conduct)
+- [License](#license)
 
-# License
+## Getting Started
+
+TODO: Add stuff here.
+
+## CLI Examples
+
+Following CLI params will help you to get an idea about the project and its capabilitites. 
+
+
+### `init`: Getting started with the project.
+
+The `init` command will setup the default configurations and install basic scans to get you started. The `init` command in turn calls `install` command once the configuration setup is completed.
+
+```bash
+tevico init
+```
+
+### `install`: Install framework entities from remote repos
+
+The `install` command helps you to install all dependent platforms, scans, compliance and communication channels.
+
+```bash
+tevico install <ENTITY>
+```
+
+Eg.:-
+
+```bash
+## To install all entities
+tevico install
+
+## To install all communications
+tevico install communications
+
+## To install all platforms
+tevico install platforms
+
+## To install all scans
+tevico install scans
+```
+
+### `add`: Add an entity to the project
+
+The `add` command helps you add an entity to the project.
+
+```bash
+tevico add <ENTITY> <NAME>
+```
+
+Eg.:-
+
+```bash
+## To add a new platform
+tevico add platform aws
+
+## To add a new scan
+tevico add scan aws_iam_role
+
+## To add a new communication channel
+tevico add communication slack
+```
+
+### `run`: Run the project with given configuration
+
+```bash
+tevico run
+```
+
+## Community Code of Conduct
+
+Tevico current follows the CNCF Code of Conduct. You can get the details of the code of conduct [here](https://github.com/cncf/foundation/blob/master/code-of-conduct.md). For any violations of this code of conduct you can connect with us over an [email](mailto:).
+
+## License
 
 Copyright 2024 Tevico
 
