@@ -2,5 +2,5 @@
 
 class Cli():
     
-    def init():
+    def init(self):
         pass
