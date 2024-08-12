@@ -9,12 +9,12 @@ class CommandsEnum(str, Enum):
     
 class EntitiesEnum(str, Enum):
     scan = 'scan'
-    platform = 'platform'
+    provider = 'provider'
     report = 'report'
     profile = 'profile'
     channel = 'channel'
     
-class FrameworkPillar(str, Enum):
+class FrameworkDimension(str, Enum):
     cost = 'cost'
     operations = 'operations'
     performance = 'performance'

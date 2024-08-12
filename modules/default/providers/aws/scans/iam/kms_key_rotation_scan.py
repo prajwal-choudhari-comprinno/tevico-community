@@ -1,20 +1,23 @@
 import boto3
 
 from typing import Any, List
-from tevico.framework.core.enums import FrameworkPillar
+from tevico.framework.core.enums import FrameworkDimension
 from tevico.framework.entities.scan.scan import Scan
-from tevico.framework.entities.scan.scan_model import ScanModel
+from tevico.framework.entities.report.scan_model import ScanReport
 
 
 class KMSKeyRotationScan(Scan):
     
     __scan_name = 'aws_kms_key_rotation_scan'
     
-    def __get_scan_model(self, platform: str, profile: str, framework_pillar: List[FrameworkPillar]) -> ScanModel:
-        scan = ScanModel(
+    framework_dimensions = [FrameworkDimension.security]
+    
+    def __get_scan_model(self, provider: str, profile: str) -> ScanReport:
+        scan = ScanReport(
             name=self.__scan_name,
-            platform=platform, profile=profile,
-            framework_pillar=framework_pillar
+            provider=provider,
+            profile=profile,
+            framework_dimensions=self.framework_dimensions
         )
         
         scan.description = """Rotating AWS KMS keys is the process of periodically generating new encryption keys to replace old ones.This is a critical security best practice to mitigate the risk of compromised keys."""
@@ -25,12 +28,11 @@ class KMSKeyRotationScan(Scan):
         
         return scan
     
-    def execute(self, platform: str, profile: str, connection: boto3.Session, framework_pillar: List[FrameworkPillar]) -> ScanModel:
+    def execute(self, provider: str, profile: str, connection: boto3.Session) -> ScanReport:
         # Initiate the scan model
         scan = self.__get_scan_model(
-            platform=platform,
-            profile=profile,
-            framework_pillar=framework_pillar
+            provider=provider,
+            profile=profile
         )
         
         # Define required variables for metadata and scan

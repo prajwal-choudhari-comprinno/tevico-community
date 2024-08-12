@@ -8,7 +8,7 @@ def parse_args() -> None:
     epilog=textwrap.dedent("""
         Additional Help:
         Visit our GitHub page for more information - https://github.com/abhaynpai/tevico
-        For enterprise edition of this platform visit - https://tevi.co
+        For enterprise edition of this provider visit - https://tevi.co
     """)
     
     parser = argparse.ArgumentParser(prog="tevico", formatter_class=argparse.RawDescriptionHelpFormatter, epilog=epilog)
@@ -25,8 +25,8 @@ def parse_args() -> None:
     install_scan_subparser = install_entity_subparser.add_parser('scan')
     install_scan_subparser.add_argument('entity_name')
     
-    install_platform_subparser = install_entity_subparser.add_parser('platform')
-    install_platform_subparser.add_argument('entity_name')
+    install_provider_subparser = install_entity_subparser.add_parser('provider')
+    install_provider_subparser.add_argument('entity_name')
     
     install_report_subparser = install_entity_subparser.add_parser('report')
     install_report_subparser.add_argument('entity_name')
@@ -47,8 +47,8 @@ def parse_args() -> None:
     add_scan_subparser = add_entity_subparser.add_parser('scan')
     add_scan_subparser.add_argument('entity_name')
     
-    add_platform_subparser = add_entity_subparser.add_parser('platform')
-    add_platform_subparser.add_argument('entity_name')
+    add_provider_subparser = add_entity_subparser.add_parser('provider')
+    add_provider_subparser.add_argument('entity_name')
     
     add_report_subparser = add_entity_subparser.add_parser('report')
     add_report_subparser.add_argument('entity_name')

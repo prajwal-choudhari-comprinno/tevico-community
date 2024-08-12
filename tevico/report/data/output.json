@@ -1,0 +1,31 @@
+[
+  {
+    "name": "aws_kms_key_rotation_scan",
+    "provider": "AWS",
+    "passed": false,
+    "framework_dimensions": [
+      "security"
+    ],
+    "profile": "center_for_internet_security",
+    "description": "Rotating AWS KMS keys is the process of periodically generating new encryption keys to replace old ones.This is a critical security best practice to mitigate the risk of compromised keys.",
+    "success_message": "Hooray!!! All your keys are rotating on a timely basis.",
+    "failure_message": "Oh Snap!!! Some of your keys are not rotated on a timely basis. You need to fix this ASAP! Check metadata for more insights.",
+    "service_name": "",
+    "resource_ids": null,
+    "metadata": {
+      "key_rotation_status": {
+        "3f9acc07-2899-4992-b782-a2c1d800089d": true,
+        "4bda0bd8-ec6f-44cb-91c4-c425b67fbb92": true,
+        "7d83bbd0-6dc0-4b3e-bf61-1d83c0d5da5d": true,
+        "83055aab-d340-4706-b4ec-39a6312f7252": false,
+        "8d41ea19-60b3-457a-a8b3-cfe06dd8f661": true,
+        "94a2a762-2b3e-41e7-a66c-de909128eeb2": true,
+        "9cc123c6-9bd4-41d8-afa5-9f206b833aed": true,
+        "aa5218f5-a4c5-4812-b72f-3fee969b63b8": true,
+        "bfefbdec-5067-41cd-8a75-92b818d2a96b": true,
+        "c11d9f1b-690c-4c36-a120-f568798654e0": true
+      }
+    },
+    "created_on": "2024-08-12T21:42:56.482390"
+  }
+]

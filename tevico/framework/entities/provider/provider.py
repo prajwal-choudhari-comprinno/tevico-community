@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from tevico.framework.entities.platform.platform_model import PlatformModel
-from tevico.framework.entities.platform.profile_model import ProfileModel
-from tevico.framework.entities.scan.scan_model import ScanModel
+from tevico.framework.entities.provider.provider_model import ProviderModel
+from tevico.framework.entities.profile.profile_model import ProfileModel
+from tevico.framework.entities.report.scan_model import ScanReport
 
 class Provider(ABC):
 
     @property
     @abstractmethod
-    def instance(self) -> PlatformModel:
+    def instance(self) -> ProviderModel:
         raise NotImplementedError()
 
     @property
@@ -26,7 +26,7 @@ class Provider(ABC):
         raise NotImplementedError()
     
     @abstractmethod
-    def execute_scans(self) -> List[ScanModel]:
+    def execute_scans(self) -> List[ScanReport]:
         raise NotImplementedError()
     
     

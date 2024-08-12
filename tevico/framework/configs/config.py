@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class EntitiesConfig(BaseModel):
     channels: Optional[list[str]]
-    platforms: Optional[list[str]]
+    providers: Optional[list[str]]
     profiles: Optional[list[str]]
     scans: Optional[list[str]]
 

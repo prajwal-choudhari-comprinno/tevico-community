@@ -1,25 +1,25 @@
 import boto3
 
 from typing import List
-from modules.default.scans.kms_key_rotation_scan import KMSKeyRotationScan
-from tevico.framework.entities.platform.platform import Provider
-from tevico.framework.entities.platform.platform_model import PlatformModel
-from tevico.framework.entities.platform.profile_model import ProfileModel
+from modules.default.providers.aws.scans.iam.kms_key_rotation_scan import KMSKeyRotationScan
+from tevico.framework.entities.provider.provider import Provider
+from tevico.framework.entities.provider.provider_model import ProviderModel
+from tevico.framework.entities.profile.profile_model import ProfileModel
 from tevico.framework.entities.scan.scan import Scan
-from tevico.framework.entities.scan.scan_model import ScanModel
+from tevico.framework.entities.report.scan_model import ScanReport
 
 
-class AWSPlatform(Provider):
+class AWSProvider(Provider):
     
-    _instance: PlatformModel
+    _instance: ProviderModel
     
-    __platform_name: str = 'AWS'
+    __provider_name: str = 'AWS'
     
     def __init__(self) -> None:
-        self._instance = PlatformModel(name=self.__platform_name, profiles=self.define_profiles())
+        self._instance = ProviderModel(name=self.__provider_name, profiles=self.define_profiles())
     
     @property
-    def instance(self) -> PlatformModel:
+    def instance(self) -> ProviderModel:
         return self._instance
 
     @property
@@ -47,13 +47,13 @@ class AWSPlatform(Provider):
         return profiles
 
 
-    def execute_scans(self) -> List[ScanModel]:
+    def execute_scans(self) -> List[ScanReport]:
         print(self._instance.profiles)
-        result: List[ScanModel] = []
+        result: List[ScanReport] = []
         for profile in self._instance.profiles:
             for scan in profile.scans:
                 res = scan.execute(
-                    platform=self.__platform_name,
+                    provider=self.__provider_name,
                     profile=profile.name,
                     connection=self._instance.connection
                 )

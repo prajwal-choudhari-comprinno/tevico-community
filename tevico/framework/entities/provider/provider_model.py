@@ -3,10 +3,10 @@
 from typing import Any, Dict, List
 from pydantic import BaseModel, field_validator
 
-from tevico.framework.entities.platform.profile_model import ProfileModel
+from tevico.framework.entities.profile.profile_model import ProfileModel
 
 
-class PlatformModel(BaseModel):
+class ProviderModel(BaseModel):
     name: str
     profiles: List[ProfileModel] = []
     metadata: Dict[str, str] = {}

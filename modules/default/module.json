@@ -1,5 +1,5 @@
 {
-    "platforms": [
-        "aws_platform"
+    "providers": [
+        "aws_provider"
     ]
 }

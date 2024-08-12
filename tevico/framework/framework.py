@@ -3,9 +3,10 @@ import importlib
 import importlib.util
 import json
 from typing import List
+from unittest import result
 from tevico.framework.configs.config import TevicoConfig
-from tevico.framework.entities.platform.platform import Provider
-from tevico.framework.entities.scan.scan_model import ScanModel
+from tevico.framework.entities.provider.provider import Provider
+from tevico.framework.entities.report.scan_model import ScanReport
 
 class Framework():
     
@@ -14,8 +15,8 @@ class Framework():
     def __init__(self, config: TevicoConfig) -> None:
         self.tevico_config = config
     
-    def __get_platform_class(self, module_name: str, class_name: str):
-        module_spec = importlib.util.find_spec(module_name)
+    def __get_provider_class(self, package_name: str, class_name: str):
+        module_spec = importlib.util.find_spec(package_name)
         
         if module_spec is not None:
             module_type = importlib.util.module_from_spec(module_spec)
@@ -34,25 +35,30 @@ class Framework():
     def __get_modules_from_home(self):
         pass
     
-    def __get_platforms(self) -> List[Provider]:
+    def __get_providers(self) -> List[Provider]:
         """Get Local Modules
         """
-        platforms: List[Provider] = []
-        # for module in self.tevico_config.modules:
+        providers: List[Provider] = []
         
-        platform = self.__get_platform_class(module_name='modules.default.platforms.aws_platform', class_name='AWSPlatform')
-        if platform is not None:
-            platforms.append(platform())
+        provider = self.__get_provider_class(package_name='modules.default.providers.aws.provider', class_name='AWSProvider')
+        if provider is not None:
+            providers.append(provider())
             
-        return platforms
+        return providers
         
     def run(self):
-        platforms = self.__get_platforms()
-        print(platforms)
-        scans: List[ScanModel] = []
-        for p in platforms:
+        providers = self.__get_providers()
+        print(providers)
+        scans: List[ScanReport] = []
+        for p in providers:
             p.connect()
             result = p.execute_scans()
             scans.extend(result)
         
-        print([s.model_dump_json() for s in scans])
+        data = [s.model_dump(mode='json') for s in scans]
+        
+        
+        
+        with open('./tevico/report/data/output.json', 'w') as file:
+            json.dump(data, file, indent=2)
+        

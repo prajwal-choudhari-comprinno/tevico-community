@@ -32,7 +32,7 @@ tevico init
 
 ### `install`: Install framework entities from remote repos
 
-The `install` command helps you to install all dependent platforms, scans, profiles and channels.
+The `install` command helps you to install all dependent providers, scans, profiles and channels.
 
 ```bash
 tevico install <ENTITY>
@@ -47,8 +47,8 @@ tevico install
 ## To install all channels
 tevico install channels
 
-## To install all platforms
-tevico install platforms
+## To install all providers
+tevico install providers
 
 ## To install all scans
 tevico install scans
@@ -65,8 +65,8 @@ tevico add <ENTITY> <NAME>
 Eg.:-
 
 ```bash
-## To add a new platform
-tevico add platform aws
+## To add a new provider
+tevico add provider aws
 
 ## To add a new scan
 tevico add scan aws_iam_role
