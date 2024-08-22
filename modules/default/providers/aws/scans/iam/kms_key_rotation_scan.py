@@ -17,7 +17,7 @@ class KMSKeyRotationScan(Scan):
             name=self.__scan_name,
             provider=provider,
             profile=profile,
-            framework_dimensions=self.framework_dimensions
+            dimensions=self.framework_dimensions
         )
         
         scan.description = """Rotating AWS KMS keys is the process of periodically generating new encryption keys to replace old ones.This is a critical security best practice to mitigate the risk of compromised keys."""
@@ -28,7 +28,7 @@ class KMSKeyRotationScan(Scan):
         
         return scan
     
-    def execute(self, provider: str, profile: str, connection: boto3.Session) -> ScanReport:
+    def execute(self, profile: str, connection: boto3.Session) -> ScanReport:
         # Initiate the scan model
         scan = self.__get_scan_model(
             provider=provider,
@@ -64,4 +64,9 @@ class KMSKeyRotationScan(Scan):
         }
         
         return scan
+
+    @property
+    def name(self) -> str:
+        return self.__scan_name
+
 

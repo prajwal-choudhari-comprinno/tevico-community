@@ -5,12 +5,15 @@ import json
 from typing import List
 from unittest import result
 from tevico.framework.configs.config import TevicoConfig
+from tevico.framework.core.utils import CoreUtils
 from tevico.framework.entities.provider.provider import Provider
 from tevico.framework.entities.report.scan_model import ScanReport
 
 class Framework():
     
     tevico_config: TevicoConfig
+    
+    core_utils: CoreUtils = CoreUtils()
     
     def __init__(self, config: TevicoConfig) -> None:
         self.tevico_config = config
@@ -29,6 +32,9 @@ class Framework():
         
         return None
     
+    def __get_module_list(self, path) -> List[str]:
+        return []
+    
     def __get_modules_from_local(self):
         pass
     
@@ -40,7 +46,8 @@ class Framework():
         """
         providers: List[Provider] = []
         
-        provider = self.__get_provider_class(package_name='modules.default.providers.aws.provider', class_name='AWSProvider')
+        provider = self.core_utils.get_provider_class(package_name='modules.default.providers.aws.provider', class_name='AWSProvider')
+
         if provider is not None:
             providers.append(provider())
             
@@ -56,7 +63,6 @@ class Framework():
             scans.extend(result)
         
         data = [s.model_dump(mode='json') for s in scans]
-        
         
         
         with open('./tevico/report/data/output.json', 'w') as file:

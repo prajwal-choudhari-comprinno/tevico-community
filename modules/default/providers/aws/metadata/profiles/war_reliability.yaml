@@ -1,0 +1,16 @@
+name: Well Architected Review - Reliability Pillar
+scans:
+  - opensearch_service_domains_audit_logging_enabled
+  - opensearch_service_domains_cloudwatch_logging_enabled
+  - dynamodb_tables_pitr_enabled
+  - elb_logging_enabled
+  - cloudtrail_cloudwatch_logging_enabled
+  - awslambda_function_invoke_api_operations_cloudtrail_logging_enabled
+  - cloudformation_stacks_termination_protection_enabled
+  - rds_instance_integration_cloudwatch_logs
+  - rds_instance_multi_az
+  - rds_instance_deletion_protection
+  - rds_instance_backup_enabled
+  - rds_instance_enhanced_monitoring_enabled
+  - apigateway_restapi_logging_enabled
+  - apigatewayv2_api_access_logging_enabled

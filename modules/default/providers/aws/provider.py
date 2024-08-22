@@ -1,6 +1,7 @@
+import os
 import boto3
 
-from typing import List
+from typing import Any, Dict, List
 from modules.default.providers.aws.scans.iam.kms_key_rotation_scan import KMSKeyRotationScan
 from tevico.framework.entities.provider.provider import Provider
 from tevico.framework.entities.provider.provider_model import ProviderModel
@@ -11,53 +12,40 @@ from tevico.framework.entities.report.scan_model import ScanReport
 
 class AWSProvider(Provider):
     
-    _instance: ProviderModel
-    
     __provider_name: str = 'AWS'
     
     def __init__(self) -> None:
-        self._instance = ProviderModel(name=self.__provider_name, profiles=self.define_profiles())
+        super().__init__(os.path.dirname(__file__))
     
-    @property
-    def instance(self) -> ProviderModel:
-        return self._instance
 
     @property
     def is_connected(self) -> bool:
-        return self.instance.is_connected
+        return self.is_connected
 
-    def connect(self) -> None:
-        self._instance.connection = boto3.Session(profile_name='ssg-prod')
-        print(self._instance)
-
-    def define_profiles(self) -> List[ProfileModel]:
-        profiles: List[ProfileModel] = []
-        
-        cis_scans: List[Scan] = [
-            KMSKeyRotationScan()
-        ]
-        
-        cis_profile = ProfileModel(
-            name='center_for_internet_security',
-            scans=cis_scans
-        )
-        
-        profiles.append(cis_profile)
-        
-        return profiles
+    def connect(self) -> Any:
+        return boto3.Session(profile_name='ssg-prod')
 
 
-    def execute_scans(self) -> List[ScanReport]:
-        print(self._instance.profiles)
-        result: List[ScanReport] = []
-        for profile in self._instance.profiles:
-            for scan in profile.scans:
-                res = scan.execute(
-                    provider=self.__provider_name,
-                    profile=profile.name,
-                    connection=self._instance.connection
-                )
+    # def execute_scans(self) -> List[ScanReport]:
+    #     print(self.profiles)
+    #     result: List[ScanReport] = []
+    #     for profile in self.profiles:
+    #         for scan in profile.scans:
+    #             res = scan.execute(
+    #                 provider=self.__provider_name,
+    #                 profile=profile.name,
+    #                 connection=self.connection
+    #             )
                 
-                result.append(res)
+    #             result.append(res)
                 
-        return result
+    #     return result
+
+    @property
+    def name(self) -> str:
+        return self.__provider_name
+
+    @property
+    def metadata(self) -> Dict[str, str]:
+        return {}
+
