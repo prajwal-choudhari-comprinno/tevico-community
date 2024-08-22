@@ -14,18 +14,14 @@ class Scan(ABC):
         self.metadata = metadata
         super().__init__()
         
-    def get_report(self, profile: str, connection: Any) -> ScanReport:
-        scan_report = self.execute(profile=profile, connection=connection)
+    def get_report(self, profile_name: str, connection: Any) -> ScanReport:
+        scan_report = self.execute(connection=connection)
         scan_report.scan_metadata = self.metadata
+        scan_report.profile_name = profile_name
         return scan_report
     
-    @property
     @abstractmethod
-    def name(self) -> str:
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def execute(self, profile: str, connection: Any) -> ScanReport:
+    def execute(self, connection: Any) -> ScanReport:
         raise NotImplementedError()
     
     

@@ -23,23 +23,7 @@ class AWSProvider(Provider):
         return self.is_connected
 
     def connect(self) -> Any:
-        return boto3.Session(profile_name='ssg-prod')
-
-
-    # def execute_scans(self) -> List[ScanReport]:
-    #     print(self.profiles)
-    #     result: List[ScanReport] = []
-    #     for profile in self.profiles:
-    #         for scan in profile.scans:
-    #             res = scan.execute(
-    #                 provider=self.__provider_name,
-    #                 profile=profile.name,
-    #                 connection=self.connection
-    #             )
-                
-    #             result.append(res)
-                
-    #     return result
+        return boto3.Session()
 
     @property
     def name(self) -> str:

@@ -28,7 +28,7 @@ class KMSKeyRotationScan(Scan):
         
         return scan
     
-    def execute(self, profile: str, connection: boto3.Session) -> ScanReport:
+    def execute(self, connection: boto3.Session) -> ScanReport:
         # Initiate the scan model
         scan = self.__get_scan_model(
             provider=provider,
@@ -64,9 +64,5 @@ class KMSKeyRotationScan(Scan):
         }
         
         return scan
-
-    @property
-    def name(self) -> str:
-        return self.__scan_name
 
 

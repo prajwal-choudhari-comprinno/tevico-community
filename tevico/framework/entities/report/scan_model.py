@@ -55,11 +55,10 @@ class ScanMetadata(BaseModel):
 ######################################################################
 
 class ScanReport(BaseModel):
-    name: str
     passed: bool = True
-    scan_metadata: ScanMetadata
-    dimensions: List[FrameworkDimension]
-    profile: Optional[str] = None
-    resource_ids: Optional[str] = None
+    scan_metadata: Optional[ScanMetadata] = None
+    dimensions: List[FrameworkDimension] = []
+    profile_name: Optional[str] = None
+    resource_ids_status: Dict[str, bool] = {}
     report_metadata: Optional[Dict[str, Any]] = None
     created_on: datetime = datetime.now()

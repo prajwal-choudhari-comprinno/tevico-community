@@ -1,7 +1,4 @@
 from abc import ABC, abstractmethod
-from codecs import utf_16_be_decode
-import importlib
-import importlib.util
 import os
 from typing import Any, Dict, List
 
@@ -47,7 +44,6 @@ class Provider(ABC):
         return {}
 
     @property
-    @abstractmethod
     def is_connected(self) -> bool:
         return self.connection is not None
 
@@ -65,7 +61,7 @@ class Provider(ABC):
         for profile in self.profiles:
             for scan in profile.scans:
                 res = scan.get_report(
-                    profile=profile.name,
+                    profile_name=profile.name,
                     connection=self.connection
                 )
                 
@@ -118,8 +114,6 @@ class Provider(ABC):
         profiles: List[ProfileModel] = []
         
         profile_metadata_path = f'{self.provider_path}/metadata/profiles'
-        
-        print(f'Path = {profile_metadata_path}')
         
         for file in os.listdir(profile_metadata_path):
             print(f'File = {file}')

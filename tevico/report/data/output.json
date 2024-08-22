@@ -1,1 +1,48 @@
-[]
+[
+  {
+    "passed": true,
+    "scan_metadata": {
+      "provider": "aws",
+      "check_id": "opensearch_service_domains_audit_logging_enabled",
+      "check_title": "Check if Amazon Elasticsearch/Opensearch Service domains have audit logging enabled",
+      "check_aliases": [],
+      "check_type": [
+        "Identify",
+        "Logging"
+      ],
+      "service_name": "opensearch",
+      "sub_service_name": "",
+      "resource_id_template": "arn:partition:service:region:account-id:resource-id",
+      "severity": "low",
+      "resource_type": "AwsOpenSearchDomain",
+      "risk": "If logs are not enabled, monitoring of service use and threat analysis is not possible.",
+      "related_url": "",
+      "remediation": {
+        "code": {
+          "cli": "",
+          "native_iac": "",
+          "other": "",
+          "terraform": ""
+        },
+        "recommendation": {
+          "text": "Make sure you are logging information about Amazon Elasticsearch Service operations.",
+          "url": "https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/audit-logs.html"
+        }
+      },
+      "categories": [
+        "forensics-ready"
+      ],
+      "depends_on": [],
+      "related_to": [],
+      "notes": "",
+      "description": "Check if Amazon Elasticsearch/Opensearch Service domains have audit logging enabled",
+      "success_message": null,
+      "failure_message": null
+    },
+    "dimensions": [],
+    "profile_name": "Well Architected Review - Reliability Pillar",
+    "resource_ids_status": {},
+    "report_metadata": null,
+    "created_on": "2024-08-22T22:18:08.700667"
+  }
+]
