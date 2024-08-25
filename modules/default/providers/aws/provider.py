@@ -23,7 +23,7 @@ class AWSProvider(Provider):
         return self.is_connected
 
     def connect(self) -> Any:
-        return boto3.Session()
+        return boto3.Session(profile_name='ssg-prod')
 
     @property
     def name(self) -> str:

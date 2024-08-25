@@ -83,7 +83,6 @@ class Provider(ABC):
         
         for root, _, files in os.walk(self.provider_path):
             if file_name in files:
-                print(f'Path = {os.path.join(root, file_name)}')
                 return os.path.join(root, file_name)
         
         return None
@@ -104,7 +103,6 @@ class Provider(ABC):
         if scan_path is not None:
             module_name = self.utils.get_module_name(scan_path)
             cls = self.utils.get_provider_class(module_name, scan_name)
-            print(f'Class = {cls}')
             if cls is not None:
                 return cls(metadata)
         
@@ -116,7 +114,6 @@ class Provider(ABC):
         profile_metadata_path = f'{self.provider_path}/metadata/profiles'
         
         for file in os.listdir(profile_metadata_path):
-            print(f'File = {file}')
             if file.endswith('yaml'):
                 with open(os.path.join(profile_metadata_path, file), 'r') as f:
                     data = yaml.safe_load(f)
@@ -124,7 +121,7 @@ class Provider(ABC):
                         scan_list = data['scans']
                         scans: List[Scan] = []
                         for scan_name in scan_list:
-                            print(f'Scan Name = {scan_name}')
+                            print(f'Executing Scan = {scan_name}')
                             scan = self.load_scan(scan_name=scan_name)
                             if scan is not None:
                                 scans.append(scan)

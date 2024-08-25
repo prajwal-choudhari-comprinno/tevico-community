@@ -54,7 +54,6 @@ class Framework():
         
     def run(self):
         providers = self.__get_providers()
-        print(providers)
         scans: List[ScanReport] = []
         for p in providers:
             p.connect()

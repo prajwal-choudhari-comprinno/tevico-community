@@ -19,10 +19,9 @@ class opensearch_service_domains_audit_logging_enabled(Scan):
             domain_name = dn['DomainName']
             res = client.describe_domain(DomainName=domain_name)
             domain = res['DomainStatus']
-            if domain['LogPublishingOptions']['AUDIT_LOGS']['CloudWatchLogsLogGroupArn'] == '':
-                report.passed = False
-                report.resource_ids_status[domain_name] = False
-            else:
+            report.passed = False
+            report.resource_ids_status[domain_name] = False
+            if domain['LogPublishingOptions']['Options']['AUDIT_LOGS']['Enabled']:
                 report.passed = True
                 report.resource_ids_status[domain_name] = True
 

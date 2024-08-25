@@ -26,6 +26,5 @@ class CoreUtils():
         path = file_path.split(os.path.sep)
         path = path[path.index('modules'):]
         path[-1] = path[-1].replace('.py', '')
-        print(path)
         return '.'.join(path)
     
