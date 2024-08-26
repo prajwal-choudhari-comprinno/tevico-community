@@ -7,7 +7,7 @@ from tevico.framework.entities.scan.scan import Scan
 class cloudformation_stacks_termination_protection_enabled(Scan):
 
     def execute(self, connection: boto3.Session) -> ScanReport:
-        report = ScanReport()
+        report = ScanReport(name=__name__)
         client = connection.client('cloudformation')
         stacks = client.list_stacks()['StackSummaries']
         for stack in stacks:

@@ -12,7 +12,7 @@ class elb_logging_enabled(Scan):
         
         load_balancers = res['LoadBalancerDescriptions']
         
-        report = ScanReport()
+        report = ScanReport(name=__name__)
         
         for lb in load_balancers:
             lb_name = lb['LoadBalancerName']

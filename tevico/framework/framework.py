@@ -1,4 +1,5 @@
 
+from functools import reduce
 import importlib
 import importlib.util
 import json
@@ -55,14 +56,38 @@ class Framework():
     def run(self):
         providers = self.__get_providers()
         scans: List[ScanReport] = []
+        
+        OUTPUT_PATH = './tevico/report/data/output.json'
+        
         for p in providers:
-            p.connect()
-            result = p.execute_scans()
-            scans.extend(result)
+            try:
+                print(f'\n* Running scans for provider 🚀: {p.name}')
+                p.connect()
+                result = p.execute_scans()
+                scans.extend(result)
+            except Exception as e:
+                print(e)
         
         data = [s.model_dump(mode='json') for s in scans]
         
-        
-        with open('./tevico/report/data/output.json', 'w') as file:
+        with open(OUTPUT_PATH, 'w') as file:
             json.dump(data, file, indent=2)
+            
+        def accumulator(acc, scan):
+            acc['total'] += 1
+            if scan.passed:
+                acc['success'] += 1
+            else:
+                acc['failed'] += 1
+            return acc
         
+        # Create a dictionary output that has 2 keys - 'success' and 'failed' using reduce on the scans list
+        acc = reduce(accumulator, scans, { 'total': 0, 'success': 0, 'failed': 0 })
+        
+        print('\nScan Report Overview:')
+        print(f'#️⃣  Total    : {acc['total']}')
+        print(f'✅ Success  : {acc['success']}')
+        print(f'❌ Failed   : {acc['failed']}')
+        
+        print(f'\n📄 Output written to: {OUTPUT_PATH}')
+        print('\n👋👋👋 Bye!')

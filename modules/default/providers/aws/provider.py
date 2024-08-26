@@ -18,10 +18,6 @@ class AWSProvider(Provider):
         super().__init__(os.path.dirname(__file__))
     
 
-    @property
-    def is_connected(self) -> bool:
-        return self.is_connected
-
     def connect(self) -> Any:
         return boto3.Session(profile_name='ssg-prod')
 

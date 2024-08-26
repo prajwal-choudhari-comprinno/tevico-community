@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 import os
+from threading import Thread
 from typing import Any, Dict, List
 
 import yaml
@@ -54,20 +56,32 @@ class Provider(ABC):
     @abstractmethod
     def connect(self) -> Any:
         raise NotImplementedError()
+    
+    def handle_scan_execution(self, scan: Scan, profile_name: str) -> ScanReport:
+        res = scan.get_report(profile_name=profile_name, connection=self.connection)
+        
+        if res is not None and res.passed:
+            print(f'\t\t* Scan Passed ✅: {res.name}')
+        else:
+            print(f'\t\t* Scan Failed ❌: {res.name}')
+        
+        return res
 
     def execute_scans(self) -> List[ScanReport]:
-        # print(self.profiles)
-        result: List[ScanReport] = []
+        thread_pool = ThreadPoolExecutor(max_workers=5)
+        scan_reports: List[ScanReport] = []
+        futures = []
+
         for profile in self.profiles:
+            print(f'\t* Load Profile ✅: {profile.name}')
+            
             for scan in profile.scans:
-                res = scan.get_report(
-                    profile_name=profile.name,
-                    connection=self.connection
-                )
-                
-                result.append(res)
-                
-        return result
+                res = thread_pool.submit(self.handle_scan_execution, scan, profile.name)
+                futures.append(res)
+            
+            scan_reports = [f.result() for f in futures]
+            
+        return scan_reports
     
     def __get_metadata_path(self, scan_name) -> str | None:
         file_name = f'{scan_name}.yaml'
@@ -113,6 +127,9 @@ class Provider(ABC):
         
         profile_metadata_path = f'{self.provider_path}/metadata/profiles'
         
+        if not self.is_connected:
+            raise Exception('Provider is not connected')
+        
         for file in os.listdir(profile_metadata_path):
             if file.endswith('yaml'):
                 with open(os.path.join(profile_metadata_path, file), 'r') as f:
@@ -121,7 +138,6 @@ class Provider(ABC):
                         scan_list = data['scans']
                         scans: List[Scan] = []
                         for scan_name in scan_list:
-                            print(f'Executing Scan = {scan_name}')
                             scan = self.load_scan(scan_name=scan_name)
                             if scan is not None:
                                 scans.append(scan)

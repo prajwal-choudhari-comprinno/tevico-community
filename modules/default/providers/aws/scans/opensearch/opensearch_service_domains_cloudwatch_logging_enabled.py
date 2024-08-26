@@ -12,7 +12,7 @@ class opensearch_service_domains_cloudwatch_logging_enabled(Scan):
         
         domain_names = res['DomainNames']
         
-        report = ScanReport()
+        report = ScanReport(name=__name__)
         
         log_publishing_options = [
             'INDEX_SLOW_LOGS',

@@ -56,6 +56,7 @@ class ScanMetadata(BaseModel):
 
 class ScanReport(BaseModel):
     passed: bool = True
+    name: str
     scan_metadata: Optional[ScanMetadata] = None
     dimensions: List[FrameworkDimension] = []
     profile_name: Optional[str] = None

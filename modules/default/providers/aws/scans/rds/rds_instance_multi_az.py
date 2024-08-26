@@ -8,7 +8,7 @@ from tevico.framework.entities.scan.scan import Scan
 class rds_instance_multi_az(Scan):
 
     def execute(self, connection: boto3.Session) -> ScanReport:
-        report= ScanReport()
+        report = ScanReport(name=__name__)
         client = connection.client('rds')
         response = client.describe_db_instances()
         for instance in response['DBInstances']:

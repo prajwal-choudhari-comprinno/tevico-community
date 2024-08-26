@@ -7,7 +7,7 @@ from tevico.framework.entities.scan.scan import Scan
 class rds_instance_backup_enabled(Scan):
 
     def execute(self, connection: boto3.Session) -> ScanReport:
-        report = ScanReport()
+        report = ScanReport(name=__name__)
         client = connection.client('rds')
         instances = client.describe_db_instances()['DBInstances']
         for instance in instances:

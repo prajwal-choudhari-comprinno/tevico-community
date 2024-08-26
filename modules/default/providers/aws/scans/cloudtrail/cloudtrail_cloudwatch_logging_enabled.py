@@ -12,7 +12,7 @@ class cloudtrail_cloudwatch_logging_enabled(Scan):
         
         trails = res['trailList']
         
-        report = ScanReport()
+        report = ScanReport(name=__name__)
         
         for trail in trails:
             trail_name = trail['Name']

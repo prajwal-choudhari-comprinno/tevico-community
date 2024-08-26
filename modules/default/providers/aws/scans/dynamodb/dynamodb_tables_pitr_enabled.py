@@ -11,7 +11,7 @@ class dynamodb_tables_pitr_enabled(Scan):
         response = client.list_tables()
         tables = response['TableNames']
 
-        report = ScanReport()
+        report = ScanReport(name=__name__)
 
         for table in tables:
             response = client.describe_continuous_backups(TableName=table)

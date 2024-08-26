@@ -13,7 +13,7 @@ class opensearch_service_domains_audit_logging_enabled(Scan):
         
         domain_names = res['DomainNames']
         
-        report = ScanReport()
+        report = ScanReport(name=__name__)
         
         for dn in domain_names:
             domain_name = dn['DomainName']
