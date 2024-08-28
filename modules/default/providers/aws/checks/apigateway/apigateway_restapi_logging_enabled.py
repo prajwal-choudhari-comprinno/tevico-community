@@ -1,13 +1,13 @@
 import boto3
 
-from tevico.framework.entities.report.scan_model import ScanReport
-from tevico.framework.entities.scan.scan import Scan
+from tevico.framework.entities.report.check_model import CheckReport
+from tevico.framework.entities.check.check import Check
 
 
-class apigateway_restapi_logging_enabled(Scan):
+class apigateway_restapi_logging_enabled(Check):
 
-    def execute(self, connection: boto3.Session) -> ScanReport:
-        report = ScanReport(name=__name__)
+    def execute(self, connection: boto3.Session) -> CheckReport:
+        report = CheckReport(name=__name__)
         client = connection.client('apigateway')
         apis = client.get_rest_apis()['items']
         for api in apis:

@@ -1,6 +1,6 @@
 # Tevico
 
-Tevico is an extensible open-source, Python-based auditing framework that empowers users to comprehensively scan their infrastructure and apps for compliance adherence, security vulnerabilities, and custom operational checks.
+Tevico is an extensible open-source, Python-based auditing framework that empowers users to comprehensively check their infrastructure and apps for compliance adherence, security vulnerabilities, and custom operational checks.
 
 ## Table of Contents
 
@@ -24,7 +24,7 @@ Following CLI params will help you to get an idea about the project and its capa
 
 ### `init`: Getting started with the project.
 
-The `init` command will setup the default configurations and install basic scans to get you started. The `init` command in turn calls `install` command once the configuration setup is completed.
+The `init` command will setup the default configurations and install basic checks to get you started. The `init` command in turn calls `install` command once the configuration setup is completed.
 
 ```bash
 tevico init
@@ -32,7 +32,7 @@ tevico init
 
 ### `install`: Install framework entities from remote repos
 
-The `install` command helps you to install all dependent providers, scans, profiles and channels.
+The `install` command helps you to install all dependent providers, checks, profiles and channels.
 
 ```bash
 tevico install <ENTITY>
@@ -50,8 +50,8 @@ tevico install channels
 ## To install all providers
 tevico install providers
 
-## To install all scans
-tevico install scans
+## To install all checks
+tevico install checks
 ```
 
 ### `add`: Add an entity to the project
@@ -68,8 +68,8 @@ Eg.:-
 ## To add a new provider
 tevico add provider aws
 
-## To add a new scan
-tevico add scan aws_iam_role
+## To add a new check
+tevico add check aws_iam_role
 
 ## To add a new channel channel
 tevico add channel slack

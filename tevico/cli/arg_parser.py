@@ -22,8 +22,8 @@ def parse_args() -> None:
     install_subparser = subparser.add_parser('install')
     install_entity_subparser = install_subparser.add_subparsers(dest="entity")
     
-    install_scan_subparser = install_entity_subparser.add_parser('scan')
-    install_scan_subparser.add_argument('entity_name')
+    install_check_subparser = install_entity_subparser.add_parser('check')
+    install_check_subparser.add_argument('entity_name')
     
     install_provider_subparser = install_entity_subparser.add_parser('provider')
     install_provider_subparser.add_argument('entity_name')
@@ -44,8 +44,8 @@ def parse_args() -> None:
     add_subparser = subparser.add_parser('add', help=add_subparser_help)
     add_entity_subparser = add_subparser.add_subparsers(dest="entity")
     
-    add_scan_subparser = add_entity_subparser.add_parser('scan')
-    add_scan_subparser.add_argument('entity_name')
+    add_check_subparser = add_entity_subparser.add_parser('check')
+    add_check_subparser.add_argument('entity_name')
     
     add_provider_subparser = add_entity_subparser.add_parser('provider')
     add_provider_subparser.add_argument('entity_name')

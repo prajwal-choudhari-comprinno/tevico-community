@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 
 import yaml
 
-war_reliability_scans = [
+war_reliability_checks = [
     'apigateway_restapi_logging_enabled',
     'apigatewayv2_api_access_logging_enabled',
     'awslambda_function_invoke_api_operations_cloudtrail_logging_enabled',
@@ -48,8 +48,8 @@ def main(args: argparse.Namespace):
     
     for file in metadata_files:
         m_data = read_metadata_file(file)
-        if m_data is not None and m_data['CheckID'] in war_reliability_scans:
-            file_path = f'../modules/default/providers/aws/metadata/scans/{m_data['ServiceName']}/{m_data['CheckID']}.yaml'
+        if m_data is not None and m_data['CheckID'] in war_reliability_checks:
+            file_path = f'../modules/default/providers/aws/metadata/checks/{m_data['ServiceName']}/{m_data['CheckID']}.yaml'
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, 'w+') as m_data_file:
                 yaml.dump(m_data, m_data_file, default_flow_style=False, sort_keys=False, indent=2)

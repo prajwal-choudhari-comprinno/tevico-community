@@ -1,13 +1,13 @@
 import boto3
 
-from tevico.framework.entities.report.scan_model import ScanReport
-from tevico.framework.entities.scan.scan import Scan
+from tevico.framework.entities.report.check_model import CheckReport
+from tevico.framework.entities.check.check import Check
 
 
-class cloudformation_stacks_termination_protection_enabled(Scan):
+class cloudformation_stacks_termination_protection_enabled(Check):
 
-    def execute(self, connection: boto3.Session) -> ScanReport:
-        report = ScanReport(name=__name__)
+    def execute(self, connection: boto3.Session) -> CheckReport:
+        report = CheckReport(name=__name__)
         client = connection.client('cloudformation')
         stacks = client.list_stacks()['StackSummaries']
         for stack in stacks:

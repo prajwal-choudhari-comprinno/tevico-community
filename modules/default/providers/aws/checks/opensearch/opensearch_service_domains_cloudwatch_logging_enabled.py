@@ -1,18 +1,18 @@
 import boto3
 
-from tevico.framework.entities.report.scan_model import ScanReport
-from tevico.framework.entities.scan.scan import Scan
+from tevico.framework.entities.report.check_model import CheckReport
+from tevico.framework.entities.check.check import Check
 
 
-class opensearch_service_domains_cloudwatch_logging_enabled(Scan):
+class opensearch_service_domains_cloudwatch_logging_enabled(Check):
 
-    def execute(self, connection: boto3.Session) -> ScanReport:
+    def execute(self, connection: boto3.Session) -> CheckReport:
         client = connection.client('opensearch')
         res = client.list_domain_names()
         
         domain_names = res['DomainNames']
         
-        report = ScanReport(name=__name__)
+        report = CheckReport(name=__name__)
         
         log_publishing_options = [
             'INDEX_SLOW_LOGS',

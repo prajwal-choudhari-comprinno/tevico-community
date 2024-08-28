@@ -7,7 +7,7 @@ from tevico.framework.configs.config import TevicoConfig
 from tevico.framework.core.utils import CoreUtils
 from tevico.framework.entities.provider.provider import Provider
 from tevico.framework.entities.provider.provider_model import ProviderMetadata
-from tevico.framework.entities.report.scan_model import ScanReport
+from tevico.framework.entities.report.check_model import CheckReport
 
 class Framework():
     
@@ -67,44 +67,44 @@ class Framework():
         
     def run(self):
         """
-        Executes the scanning process for all providers and generates a scan report.
+        Executes the checks for all providers and generates a report.
         Returns:
             None
         Raises:
-            Exception: If an error occurs during the scanning process.
+            Exception: If an error occurs during the check execution process.
         """
         
         providers = self.__get_providers()
-        scans: List[ScanReport] = []
+        checks: List[CheckReport] = []
         
         OUTPUT_PATH = './tevico/report/data/output.json'
         
         for p in providers:
             try:
-                print(f'\n* Running scans for provider 🚀: {p.name}')
+                print(f'\n* Running checks for provider 🚀: {p.name}')
                 p.connect()
-                result = p.execute_scans()
-                scans.extend(result)
+                result = p.execute_checks()
+                checks.extend(result)
             except Exception as e:
                 print(f'\n❌ Error: {e}')
                 os._exit(1)
         
-        data = [s.model_dump(mode='json') for s in scans]
+        data = [s.model_dump(mode='json') for s in checks]
         
         with open(OUTPUT_PATH, 'w') as file:
             json.dump(data, file, indent=2)
-            
-        def accumulator(acc, scan):
+
+        def accumulator(acc, check):
             acc['total'] += 1
-            if scan.passed:
+            if check.passed:
                 acc['success'] += 1
             else:
                 acc['failed'] += 1
             return acc
         
-        acc = reduce(accumulator, scans, { 'total': 0, 'success': 0, 'failed': 0 })
+        acc = reduce(accumulator, checks, { 'total': 0, 'success': 0, 'failed': 0 })
         
-        print('\nScan Report Overview:')
+        print('\nReport Overview:')
         print(f'#️⃣  Total    : {acc['total']}')
         print(f'✅ Success  : {acc['success']}')
         print(f'❌ Failed   : {acc['failed']}')

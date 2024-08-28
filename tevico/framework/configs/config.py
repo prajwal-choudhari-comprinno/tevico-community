@@ -7,7 +7,7 @@ class EntitiesConfig(BaseModel):
     channels: Optional[list[str]]
     providers: Optional[list[str]]
     profiles: Optional[list[str]]
-    scans: Optional[list[str]]
+    checks: Optional[list[str]]
 
 class ModuleLocation(str, Enum):
     local = 'local'

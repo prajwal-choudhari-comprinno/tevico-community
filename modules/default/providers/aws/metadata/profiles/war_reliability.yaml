@@ -1,5 +1,5 @@
 name: Well Architected Review - Reliability Pillar
-scans:
+checks:
   - opensearch_service_domains_audit_logging_enabled
   - opensearch_service_domains_cloudwatch_logging_enabled
   - dynamodb_tables_pitr_enabled

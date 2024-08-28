@@ -2,40 +2,40 @@ import boto3
 
 from typing import Any, List
 from tevico.framework.core.enums import FrameworkDimension
-from tevico.framework.entities.scan.scan import Scan
-from tevico.framework.entities.report.scan_model import ScanReport
+from tevico.framework.entities.check.check import Check
+from tevico.framework.entities.report.check_model import CheckReport
 
 
-class KMSKeyRotationScan(Scan):
+class KMSKeyRotationcheck(Check):
     
-    __scan_name = 'aws_kms_key_rotation_scan'
+    __check_name = 'aws_kms_key_rotation_check'
     
     framework_dimensions = [FrameworkDimension.security]
     
-    def __get_scan_model(self, provider: str, profile: str) -> ScanReport:
-        scan = ScanReport(
-            name=self.__scan_name,
+    def __get_check_model(self, provider: str, profile: str) -> CheckReport:
+        check = CheckReport(
+            name=self.__check_name,
             provider=provider,
             profile=profile,
             dimensions=self.framework_dimensions
         )
         
-        scan.description = """Rotating AWS KMS keys is the process of periodically generating new encryption keys to replace old ones.This is a critical security best practice to mitigate the risk of compromised keys."""
+        check.description = """Rotating AWS KMS keys is the process of periodically generating new encryption keys to replace old ones.This is a critical security best practice to mitigate the risk of compromised keys."""
         
-        scan.success_message = """Hooray!!! All your keys are rotating on a timely basis."""
+        check.success_message = """Hooray!!! All your keys are rotating on a timely basis."""
         
-        scan.failure_message = """Oh Snap!!! Some of your keys are not rotated on a timely basis. You need to fix this ASAP! Check metadata for more insights."""
+        check.failure_message = """Oh Snap!!! Some of your keys are not rotated on a timely basis. You need to fix this ASAP! Check metadata for more insights."""
         
-        return scan
+        return check
     
-    def execute(self, connection: boto3.Session) -> ScanReport:
-        # Initiate the scan model
-        scan = self.__get_scan_model(
+    def execute(self, connection: boto3.Session) -> CheckReport:
+        # Initiate the check model
+        check = self.__get_check_model(
             provider=provider,
             profile=profile
         )
         
-        # Define required variables for metadata and scan
+        # Define required variables for metadata and check
         key_rotation_status = {}
         
         # Get client & list all keys
@@ -54,15 +54,15 @@ class KMSKeyRotationScan(Scan):
                 # Apply the status in the key rotation status dictionary
                 key_rotation_status[key_id] = k_rot_status['KeyRotationEnabled']
                 
-                # If any one of the key has key rotation disabled then fail the scan
+                # If any one of the key has key rotation disabled then fail the check
                 if k_rot_status['KeyRotationEnabled'] is False:
-                    scan.passed = False
+                    check.passed = False
              
         # Append key rotation status to metadata
-        scan.metadata = {
+        check.metadata = {
             'key_rotation_status': key_rotation_status
         }
         
-        return scan
+        return check
 
 

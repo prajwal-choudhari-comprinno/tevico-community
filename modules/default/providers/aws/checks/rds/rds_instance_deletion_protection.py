@@ -1,13 +1,13 @@
 import boto3
 
-from tevico.framework.entities.report.scan_model import ScanReport
-from tevico.framework.entities.scan.scan import Scan
+from tevico.framework.entities.report.check_model import CheckReport
+from tevico.framework.entities.check.check import Check
 
 
-class rds_instance_deletion_protection(Scan):
+class rds_instance_deletion_protection(Check):
 
-    def execute(self, connection: boto3.Session) -> ScanReport:
-        report = ScanReport(name=__name__)
+    def execute(self, connection: boto3.Session) -> CheckReport:
+        report = CheckReport(name=__name__)
         client = connection.client('rds')
         instances = client.describe_db_instances()['DBInstances']
         

@@ -1,6 +1,5 @@
 
 from datetime import datetime
-from enum import Enum
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
@@ -28,8 +27,8 @@ class Remediation(BaseModel):
     recommendation: RemediationRecommendation = Field(..., alias='Recommendation', description='Recommendation for remediating the security check')
 
 
-class ScanMetadata(BaseModel):
-    """Pydantic model representing security scan metadata."""
+class CheckMetadata(BaseModel):
+    """Pydantic model representing security check metadata."""
     provider: str = Field(..., alias='Provider', description='Cloud provider (e.g., aws)')
     check_id: str = Field(..., alias='CheckID', description='Unique identifier for the check')
     check_title: str = Field(..., alias='CheckTitle', description='Title of the security check')
@@ -54,10 +53,10 @@ class ScanMetadata(BaseModel):
 
 ######################################################################
 
-class ScanReport(BaseModel):
+class CheckReport(BaseModel):
     passed: bool = True
     name: str
-    scan_metadata: Optional[ScanMetadata] = None
+    check_metadata: Optional[CheckMetadata] = None
     dimensions: List[FrameworkDimension] = []
     profile_name: Optional[str] = None
     resource_ids_status: Dict[str, bool] = {}

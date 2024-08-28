@@ -8,7 +8,7 @@ class CommandsEnum(str, Enum):
     run = 'run'
     
 class EntitiesEnum(str, Enum):
-    scan = 'scan'
+    check = 'check'
     provider = 'provider'
     report = 'report'
     profile = 'profile'
