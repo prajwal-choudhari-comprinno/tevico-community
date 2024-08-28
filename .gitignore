@@ -163,3 +163,5 @@ cython_debug/
 
 scripts/**/*.yaml
 .DS_Store
+
+tevico/report/data/*

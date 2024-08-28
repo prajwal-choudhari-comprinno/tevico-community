@@ -16,3 +16,7 @@ class ProviderModel(BaseModel):
     def is_connected(self) -> bool:
         return self.connection is not None
     
+
+class ProviderMetadata(BaseModel):
+    package_name: str
+    class_name: str

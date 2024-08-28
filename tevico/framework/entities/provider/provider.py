@@ -101,7 +101,7 @@ class Provider(ABC):
         
         return None
     
-    def load_scan(self, scan_name) -> Scan | None:
+    def load_scan(self, scan_name: str) -> Scan | None:
         metadata_path = self.__get_metadata_path(scan_name=scan_name)
         scan_path = self.__get_scan_path(scan_name=scan_name)
         
@@ -115,7 +115,7 @@ class Provider(ABC):
         # print(f'Metadata = {metadata}')
         
         if scan_path is not None:
-            module_name = self.utils.get_module_name(scan_path)
+            module_name = self.utils.get_package_name(scan_path)
             cls = self.utils.get_provider_class(module_name, scan_name)
             if cls is not None:
                 return cls(metadata)
@@ -125,10 +125,10 @@ class Provider(ABC):
     def load_profiles(self) -> List[ProfileModel]:
         profiles: List[ProfileModel] = []
         
-        profile_metadata_path = f'{self.provider_path}/metadata/profiles'
+        profile_metadata_path: str = f'{self.provider_path}/metadata/profiles'
         
         if not self.is_connected:
-            raise Exception('Provider is not connected')
+            raise Exception(f'Provider ({self.name}) is not connected')
         
         for file in os.listdir(profile_metadata_path):
             if file.endswith('yaml'):

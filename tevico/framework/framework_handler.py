@@ -30,6 +30,6 @@ class FrameworkHandler():
         print(f'Command = {CommandsEnum.add}, {args}')
 
     def handle_run(self, args: argparse.Namespace):
-        print(f'Command = {CommandsEnum.run}, {args}')
+        # print(f'Command = {CommandsEnum.run}, {args}')
         
         self.framework.run()

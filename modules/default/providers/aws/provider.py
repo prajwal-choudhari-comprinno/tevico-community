@@ -1,13 +1,8 @@
 import os
 import boto3
 
-from typing import Any, Dict, List
-from modules.default.providers.aws.scans.iam.kms_key_rotation_scan import KMSKeyRotationScan
+from typing import Any, Dict
 from tevico.framework.entities.provider.provider import Provider
-from tevico.framework.entities.provider.provider_model import ProviderModel
-from tevico.framework.entities.profile.profile_model import ProfileModel
-from tevico.framework.entities.scan.scan import Scan
-from tevico.framework.entities.report.scan_model import ScanReport
 
 
 class AWSProvider(Provider):
