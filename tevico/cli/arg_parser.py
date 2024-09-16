@@ -1,8 +1,7 @@
 
 import textwrap
 import argparse
-from tevico.app.core.enums import CommandsEnum
-from tevico.app.framework_handler import FrameworkHandler
+from tevico.app.handler import FrameworkHandler
 
 def parse_args() -> None:
     epilog=textwrap.dedent("""

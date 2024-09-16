@@ -3,20 +3,14 @@ from functools import reduce
 import json
 import os
 from typing import List
-from tevico.app.configs.config import TevicoConfig
 from tevico.app.core.utils import CoreUtils
 from tevico.app.entities.provider.provider import Provider
 from tevico.app.entities.provider.provider_model import ProviderMetadata
 from tevico.app.entities.report.check_model import CheckReport
 
-class Framework():
-    
-    tevico_config: TevicoConfig
+class TevicoFramework():
     
     core_utils: CoreUtils = CoreUtils()
-    
-    def __init__(self, config: TevicoConfig) -> None:
-        self.tevico_config = config
     
     
     def __get_provider_metadata(self) -> List[ProviderMetadata]:
@@ -45,8 +39,8 @@ class Framework():
                 provider_metatdata.append(ProviderMetadata(package_name=package_name, class_name=class_name))
                 
             except Exception as e:
-                print(f'\n❌ Error: {e}')
-                print(e)
+                # print(f'\n 🚨 Warning: {e}')
+                pass
         
         return provider_metatdata
         

@@ -20,6 +20,5 @@ class EntityModuleMapping(BaseModel):
     is_default: bool = False
 
 class TevicoConfig(BaseModel):
-    modules: list[str] = ['default']
-    exclude_entities: Optional[EntitiesConfig] = None
+    profile: str
 

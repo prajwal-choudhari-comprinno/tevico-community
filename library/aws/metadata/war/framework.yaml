@@ -1,0 +1,18 @@
+name: AWS | Well Architected Review
+
+version: 1.0.0
+
+description: |
+  Well-Architected Review is a comprehensive assessment framework developed by AWS to help organizations
+  evaluate their cloud architectures against a set of best practices. It provides a structured approach to
+  identify areas for improvement and ensure that cloud-based applications are designed, built, and operated
+  in a reliable, secure, efficient, and cost-effective manner.
+
+  1. Operational Excellence
+  2. Security
+  3. Reliability
+  4. Performance Efficiency
+  5. Cost Optimization
+  6. Sustainability
+
+default_profile: default.yaml

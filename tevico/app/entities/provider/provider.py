@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 import os
-from threading import Thread
 from typing import Any, Dict, List
 
 import yaml
 
 from tevico.app.core.utils import CoreUtils
+from tevico.app.entities.framework.framework_model import FrameworkModel
 from tevico.app.entities.profile.profile_model import ProfileModel
 from tevico.app.entities.report.check_model import CheckMetadata, CheckReport
 from tevico.app.entities.check.check import Check
@@ -75,14 +75,15 @@ class Provider(ABC):
         for profile in self.profiles:
             print(f'\t* Load Profile ✅: {profile.name}')
             
-            for check in profile.checks:
-                res = thread_pool.submit(self.handle_check_execution, check, profile.name)
-                futures.append(res)
+            if profile.checks is not None:
+                for check in profile.checks:
+                    res = thread_pool.submit(self.handle_check_execution, check, profile.name)
+                    futures.append(res)
             
             check_reports = [f.result() for f in futures]
             
         return check_reports
-    
+
     def __get_metadata_path(self, check_name) -> str | None:
         file_name = f'{check_name}.yaml'
         
@@ -130,23 +131,34 @@ class Provider(ABC):
         if not self.is_connected:
             raise Exception(f'Provider ({self.name}) is not connected')
         
-        for file in os.listdir(profile_metadata_path):
-            if file.endswith('yaml'):
-                with open(os.path.join(profile_metadata_path, file), 'r') as f:
-                    data = yaml.safe_load(f)
-                    if 'checks' in data and isinstance(data['checks'], list):
-                        check_list = data['checks']
+        for folder in os.listdir(profile_metadata_path):
+            if folder.startswith('_') or folder.startswith('.'):
+                continue
+            
+            framework_metadata_path = os.path.join(f'{profile_metadata_path}/{folder}', 'framework.yaml')
+            
+            with open(os.path.join(framework_metadata_path), 'r') as f_metadata:
+                framework_raw_data = yaml.safe_load(f_metadata)
+                framework_metadata = FrameworkModel(**framework_raw_data)
+                
+                profile_path = os.path.join(f'{profile_metadata_path}/{folder}/profiles', framework_metadata.default_profile)
+                
+                with open(os.path.join(profile_path), 'r') as f_profile:
+                    profile_raw_data = yaml.safe_load(f_profile)
+                    
+                    if 'checks' in profile_raw_data and isinstance(profile_raw_data['checks'], list):
+                        check_list = profile_raw_data['checks']
                         checks: List[Check] = []
                         for check_name in check_list:
                             check = self.load_check(check_name=check_name)
                             if check is not None:
                                 checks.append(check)
-                        
-                        data['checks'] = checks
-                        
-                    profile = ProfileModel(**data)
+                            
+                        profile_raw_data['checks'] = checks
+                    
+                    profile = ProfileModel(**profile_raw_data)
                     profiles.append(profile)
-        
+
         return profiles
     
     
