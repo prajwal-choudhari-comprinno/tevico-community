@@ -125,7 +125,7 @@ class Provider(ABC):
     def load_profiles(self) -> List[ProfileModel]:
         profiles: List[ProfileModel] = []
         
-        profile_metadata_path: str = f'{self.provider_path}/metadata/profiles'
+        profile_metadata_path: str = f'{self.provider_path}/metadata'
         
         if not self.is_connected:
             raise Exception(f'Provider ({self.name}) is not connected')

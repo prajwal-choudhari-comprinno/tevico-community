@@ -46,6 +46,7 @@ class Framework():
                 
             except Exception as e:
                 print(f'\n❌ Error: {e}')
+                print(e)
         
         return provider_metatdata
         
