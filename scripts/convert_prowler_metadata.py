@@ -49,7 +49,7 @@ def main(args: argparse.Namespace):
     for file in metadata_files:
         m_data = read_metadata_file(file)
         if m_data is not None and m_data['CheckID'] in war_reliability_checks:
-            file_path = f'../modules/default/providers/aws/metadata/checks/{m_data['ServiceName']}/{m_data['CheckID']}.yaml'
+            file_path = f'../library/default/providers/aws/metadata/checks/{m_data['ServiceName']}/{m_data['CheckID']}.yaml'
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, 'w+') as m_data_file:
                 yaml.dump(m_data, m_data_file, default_flow_style=False, sort_keys=False, indent=2)
