@@ -1,9 +1,9 @@
 import boto3
 
 from typing import Any, List
-from tevico.app.core.enums import FrameworkDimension
-from tevico.app.entities.check.check import Check
-from tevico.app.entities.report.check_model import CheckReport
+from tevico.engine.core.enums import FrameworkDimension
+from tevico.engine.entities.check.check import Check
+from tevico.engine.entities.report.check_model import CheckReport
 
 
 class KMSKeyRotationcheck(Check):

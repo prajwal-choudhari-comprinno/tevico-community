@@ -4,6 +4,8 @@ import importlib.util
 import os
 from typing import Optional
 
+from tevico.engine.configs.config import TevicoConfig
+
 
 class CoreUtils():
     
@@ -60,3 +62,12 @@ class CoreUtils():
                 if 'class' in line:
                     return line.split(' ')[1].split('(')[0]
             return ""
+    
+    def get_tevico_config(self) -> TevicoConfig:
+        """
+        Retrieves the Tevico configuration.
+        Returns:
+            TevicoConfig: The Tevico configuration.
+        """
+        
+        return TevicoConfig()

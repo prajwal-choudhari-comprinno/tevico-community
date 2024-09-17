@@ -1,0 +1,89 @@
+name: AWS | Well Architected Review
+
+version: 1.0.0
+
+description: |
+  Well-Architected Review is a comprehensive assessment framework developed by AWS to help organizations evaluate their
+  cloud architectures against a set of best practices. It provides a structured approach to identify areas for improvement
+  and ensure that cloud-based applications are designed, built, and operated in a reliable, secure, efficient, and
+  cost-effective manner.
+
+  1. Operational Excellence
+  2. Security
+  3. Reliability
+  4. Performance Efficiency
+  5. Cost Optimization
+  6. Sustainability
+
+  https://aws.amazon.com/architecture/well-architected/
+
+sections:
+  - name: AWS | Well Architechted Review | Operational Excellence
+    description: |
+      The Security pillar includes the ability to protect information, systems, and assets while delivering business
+      value through risk assessments and mitigation strategies.
+
+      This section checks for the presence of a Well Architected Review in the AWS account.
+    checks: []
+
+  - name: AWS | Well Architechted Review | Reliability
+    description: |
+      The Reliability pillar includes the ability of a system to recover from infrastructure or service disruptions,
+      dynamically acquire computing resources to meet demand, and mitigate disruptions such as misconfigurations or transient
+      network issues.
+
+      This section checks for the presence of a Well Architected Review in the AWS account.
+    checks:
+      - cloudformation_stacks_termination_protection_enabled
+      - dynamodb_tables_pitr_enabled
+      - elb_logging_enabled
+      - opensearch_service_domains_audit_logging_enabled
+      - opensearch_service_domains_cloudwatch_logging_enabled
+      # - rds_instance_backup_enabled
+      # - rds_instance_deletion_protection
+      # - rds_instance_enhanced_monitoring_enabled
+      # - rds_instance_integration_cloudwatch_logs
+      # - rds_instance_multi_az
+      # - apigateway_restapi_logging_enabled
+      # - apigatewayv2_api_access_logging_enabled
+      # - awslambda_function_invoke_api_operations_cloudtrail_logging_enabled
+      # - cloudtrail_cloudwatch_logging_enabled
+    sections:
+      - name: All RDS checks
+        description: |
+          The Reliability pillar includes the ability of a system to recover from infrastructure or service disruptions,
+          dynamically acquire computing resources to meet demand, and mitigate disruptions such as misconfigurations or transient
+          network issues.
+
+          This section checks for the presence of a Well Architected Review in the AWS account.
+        checks:
+          - rds_instance_backup_enabled
+          # - rds_instance_deletion_protection
+          - rds_instance_enhanced_monitoring_enabled
+          - rds_instance_integration_cloudwatch_logs
+          - rds_instance_multi_az
+
+  - name: AWS | Well Architechted Review | Performance Efficiency
+    description: |
+      The Performance Efficiency pillar includes the ability to use computing resources efficiently to meet system
+      requirements and to maintain that efficiency as demand changes and technologies evolve.
+
+      This section checks for the presence of a Well Architected Review in the AWS account.
+    checks: []
+
+  - name: AWS | Well Architechted Review | Cost Optimization
+    description: |
+      The Cost Optimization pillar includes the ability to avoid or eliminate unneeded cost or suboptimal resources.
+
+      This section checks for the presence of a Well Architected Review in the AWS account.
+    checks: []
+
+
+  - name: AWS | Well Architechted Review | Operational Excellence
+    description: |
+      The Operational Excellence pillar includes the ability to run and monitor systems to deliver business value and to
+      continually improve supporting processes and procedures.
+
+      This section checks for the presence of a Well Architected Review in the AWS account.
+    checks: []
+

@@ -3,7 +3,7 @@
 from typing import Any, Dict, List
 from pydantic import BaseModel, field_validator
 
-from tevico.app.entities.profile.profile_model import ProfileModel
+from tevico.engine.entities.profile.profile_model import ProfileModel
 
 
 class ProviderModel(BaseModel):

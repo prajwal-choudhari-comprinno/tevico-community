@@ -3,14 +3,18 @@ from functools import reduce
 import json
 import os
 from typing import List
-from tevico.app.core.utils import CoreUtils
-from tevico.app.entities.provider.provider import Provider
-from tevico.app.entities.provider.provider_model import ProviderMetadata
-from tevico.app.entities.report.check_model import CheckReport
+from tevico.engine.configs.config import TevicoConfig
+from tevico.engine.core.utils import CoreUtils
+from tevico.engine.entities.provider.provider import Provider
+from tevico.engine.entities.provider.provider_model import ProviderMetadata
+from tevico.engine.entities.report.check_model import CheckReport
 
 class TevicoFramework():
     
     core_utils: CoreUtils = CoreUtils()
+    
+    def __init__(self) -> None:
+        super().__init__()
     
     
     def __get_provider_metadata(self) -> List[ProviderMetadata]:
@@ -81,7 +85,7 @@ class TevicoFramework():
             try:
                 print(f'\n* Running checks for provider 🚀: {p.name}')
                 p.connect()
-                result = p.execute_checks()
+                result = p.start_execution()
                 checks.extend(result)
             except Exception as e:
                 print(f'\n❌ Error: {e}')

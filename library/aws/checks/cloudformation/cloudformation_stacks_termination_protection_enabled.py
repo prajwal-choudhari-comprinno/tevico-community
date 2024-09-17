@@ -1,7 +1,7 @@
 import boto3
 
-from tevico.app.entities.report.check_model import CheckReport
-from tevico.app.entities.check.check import Check
+from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.check.check import Check
 
 
 class cloudformation_stacks_termination_protection_enabled(Check):

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
-from tevico.app.entities.report.check_model import CheckMetadata, CheckReport
+from tevico.engine.entities.report.check_model import CheckMetadata, CheckReport
 
 
 class Check(ABC):

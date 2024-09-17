@@ -2,7 +2,7 @@ import os
 import boto3
 
 from typing import Any, Dict
-from tevico.app.entities.provider.provider import Provider
+from tevico.engine.entities.provider.provider import Provider
 
 
 class AWSProvider(Provider):
