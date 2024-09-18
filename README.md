@@ -6,10 +6,8 @@ Tevico is an extensible open-source, Python-based auditing framework that empowe
 
 - [Getting Started](#getting-started)
 - [CLI Examples](#cli-examples)
-    - [init](#init-getting-started-with-the-project)
-    - [install](#install-install-framework-entities-from-remote-repos)
-    - [add](#add-add-an-entity-to-the-project)
     - [run](#run-run-the-project-with-given-configuration)
+    - [create](#run-run-the-project-with-given-configuration)
 - [Community Code of Conduct](#community-code-of-conduct)
 - [License](#license)
 
@@ -21,64 +19,16 @@ TODO: Add stuff here.
 
 Following CLI params will help you to get an idea about the project and its capabilitites. 
 
-
-### `init`: Getting started with the project.
-
-The `init` command will setup the default configurations and install basic checks to get you started. The `init` command in turn calls `install` command once the configuration setup is completed.
-
-```bash
-tevico init
-```
-
-### `install`: Install framework entities from remote repos
-
-The `install` command helps you to install all dependent providers, checks, profiles and channels.
-
-```bash
-tevico install <ENTITY>
-```
-
-Eg.:-
-
-```bash
-## To install all entities
-tevico install
-
-## To install all channels
-tevico install channels
-
-## To install all providers
-tevico install providers
-
-## To install all checks
-tevico install checks
-```
-
-### `add`: Add an entity to the project
-
-The `add` command helps you add an entity to the project.
-
-```bash
-tevico add <ENTITY> <NAME>
-```
-
-Eg.:-
-
-```bash
-## To add a new provider
-tevico add provider aws
-
-## To add a new check
-tevico add check aws_iam_role
-
-## To add a new channel channel
-tevico add channel slack
-```
-
 ### `run`: Run the project with given configuration
 
 ```bash
 tevico run
+```
+
+### `create`: Create project entities with given configuration
+
+```bash
+tevico create <ENTITY> <NAME>
 ```
 
 ## Community Code of Conduct
