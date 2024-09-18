@@ -2,6 +2,7 @@ import os
 import boto3
 
 from typing import Any, Dict
+from tevico.engine.configs.config import ConfigUtils
 from tevico.engine.entities.provider.provider import Provider
 
 
@@ -14,7 +15,12 @@ class AWSProvider(Provider):
     
 
     def connect(self) -> Any:
-        return boto3.Session(profile_name='ssg-prod')
+        aws_config = ConfigUtils().get_config().aws_config
+
+        if aws_config is not None:
+            return boto3.Session(profile_name=aws_config['profile'])
+        
+        return boto3.Session()
 
     @property
     def name(self) -> str:

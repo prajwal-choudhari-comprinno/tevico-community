@@ -58,7 +58,7 @@ sections:
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
           - rds_instance_backup_enabled
-          # - rds_instance_deletion_protection
+          - rds_instance_deletion_protection
           - rds_instance_enhanced_monitoring_enabled
           - rds_instance_integration_cloudwatch_logs
           - rds_instance_multi_az

@@ -2,7 +2,7 @@
 import argparse
 from enum import Enum
 import textwrap
-from typing import Optional
+from typing import Dict, Optional
 from pydantic import BaseModel
 
 class EntitiesConfig(BaseModel):
@@ -23,13 +23,25 @@ class EntityModuleMapping(BaseModel):
 
 class TevicoConfig(BaseModel):
     profile: Optional[str] = None
+    aws_config: Optional[Dict[str, str]] = None
 
 
 class ConfigUtils():
     def get_config_from_args(self, args: argparse.Namespace) -> TevicoConfig:
         config = TevicoConfig()
+        
         if args.profile:
             config.profile = args.profile
+        
+        if args.aws_config:
+            aws_config = {}
+
+            for key_value in args.aws_config.split(','):
+                key, value = key_value.split(':')
+                aws_config[key] = value
+            
+            config.aws_config = aws_config
+            
         return config
     
     def get_parser(self) -> argparse.ArgumentParser:
@@ -46,6 +58,8 @@ class ConfigUtils():
         run_parser = subparser.add_parser('run')
         
         run_parser.add_argument('--profile', help='The profile to run the checks against.', required=False)
+        
+        run_parser.add_argument('--aws_config', help='The AWS configuration to use for the checks.', required=False)
         
         return parser
     
