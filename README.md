@@ -33,7 +33,7 @@ tevico create <ENTITY> <NAME>
 
 ## Community Code of Conduct
 
-Tevico current follows the CNCF Code of Conduct. You can get the details of the code of conduct [here](https://github.com/cncf/foundation/blob/master/code-of-conduct.md). For any violations of this code of conduct you can connect with us over an [email](mailto:).
+Tevico current follows the CNCF Code of Conduct. You can get the details of the code of conduct [here](https://github.com/cncf/foundation/blob/master/code-of-conduct.md). For any violations of this code of conduct you can connect with us over an [email](mailto:test@email.com).
 
 ## License
 
