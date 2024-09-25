@@ -1,18 +1,14 @@
 from enum import Enum
 
 class CommandsEnum(str, Enum):
-    config = 'config'
-    init = 'init'
-    install = 'install'
-    add = 'add'
     run = 'run'
+    create = 'create'
     
 class EntitiesEnum(str, Enum):
-    check = 'check'
+    framework = 'framework'
     provider = 'provider'
-    report = 'report'
     profile = 'profile'
-    channel = 'channel'
+    check = 'check'
     
 class FrameworkDimension(str, Enum):
     cost = 'cost'

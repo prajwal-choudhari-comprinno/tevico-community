@@ -5,6 +5,7 @@ import textwrap
 from typing import Dict, Optional
 from pydantic import BaseModel
 
+
 class EntitiesConfig(BaseModel):
     channels: Optional[list[str]]
     providers: Optional[list[str]]
@@ -21,19 +22,27 @@ class EntityModuleMapping(BaseModel):
     entity_config: EntitiesConfig
     is_default: bool = False
 
+
+class CreateConfig(BaseModel):
+    entity: str
+    name: str
+    provider: str
+    options: Optional[Dict[str, str]] = None
+
 class TevicoConfig(BaseModel):
     profile: Optional[str] = None
     aws_config: Optional[Dict[str, str]] = None
+    create_config: Optional[CreateConfig] = None
 
 
 class ConfigUtils():
     def get_config_from_args(self, args: argparse.Namespace) -> TevicoConfig:
         config = TevicoConfig()
         
-        if args.profile:
+        if 'profile' in args:
             config.profile = args.profile
         
-        if args.aws_config:
+        if 'aws_config' in args:
             aws_config = {}
 
             for key_value in args.aws_config.split(','):
@@ -41,6 +50,24 @@ class ConfigUtils():
                 aws_config[key] = value
             
             config.aws_config = aws_config
+            
+        if args.command == 'create':
+            create_config = {
+                'entity': args.entity,
+                'name': args.name,
+                'provider': args.provider
+            }
+            
+            create_config['options'] = {}
+            
+            if 'options' in args and args.options is not None:
+                for key_value in args.options.split(','):
+                    key, value = key_value.split(':')
+                    create_config['options'][key] = value
+            
+            create_config = CreateConfig(**create_config)
+            
+            config.create_config = create_config
             
         return config
     
@@ -56,10 +83,14 @@ class ConfigUtils():
         subparser = parser.add_subparsers(dest='command')
         
         run_parser = subparser.add_parser('run')
-        
-        run_parser.add_argument('--profile', help='The profile to run the checks against.', required=False)
-        
-        run_parser.add_argument('--aws_config', help='The AWS configuration to use for the checks.', required=False)
+        run_parser.add_argument('--profile', help='The profile to run the checks against.')
+        run_parser.add_argument('--aws_config', help='The AWS configuration to use for the checks.')
+
+        create_parser = subparser.add_parser('create')
+        create_parser.add_argument('entity', help='The entity to create.', choices=['framework', 'provider', 'profile', 'check'])
+        create_parser.add_argument('name', help='The name of the entity to create.')
+        create_parser.add_argument('--provider', help='The provider to create the entity for.', required=True)
+        create_parser.add_argument('--options', help='The configuration options for the entity to create.', required=False)
         
         return parser
     
