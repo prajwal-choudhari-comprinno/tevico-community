@@ -2,8 +2,11 @@
 from functools import reduce
 import json
 import os
-from typing import List
-from tevico.engine.configs.config import TevicoConfig
+from typing import Dict, List
+
+from jinja2 import Environment, FileSystemLoader
+from tevico.engine.configs.config import CreateConfig
+from tevico.engine.core.enums import EntitiesEnum
 from tevico.engine.core.utils import CoreUtils
 from tevico.engine.entities.provider.provider import Provider
 from tevico.engine.entities.provider.provider_model import ProviderMetadata
@@ -66,6 +69,74 @@ class TevicoFramework():
                 providers.append(provider())
 
         return providers
+    
+    
+    def __create_check(self, provider: str, check: str, config: Dict[str, str] | None) -> None:
+        """
+        Creates a new check for the specified provider.
+        Args:
+            provider (str): The provider to use for creating the check.
+            check (str): The check to create.
+        Returns:
+            None
+        Raises:
+            Exception: If an error occurs during the check creation process.
+        """
+        provider_checks_dir = f'./library/{provider}/checks'
+        
+        if not os.path.exists(provider_checks_dir):
+            raise Exception(f'Provider checks directory does not exist: {provider_checks_dir}')
+        
+        check_dir = f'{provider_checks_dir}'
+        
+        print(config)
+        
+        if config is not None and 'service' in config:
+            service_name = config['service']
+            os.makedirs(f'{provider_checks_dir}/{service_name}', exist_ok=True)
+            check_dir = f'{provider_checks_dir}/{service_name}'
+        
+        check_file_path = f'{check_dir}/{check}.py'
+        metadata_file_path = f'{check_dir}/{check}.yaml'
+        
+        j2_env = Environment(loader=FileSystemLoader('./tevico/templates'), trim_blocks=True)
+        
+        metadata_template = j2_env.get_template('check_metadata.jinja2')
+        check_template = j2_env.get_template('check_python.jinja2')
+        
+        with open(metadata_file_path, 'w') as file:
+            file.write(metadata_template.render(check_id=check))
+            
+        with open(check_file_path, 'w') as file:
+            file.write(check_template.render(check_id=check))
+            
+        print(f'\n✅ Check created successfully: {check_file_path}')
+    
+    def create(self, config: CreateConfig) -> None:
+        """
+        Creates a new entity for the specified provider.
+        Args:
+            entity (str): The entity type to create.
+            name (str): The name of the entity to create.
+            provider (str): The provider to use for creating the entity.
+        Returns:
+            None
+        Raises:
+            Exception: If an error occurs during the entity creation process.
+        """
+        
+        
+        if config.entity == EntitiesEnum.provider.value:
+            raise NotImplementedError('Provider create not implemented.')
+        elif config.entity == EntitiesEnum.profile.value:
+            raise NotImplementedError('Profile create not implemented.')
+        elif config.entity == EntitiesEnum.check.value:
+            return self.__create_check(provider=config.provider, check=config.name, config=config.options)
+        elif config.entity == EntitiesEnum.framework.value:
+            raise NotImplementedError('Framework create not implemented.')
+        else:
+            raise Exception('Invalid entity type.')
+        
         
     def run(self):
         """
@@ -79,7 +150,7 @@ class TevicoFramework():
         providers = self.__get_providers()
         checks: List[CheckReport] = []
         
-        OUTPUT_PATH = './tevico/report/data/output.json'
+        OUTPUT_PATH = './tevico/report/output.json'
         
         for p in providers:
             try:
