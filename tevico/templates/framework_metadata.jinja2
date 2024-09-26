@@ -1,0 +1,25 @@
+# Name of the framework. Eg: ISO27001, NIST, etc.
+title: {{ title | default('') }}
+
+# Version of the framework. Eg: 1.0, 1.1, etc.
+version: {{ version | default('1.0') }}
+
+# Description of the framework.
+description: {{ description | default('') }}
+
+# URL to the framework's official website.
+url: {{ url | default('') }}
+
+# Different sections/chapters of the framework.
+# 
+# NOTE:
+# A section can have subsections.
+# A subsection can have subsubsections.
+# And so on.
+# 
+# The strcutre of a section is as follows:
+#
+# - name: Name of the section (string)
+#   description: Description of the section (string)
+#   checks: List of checks in the section (list of strings)
+sections: []

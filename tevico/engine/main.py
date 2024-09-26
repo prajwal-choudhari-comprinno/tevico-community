@@ -5,7 +5,7 @@ import os
 from typing import Dict, List
 
 from jinja2 import Environment, FileSystemLoader
-from tevico.engine.configs.config import CreateConfig
+from tevico.engine.configs.config import CreateParams
 from tevico.engine.core.enums import EntitiesEnum
 from tevico.engine.core.utils import CoreUtils
 from tevico.engine.entities.provider.provider import Provider
@@ -71,7 +71,7 @@ class TevicoFramework():
         return providers
     
     
-    def __create_check(self, provider: str, check: str, config: Dict[str, str] | None) -> None:
+    def __create_check(self, provider: str, name: str, config: Dict[str, str] | None) -> None:
         """
         Creates a new check for the specified provider.
         Args:
@@ -89,15 +89,13 @@ class TevicoFramework():
         
         check_dir = f'{provider_checks_dir}'
         
-        print(config)
-        
         if config is not None and 'service' in config:
             service_name = config['service']
             os.makedirs(f'{provider_checks_dir}/{service_name}', exist_ok=True)
             check_dir = f'{provider_checks_dir}/{service_name}'
         
-        check_file_path = f'{check_dir}/{check}.py'
-        metadata_file_path = f'{check_dir}/{check}.yaml'
+        check_file_path = f'{check_dir}/{name}.py'
+        metadata_file_path = f'{check_dir}/{name}.yaml'
         
         j2_env = Environment(loader=FileSystemLoader('./tevico/templates'), trim_blocks=True)
         
@@ -105,14 +103,52 @@ class TevicoFramework():
         check_template = j2_env.get_template('check_python.jinja2')
         
         with open(metadata_file_path, 'w') as file:
-            file.write(metadata_template.render(check_id=check))
+            file.write(metadata_template.render(check_id=name))
             
         with open(check_file_path, 'w') as file:
-            file.write(check_template.render(check_id=check))
+            file.write(check_template.render(check_id=name))
             
         print(f'\n✅ Check created successfully: {check_file_path}')
+        
+
+    def __create_framework(self, provider: str, name: str, config: Dict[str, str] | None) -> None:
+        """
+        Creates a new framework for the specified provider.
+        Args:
+            provider (str): The provider to use for creating the framework.
+        Returns:
+            None
+        Raises:
+            Exception: If an error occurs during the framework creation process.
+        """
+        provider_framework_dir = f'./library/{provider}/frameworks'
+        
+        if not os.path.exists(provider_framework_dir):
+            raise Exception(f'Provider framework directory does not exist: {provider_framework_dir}')
+        
+        j2_env = Environment(loader=FileSystemLoader('./tevico/templates'), trim_blocks=True)
+        
+        framework_template = j2_env.get_template('framework_metadata.jinja2')
+        framework_file_path = f'{provider_framework_dir}/{name}.yaml'
+        
+        with open(framework_file_path, 'w') as file:
+            if config is not None:
+                file.write(framework_template.render(**{str(k): v for k, v in config.items()}))
+            else:
+                file.write(framework_template.render())
+            
+        print(f'\n✅ Framework created successfully: {framework_file_path}')
+
+
+    def __create_profile(self) -> None:
+        raise NotImplementedError('Profile create not implemented.')
     
-    def create(self, config: CreateConfig) -> None:
+
+    def __create_provider(self) -> None:
+        raise NotImplementedError('Provider create not implemented.')
+
+    
+    def create(self, config: CreateParams) -> None:
         """
         Creates a new entity for the specified provider.
         Args:
@@ -127,13 +163,13 @@ class TevicoFramework():
         
         
         if config.entity == EntitiesEnum.provider.value:
-            raise NotImplementedError('Provider create not implemented.')
+            return self.__create_provider()
         elif config.entity == EntitiesEnum.profile.value:
-            raise NotImplementedError('Profile create not implemented.')
+            return self.__create_profile()
         elif config.entity == EntitiesEnum.check.value:
-            return self.__create_check(provider=config.provider, check=config.name, config=config.options)
+            return self.__create_check(provider=config.provider, name=config.name, config=config.options)
         elif config.entity == EntitiesEnum.framework.value:
-            raise NotImplementedError('Framework create not implemented.')
+            return self.__create_framework(provider=config.provider, name=config.name, config=config.options)
         else:
             raise Exception('Invalid entity type.')
         

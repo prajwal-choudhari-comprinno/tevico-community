@@ -23,7 +23,7 @@ class EntityModuleMapping(BaseModel):
     is_default: bool = False
 
 
-class CreateConfig(BaseModel):
+class CreateParams(BaseModel):
     entity: str
     name: str
     provider: str
@@ -32,7 +32,7 @@ class CreateConfig(BaseModel):
 class TevicoConfig(BaseModel):
     profile: Optional[str] = None
     aws_config: Optional[Dict[str, str]] = None
-    create_config: Optional[CreateConfig] = None
+    create_params: Optional[CreateParams] = None
 
 
 class ConfigUtils():
@@ -52,22 +52,22 @@ class ConfigUtils():
             config.aws_config = aws_config
             
         if args.command == 'create':
-            create_config = {
+            create_params = {
                 'entity': args.entity,
                 'name': args.name,
                 'provider': args.provider
             }
             
-            create_config['options'] = {}
+            create_params['options'] = {}
             
             if 'options' in args and args.options is not None:
                 for key_value in args.options.split(','):
                     key, value = key_value.split(':')
-                    create_config['options'][key] = value
+                    create_params['options'][key] = value
             
-            create_config = CreateConfig(**create_config)
+            create_params = CreateParams(**create_params)
             
-            config.create_config = create_config
+            config.create_params = create_params
             
         return config
     
