@@ -140,8 +140,33 @@ class TevicoFramework():
         print(f'\n✅ Framework created successfully: {framework_file_path}')
 
 
-    def __create_profile(self) -> None:
-        raise NotImplementedError('Profile create not implemented.')
+    def __create_profile(self, provider: str, name: str, config: Dict[str, str] | None) -> None:
+        """
+        Creates a new profile for the specified provider.
+        Args:
+            provider (str): The provider to use for creating the profile.
+        Returns:
+            None
+        Raises:
+            Exception: If an error occurs during the profile creation process.
+        """
+        provider_profile_dir = f'./library/{provider}/profiles'
+        
+        if not os.path.exists(provider_profile_dir):
+            raise Exception(f'Provider profile directory does not exist: {provider_profile_dir}')
+        
+        j2_env = Environment(loader=FileSystemLoader('./tevico/templates'), trim_blocks=True)
+        
+        profile_template = j2_env.get_template('profile_metadata.jinja2')
+        profile_file_path = f'{provider_profile_dir}/{name}.yaml'
+        
+        with open(profile_file_path, 'w') as file:
+            if config is not None:
+                file.write(profile_template.render(**{str(k): v for k, v in config.items()}))
+            else:
+                file.write(profile_template.render())
+            
+        print(f'\n✅ Profile created successfully: {profile_file_path}')
     
 
     def __create_provider(self) -> None:
@@ -165,7 +190,7 @@ class TevicoFramework():
         if config.entity == EntitiesEnum.provider.value:
             return self.__create_provider()
         elif config.entity == EntitiesEnum.profile.value:
-            return self.__create_profile()
+            return self.__create_profile(provider=config.provider, name=config.name, config=config.options)
         elif config.entity == EntitiesEnum.check.value:
             return self.__create_check(provider=config.provider, name=config.name, config=config.options)
         elif config.entity == EntitiesEnum.framework.value:
