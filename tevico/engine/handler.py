@@ -1,7 +1,7 @@
 
 
 from tevico.engine.configs.config import TevicoConfig
-from tevico.engine.main import TevicoFramework
+from tevico.engine.framework import TevicoFramework
 
 
 class FrameworkHandler():
@@ -17,8 +17,8 @@ class FrameworkHandler():
         self.framework.run()
 
     def handle_create(self) -> None:
-        if not self.config.create_config:
+        if not self.config.create_params:
             raise ValueError('Create config is required')
         
-        self.framework.create(config=self.config.create_config)
+        self.framework.create(config=self.config.create_params)
 
