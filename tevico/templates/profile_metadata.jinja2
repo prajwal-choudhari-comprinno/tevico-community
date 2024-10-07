@@ -1,0 +1,13 @@
+# Name of the profile
+name: {{ name }}
+
+# Description of the profile
+description: {{ description | default('') }}
+
+{% if include_checks %}
+# List of checks to include in the profile
+include_checks: []
+{% else %}
+# List of checks to exclude from the profile
+exclude_checks: []
+{% endif %}

@@ -1,0 +1,19 @@
+"""
+AUTHOR: {{ author | default('') }}
+DATE: {{ date | default('') }}
+"""
+
+import boto3
+
+from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.check.check import Check
+
+
+class {{ check_id }}(Check):
+
+    def execute(self, connection: boto3.Session) -> CheckReport:
+        report = CheckReport(name=__name__)
+
+        # Add your check logic here
+        
+        return report
