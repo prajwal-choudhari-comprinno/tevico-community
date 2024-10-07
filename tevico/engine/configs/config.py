@@ -39,10 +39,10 @@ class ConfigUtils():
     def get_config_from_args(self, args: argparse.Namespace) -> TevicoConfig:
         config = TevicoConfig()
         
-        if 'profile' in args:
+        if 'profile' in args and args.profile is not None:
             config.profile = args.profile
         
-        if 'aws_config' in args:
+        if 'aws_config' in args and args.aws_config is not None:
             aws_config = {}
 
             for key_value in args.aws_config.split(','):
