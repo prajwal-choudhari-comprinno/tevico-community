@@ -103,7 +103,7 @@ class TevicoFramework():
         check_template = j2_env.get_template('check_python.jinja2')
         
         with open(metadata_file_path, 'w') as file:
-            file.write(metadata_template.render(check_id=name))
+            file.write(metadata_template.render(check_id=name, provider=provider))
             
         with open(check_file_path, 'w') as file:
             file.write(check_template.render(check_id=name))
