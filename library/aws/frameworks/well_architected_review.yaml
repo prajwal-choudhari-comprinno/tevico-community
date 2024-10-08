@@ -87,3 +87,11 @@ sections:
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
 
+
+  - name: AWS | Well Architechted Review | Security
+    description: |
+      The Security pillar focuses on the ability to protect data, systems, and assets through risk management and control. 
+      
+      This section checks for the presence of a Well Architected Review in the AWS account.
+    checks:
+     - network_acl_allow_ingress_tcp_port_22

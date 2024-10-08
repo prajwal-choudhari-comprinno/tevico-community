@@ -1,0 +1,26 @@
+
+Provider: aws
+CheckID: network_acl_allow_ingress_tcp_port_22
+CheckTitle: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to SSH port 22
+CheckType: []
+ServiceName: ec2
+SubServiceName: networkacl
+ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
+Severity: medium
+ResourceType: AwsEc2NetworkAcl
+Description: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to SSH port 22
+Risk: Even with a perimeter firewall in place, open network ACLs can allow any user or malware with VPC access to scan for well-known and sensitive ports, potentially gaining access to instances.
+RelatedUrl: https://tevi.co
+Remediation:
+  Code:
+    CLI: ""
+    NativeIaC: https://docs.prowler.com/checks/aws/networking-policies/ensure-aws-nacl-does-not-allow-ingress-from-00000-to-port-22#cloudformation
+    Other: ""
+    Terraform: https://docs.prowler.com/checks/aws/networking-policies/ensure-aws-nacl-does-not-allow-ingress-from-00000-to-port-22#terraform
+  Recommendation:
+    Text: Apply Zero Trust approach. Implement a process to scan and remediate unrestricted or overly permissive network ACLs. Recommended best practices is to narrow the definition for the minimum ports required
+    Url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html
+Categories: []
+DependsOn: []
+RelatedTo: []
+Notes: Infrastructure Protection
