@@ -79,8 +79,7 @@ class network_acl_allow_ingress_tcp_port_22(Check):
                             if port_range and port_range['From'] <= check_port <= port_range['To']:
                                 acl_allows_ingress = True
                                 break  # No need to check further, fail the check
-                        # If protocol is '-1', it allows all traffic (protocol all)
-                        if entry['Protocol'] == '-1':
+                        if entry['Protocol'] == '-1': # If protocol is '-1', it allows all traffic (protocol all)
                             acl_allows_ingress = True
                             break  # No need to check further, fail the check
             
