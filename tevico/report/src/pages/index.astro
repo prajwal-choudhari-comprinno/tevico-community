@@ -1,8 +1,16 @@
 ---
-import '@/styles/globals.css'
-import MainLayout from '@/components/MainLayout.astro'
-import { pageNames, pages } from '@/lib/utils'
-
+import "@/styles/globals.css";
+import MainLayout from "@/components/MainLayout.astro";
+import { pageNames, pages } from "@/lib/utils";
+import { MetricCard } from "@/components/tevico/metric-card";
+console.log(MetricCard);
 ---
 
-<MainLayout activePage={pages[pageNames.index]} />
+<MainLayout activePage={pages[pageNames.index]}>
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+    <MetricCard title="Total Number of Checks" value={30} />
+    <MetricCard title="Total Number of Checks" value={30} />
+    <MetricCard title="Total Number of Checks" value={30} />
+    <MetricCard title="Total Number of Checks" value={30} />
+  </div>
+</MainLayout>

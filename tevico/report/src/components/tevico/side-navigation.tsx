@@ -8,7 +8,11 @@ import { Badge } from "@/components/ui/badge";
 
 import { pageNames, pages, type Page } from "@/lib/utils";
 
-export function SideNavigation({ activePage }: { activePage: Page }) {
+interface SideNavigationProps {
+  activePage: Page;
+}
+
+export function SideNavigation({ activePage }: SideNavigationProps) {
   const baseClassNames = "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary";
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
