@@ -1,0 +1,8 @@
+---
+import '@/styles/globals.css'
+import MainLayout from '@/components/MainLayout.astro'
+import { pageNames, pages } from '@/lib/utils'
+
+---
+
+<MainLayout activePage={pages[pageNames.index]} />
