@@ -1,6 +1,5 @@
-
 Provider: aws
-CheckID: network_acl_allow_ingress_tcp_port_22
+CheckID: ec2_network_acl_allow_ingress_tcp_port_22
 CheckTitle: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to SSH port 22
 CheckType: []
 ServiceName: ec2
