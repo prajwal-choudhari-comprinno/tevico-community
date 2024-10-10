@@ -23,7 +23,7 @@ class ec2_network_acl_allow_ingress_any_port(Check):
                 if entry['Egress'] is False: 
                     if entry['RuleAction'] == 'allow' and entry['CidrBlock'] == '0.0.0.0/0':  
                         port_range = entry.get('PortRange')
-                        if port_range and port_range['From'] == 0 and port_range['To'] == 65535:  # All TCP ports
+                        if port_range and port_range['From'] == 0 and port_range['To'] == 65535:  # All network ports
                             acl_allows_ingress = True
                             break  
                         if entry['Protocol'] == '-1':  
