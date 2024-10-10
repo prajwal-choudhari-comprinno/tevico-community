@@ -35,7 +35,8 @@ sections:
     checks: 
       # - ec2_ebs_volume_encryption
       # - ec2_ebs_default_encryption
-      - ec2_ebs_snapshot_encrypted
+      # - ec2_ebs_snapshot_encrypted
+      - ec2_instance_managed_by_ssm
 
   - name: AWS | Well Architechted Review | Reliability
     description: |
