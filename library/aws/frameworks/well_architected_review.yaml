@@ -33,7 +33,8 @@ sections:
 
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: 
-      - ec2_ebs_volume_encryption
+      # - ec2_ebs_volume_encryption
+      - ec2_ebs_default_encryption
 
   - name: AWS | Well Architechted Review | Reliability
     description: |
