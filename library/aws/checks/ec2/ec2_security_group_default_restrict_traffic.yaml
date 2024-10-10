@@ -19,9 +19,10 @@ Remediation:
   Recommendation:
     Text: Apply Zero Trust approach. Implement a process to scan and remediate unrestricted or overly permissive security groups. Recommended best practices is to narrow the definition for the minimum ports required.
     Url: https://docs.aws.amazon.com/eks/latest/userguide/sec-group-reqs.html
-Categories: []
+Categories: 
+ - Infrastructure Protection
 DependsOn: []
 RelatedTo: []
-Notes: ""
+Notes: Infrastructure Protection
 
 

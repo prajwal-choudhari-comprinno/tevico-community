@@ -7,7 +7,6 @@ import boto3
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
-
 class ec2_security_group_default_restrict_traffic(Check):
 
     def execute(self, connection: boto3.Session) -> CheckReport:

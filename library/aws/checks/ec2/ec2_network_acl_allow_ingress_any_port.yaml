@@ -19,7 +19,8 @@ Remediation:
   Recommendation:
     Text: Apply Zero Trust approach. Implement a process to scan and remediate unrestricted or overly permissive network ACLs. Recommended best practices is to narrow the definition for the minimum ports required
     Url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html
-Categories: []
+Categories:
+ - Infrastructure Protection
 DependsOn: []
 RelatedTo: []
 Notes: Infrastructure Protection

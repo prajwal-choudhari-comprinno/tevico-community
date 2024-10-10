@@ -19,7 +19,8 @@ Remediation:
   Recommendation:
     Text: Verify and apply Systems Manager Prerequisites
     Url: https://docs.aws.amazon.com/systems-manager/latest/userguide/managed_instances.html
-Categories: []
+Categories:
+ - Infrastructure Protection
 DependsOn: []
 RelatedTo: []
-Notes: ""
+Notes: Infrastructure Protection
