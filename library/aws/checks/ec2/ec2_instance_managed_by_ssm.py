@@ -1,9 +1,8 @@
 """
-AUTHOR: 
-DATE: 
+AUTHOR: Sheikh Aafaq Rashid
+DATE: 10-10-2024
 """
 
-from tabnanny import check
 import boto3
 
 from tevico.engine.entities.report.check_model import CheckReport
