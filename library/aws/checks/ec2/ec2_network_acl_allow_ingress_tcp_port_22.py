@@ -14,8 +14,8 @@ class ec2_network_acl_allow_ingress_tcp_port_22(Check):
         client = connection.client('ec2')
         acls = client.describe_network_acls()['NetworkAcls']
         
-        tcp_protocol = "6" 
-        check_port = 22  
+        tcp_protocol = "6"
+        check_port = 22
         report.passed = True   
 
         for acl in acls:
@@ -23,20 +23,24 @@ class ec2_network_acl_allow_ingress_tcp_port_22(Check):
             acl_allows_ingress = False
             
             for entry in acl['Entries']:
-                if entry['Egress'] is False:  
-                    if entry['CidrBlock'] == '0.0.0.0/0' and entry['RuleAction'] == "allow": #to-do add and statement 
-                        if entry['Protocol'] == tcp_protocol:
-                            port_range = entry.get('PortRange')
-                            if port_range and port_range['From'] <= check_port <= port_range['To']:
-                                acl_allows_ingress = True
-                                break  
-                        if entry['Protocol'] == '-1':  
-                            acl_allows_ingress = True
-                            break  
+                if entry['Egress']:  
+                    continue
+                if entry['CidrBlock'] != '0.0.0.0/0' or entry['RuleAction'] != "allow": 
+                    continue
+                if entry['Protocol'] != tcp_protocol and entry['Protocol'] != '-1': 
+                    continue
+
+                port_range = entry.get('PortRange')
+                if port_range and port_range['From'] <= check_port <= port_range['To']:
+                    acl_allows_ingress = True
+                    break
+                if entry['Protocol'] == '-1': 
+                    acl_allows_ingress = True
+                    break
+            
+            report.resource_ids_status[acl_id] = not acl_allows_ingress
             if acl_allows_ingress:
-                report.passed = False             
-                report.resource_ids_status[acl_id] = False   
-            else:
-                report.resource_ids_status[acl_id] = True
+                report.passed = False
         
         return report
+
