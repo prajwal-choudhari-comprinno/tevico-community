@@ -1,0 +1,29 @@
+Provider: aws
+CheckID: user_multiple_active_access_keys
+CheckTitle: Ensure Multiple active access key for the users
+CheckType: []
+ServiceName: iam
+SubServiceName: ''
+ResourceIdTemplate: 'arn:partition:service:region:account-id:resource-id'
+Severity: critical
+ResourceType: AwsIamUser
+Description: Ensure no IAM user has multiple active access keys. AWS recommends having only one active access key per user to reduce the potential attack surface. Multiple active access keys can increase the risk of unauthorized access or compromise, as it becomes harder to manage and track which keys are being used.
+Risk: >-
+ Having multiple active access keys can lead to security risks, such as difficulty in key rotation and potential unauthorized access. If one key gets compromised, an attacker could gain access to the user's account without the organization's knowledge. It also makes it harder to monitor and audit key usage. To mitigate these risks, limit the number of active access keys to one per user and regularly rotate them.
+RelatedUrl: ''
+Remediation:
+  Code:
+    CLI: ''
+    NativeIaC: ''
+    Other: ''
+    Terraform: ''
+  Recommendation:
+    Text: >-
+      Using IAM console navigate to Dashboard and expand Activate MFA on your
+      user's account.
+    Url: >-
+      https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_mfa
+Categories: []
+DependsOn: []
+RelatedTo: []
+Notes: ''

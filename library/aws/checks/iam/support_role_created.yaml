@@ -1,0 +1,29 @@
+Provider: aws
+CheckID: support_role_created
+CheckTitle: Ensure a support role is created within the AWS account. The support role is essential for enabling AWS support to assist with issues that require specific access, such as troubleshooting or resolving service disruptions.
+CheckType: []
+ServiceName: iam
+SubServiceName: ''
+ResourceIdTemplate: 'arn:partition:service:region:account-id:resource-id'
+Severity: critical
+ResourceType: AwsIamUser
+Description: Ensure MFA is enabled for the user's account
+Risk: >-
+ If a support role is not created, AWS support may not be able to efficiently access or assist with issues within your account. This can delay the resolution of critical incidents, leading to prolonged outages or misconfigurations. Having a dedicated support role ensures that AWS support can quickly intervene when necessary, providing the right level of access without compromising security.
+RelatedUrl: ''
+Remediation:
+  Code:
+    CLI: ''
+    NativeIaC: ''
+    Other: ''
+    Terraform: ''
+  Recommendation:
+    Text: >-
+      Using IAM console navigate to Dashboard and expand Activate MFA on your
+      user's account.
+    Url: >-
+      https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_mfa
+Categories: []
+DependsOn: []
+RelatedTo: []
+Notes: ''

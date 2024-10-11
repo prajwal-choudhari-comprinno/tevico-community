@@ -1,0 +1,30 @@
+Provider: aws
+CheckID: user_mfa_enabled_console_access
+CheckTitle: Ensure MFA is enabled for the user's account
+CheckType: []
+ServiceName: iam
+SubServiceName: ''
+ResourceIdTemplate: 'arn:partition:service:region:account-id:resource-id'
+Severity: critical
+ResourceType: AwsIamUser
+Description: Ensure MFA (Multi-Factor Authentication) is enabled for all IAM users with console access. Enabling MFA provides an additional layer of security beyond just username and password, making it harder for unauthorized users to gain access.
+
+Risk: >-
+ Without MFA enabled, accounts with console access are more vulnerable to unauthorized access. MFA ensures that even if a password is compromised, an attacker would still need a second authentication factor (such as an MFA device) to gain access. Failure to enable MFA increases the risk of unauthorized access, potentially leading to data breaches or privilege misuse. Additionally, using a non-personal MFA device reduces risks associated with device loss or employee turnover.
+RelatedUrl: ''
+Remediation:
+  Code:
+    CLI: ''
+    NativeIaC: ''
+    Other: ''
+    Terraform: ''
+  Recommendation:
+    Text: >-
+      Using IAM console navigate to Dashboard and expand Activate MFA on your
+      user's account.
+    Url: >-
+      https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_mfa
+Categories: []
+DependsOn: []
+RelatedTo: []
+Notes: ''

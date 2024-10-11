@@ -1,0 +1,30 @@
+Provider: aws
+CheckID: policy_attached_to_only_group_or_roles
+CheckTitle: Ensure IAM Policies Are Only Attached to Groups or Roles
+CheckType: []
+ServiceName: iam
+SubServiceName: ''
+ResourceIdTemplate: 'arn:partition:service:region:account-id:resource-id'
+Severity: critical
+ResourceType: AwsIamUser
+Description: Ensure IAM policies are only attached to groups or roles, and not directly to individual users. This helps to simplify the management of permissions and maintain better security practices by applying policies through roles and groups rather than individual users.
+
+Risk: >-
+ Attaching policies directly to users increases the complexity of managing permissions and the risk of accidentally assigning excessive permissions. It bypasses the principle of least privilege and makes it difficult to audit and manage access control effectively. Policies should be attached to groups or roles, which can then be assigned to users, ensuring more controlled and scalable permission management across the AWS environment.
+RelatedUrl: ''
+Remediation:
+  Code:
+    CLI: ''
+    NativeIaC: ''
+    Other: ''
+    Terraform: ''
+  Recommendation:
+    Text: >-
+      Using IAM console navigate to Dashboard and expand Activate MFA on your
+      user's account.
+    Url: >-
+      https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_mfa
+Categories: []
+DependsOn: []
+RelatedTo: []
+Notes: ''

@@ -39,6 +39,13 @@ sections:
       - elb_logging_enabled
       - opensearch_service_domains_audit_logging_enabled
       - opensearch_service_domains_cloudwatch_logging_enabled
+      - user_mfa_enabled_console_access
+      - user_multiple_active_access_keys
+      - avoid_root_usage
+      - rotate_access_keys_90_days
+      - policy_allows_privilege_escalation
+      - policy_attached_to_only_group_or_roles
+      - support_role_created
       # - rds_instance_backup_enabled
       # - rds_instance_deletion_protection
       # - rds_instance_enhanced_monitoring_enabled
