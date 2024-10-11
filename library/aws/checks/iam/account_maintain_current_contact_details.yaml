@@ -1,0 +1,67 @@
+
+########### PLEASE NOTE ###########
+# For better readability of the metadata file, kindly remove all the comments before using the template.
+###################################
+
+Provider: aws
+
+# Eg: cloudformation_stacks_termination_protection_enabled
+CheckID: account_maintain_current_contact_details
+
+# Short title/description of the check
+CheckTitle: "IAM Account Maintain Current Contact Details Check"
+
+# Check Type
+CheckType: []
+
+# Service Name. Eg: cloudformation, ec2, s3, etc.
+ServiceName: iam
+
+# Sub Service Name. Eg: ec2_instance, s3_bucket, etc.
+SubServiceName: ""
+
+# Resource Template
+ResourceIdTemplate: arn:partition:iam::account-id:role/resource-id
+
+# Severity of the check. Allowed values: critical, high, medium, low
+Severity: medium
+
+# Resource Type. Eg: AwsCloudFormationStack, AwsEC2Instance, AwsS3Bucket, etc.
+ResourceType: "AwsIAMUser"
+
+# Description of the check
+Description: "Check if IAM account maintains current contact details."
+
+# Explanation of the risk associated with the check
+Risk: "Missing contact information may lead to communication issues."
+
+# Related URL for the check
+RelatedUrl: https://tevi.co
+
+# Help section on how to fix the issue
+Remediation:
+  Code:
+    CLI:
+      aws rds modify-db-instance --db-instance-identifier <db_instance_id> --backup-retention-period
+      7 --apply-immediately
+    NativeIaC: ""
+    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/RDS/rds-automated-backups-enabled.html
+    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-rds-instances-have-backup-policy#terraform
+  Recommendation:
+    Text:
+      Enable automated backup for production data. Define a retention period and
+      periodically test backup restoration. A Disaster Recovery process should be
+      in place to govern Data Protection approach.
+    Url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
+    
+# Categories for the check. Eg: forensics-ready, security, etc.
+Categories: []
+
+# Dependencies on other checks
+DependsOn: []
+
+# Related checks
+RelatedTo: []
+
+# Side notes
+Notes: Infrastructure Protection

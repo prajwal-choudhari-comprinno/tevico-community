@@ -1,0 +1,73 @@
+
+########### PLEASE NOTE ###########
+# For better readability of the metadata file, kindly remove all the comments before using the template.
+###################################
+
+Provider: aws
+
+# Eg: cloudformation_stacks_termination_protection_enabled
+CheckID: organizations_account_part_of_organizations
+
+# Short title/description of the check
+CheckTitle: Check if account is part of an AWS Organizations
+
+# Check Type
+CheckType:
+  - Logging and Monitoring
+
+# Service Name. Eg: cloudformation, ec2, s3, etc.
+ServiceName: organizations
+
+# Sub Service Name. Eg: ec2_instance, s3_bucket, etc.
+SubServiceName: ""
+
+# Resource Template
+ResourceIdTemplate: arn:partition:service::account-id:organization/organization-id
+
+# Severity of the check. Allowed values: critical, high, medium, low
+Severity: medium
+
+# Resource Type. Eg: AwsCloudFormationStack, AwsEC2Instance, AwsS3Bucket, etc.
+ResourceType: Other
+
+# Description of the check
+Description:  |
+ This script checks AWS IAM customer-managed policies for administrative privileges.
+  It identifies policies that grant full access and marks them as failing the check.
+
+
+# Explanation of the risk associated with the check
+Risk: The risk associated with not being part of an AWS Organizations is that it can lead to a lack of centralized management and control over the AWS accounts in an organization. This can make it difficult to enforce security policies consistently across all accounts, and can also result in increased costs due to inefficiencies in resource usage. Additionally, not being part of an AWS Organizations can make it harder to track and manage account usage and access.
+
+# Related URL for the check
+RelatedUrl: https://tevi.co
+
+
+# Help section on how to fix the issue
+Remediation:
+  Code:
+    CLI:
+      aws rds modify-db-instance --db-instance-identifier <db_instance_id> --backup-retention-period
+      7 --apply-immediately
+    NativeIaC: ""
+    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/RDS/rds-automated-backups-enabled.html
+    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-rds-instances-have-backup-policy#terraform
+  Recommendation:
+    Text:
+      Enable automated backup for production data. Define a retention period and
+      periodically test backup restoration. A Disaster Recovery process should be
+      in place to govern Data Protection approach.
+    Url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
+    
+    
+# Categories for the check. Eg: forensics-ready, security, etc.
+Categories: []
+
+# Dependencies on other checks
+DependsOn: []
+
+# Related checks
+RelatedTo: []
+
+# Side notes
+Notes: Infrastructure Protection

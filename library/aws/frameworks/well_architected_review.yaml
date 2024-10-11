@@ -34,11 +34,11 @@ sections:
 
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks:
-      - cloudformation_stacks_termination_protection_enabled
-      - dynamodb_tables_pitr_enabled
-      - elb_logging_enabled
-      - opensearch_service_domains_audit_logging_enabled
-      - opensearch_service_domains_cloudwatch_logging_enabled
+      # - cloudformation_stacks_termination_protection_enabled
+      # - dynamodb_tables_pitr_enabled
+      # - elb_logging_enabled
+      # - opensearch_service_domains_audit_logging_enabled
+      # - opensearch_service_domains_cloudwatch_logging_enabled
       # - rds_instance_backup_enabled
       # - rds_instance_deletion_protection
       # - rds_instance_enhanced_monitoring_enabled
@@ -57,11 +57,11 @@ sections:
 
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
-          - rds_instance_backup_enabled
-          - rds_instance_deletion_protection
-          - rds_instance_enhanced_monitoring_enabled
-          - rds_instance_integration_cloudwatch_logs
-          - rds_instance_multi_az
+          # - rds_instance_backup_enabled
+          # - rds_instance_deletion_protection
+          # - rds_instance_enhanced_monitoring_enabled
+          # - rds_instance_integration_cloudwatch_logs
+          # - rds_instance_multi_az
 
   - name: AWS | Well Architechted Review | Performance Efficiency
     description: |
@@ -86,4 +86,23 @@ sections:
 
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
+
+  - name: AWS | Well Architechted Review | Security
+    description: |
+      The Securirty pillar includes the ability to run and monitor systems to deliver business value and to
+      continually improve supporting processes and procedures.
+
+      This section checks for the presence of a Well Architected Review in the AWS account.
+    checks:
+      # - attached_policy_admin_privileges_found
+      # - inline_policy_admin_privileges_found
+      # - account_maintain_current_contact_details
+      # - account_security_contact_information_registered
+      # - account_security_questions_registered    
+      # - customer_attached_policy_admin_privileges_found    
+      # - customer_unattached_policy_admin_privileges_foun
+      - organizations_account_part_of_organizations
+
+
+
 

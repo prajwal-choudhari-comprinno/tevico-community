@@ -1,0 +1,72 @@
+
+########### PLEASE NOTE ###########
+# For better readability of the metadata file, kindly remove all the comments before using the template.
+###################################
+
+Provider: aws
+
+# Eg: cloudformation_stacks_termination_protection_enabled
+CheckID: inline_policy_admin_privileges_found
+
+# Short title/description of the check
+CheckTitle: Ensure IAM inline policies with administrative privileges are not attached
+
+# Check Type
+CheckType: 
+  - Software and Configuration Checks
+  - Security Checks
+
+# Service Name. Eg: cloudformation, ec2, s3, etc.
+ServiceName: iam
+
+# Sub Service Name. Eg: ec2_instance, s3_bucket, etc.
+SubServiceName: ""
+
+# Resource Template
+ResourceIdTemplate: arn:aws:iam::account-id:user/username
+
+# Severity of the check. Allowed values: critical, high, medium, low
+Severity: high
+
+# Resource Type. Eg: AwsCloudFormationStack, AwsEC2Instance, AwsS3Bucket, etc.
+ResourceType: AwsIamPolicy
+
+# Description of the check
+Description: Ensure IAM inline policies with full administrative privileges (`*:*`) are not attached to any IAM user.
+
+# Explanation of the risk associated with the check
+Risk: Attaching full administrative privileges to IAM users exposes the account to significant risk, as the user can perform unrestricted actions across all AWS services.
+
+# Related URL for the check
+RelatedUrl: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
+
+# Help section on how to fix the issue
+Remediation:
+  Code:
+    CLI:
+      aws rds modify-db-instance --db-instance-identifier <db_instance_id> --backup-retention-period
+      7 --apply-immediately
+    NativeIaC: ""
+    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/RDS/rds-automated-backups-enabled.html
+    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-rds-instances-have-backup-policy#terraform
+  Recommendation:
+    Text:
+      Enable automated backup for production data. Define a retention period and
+      periodically test backup restoration. A Disaster Recovery process should be
+      in place to govern Data Protection approach.
+    Url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
+    
+
+# Categories for the check. Eg: forensics-ready, security, etc.
+Categories: 
+  - security
+  - privilege_management
+
+# Dependencies on other checks
+DependsOn: []
+
+# Related checks
+RelatedTo: []
+
+# Side notes
+Notes: Best practices for IAM privilege management.

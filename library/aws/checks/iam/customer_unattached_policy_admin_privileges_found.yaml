@@ -1,0 +1,77 @@
+
+########### PLEASE NOTE ###########
+# For better readability of the metadata file, kindly remove all the comments before using the template.
+###################################
+
+Provider: aws
+
+# Eg: cloudformation_stacks_termination_protection_enabled
+CheckID: customer_unattached_policy_admin_privileges_found
+
+# Short title/description of the check
+CheckTitle: Ensure IAM policies that allow full "*:*" administrative privileges are not created
+
+# Check Type
+CheckType: 
+  - Software and Configuration Checks
+  - Industry and Regulatory Standards
+  - CIS AWS Foundations Benchmark
+
+# Service Name. Eg: cloudformation, ec2, s3, etc.
+ServiceName:  iam
+
+# Sub Service Name. Eg: ec2_instance, s3_bucket, etc.
+SubServiceName:  ""
+
+# Resource Template
+ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
+
+# Severity of the check. Allowed values: critical, high, medium, low
+Severity: high
+
+# Resource Type. Eg: AwsCloudFormationStack, AwsEC2Instance, AwsS3Bucket, etc.
+ResourceType: AwsIamPolicy
+
+# Description of the check
+Description: Ensure IAM policies that allow full "*:*" administrative privileges are not created, may be eventually consistent if an ephemeral resource is using it.
+
+# Explanation of the risk associated with the check
+Risk: |
+  IAM policies are the means by which privileges are granted to users, groups, or roles. 
+  It is recommended and considered standard security advice to grant least privilege—that is, 
+  granting only the permissions required to perform a task. Determine what users need to do 
+  and then craft policies for them that let the users perform only those tasks instead of 
+  allowing full administrative privileges. Providing full administrative privileges instead of 
+  restricting to the minimum set of permissions exposes the resources to potentially unwanted actions.
+
+# Related URL for the check
+RelatedUrl: https://tevi.co
+
+# Help section on how to fix the issue
+Remediation:
+  Code:
+    CLI:
+      aws rds modify-db-instance --db-instance-identifier <db_instance_id> --backup-retention-period
+      7 --apply-immediately
+    NativeIaC: ""
+    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/RDS/rds-automated-backups-enabled.html
+    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-rds-instances-have-backup-policy#terraform
+  Recommendation:
+    Text:
+      Enable automated backup for production data. Define a retention period and
+      periodically test backup restoration. A Disaster Recovery process should be
+      in place to govern Data Protection approach.
+    Url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
+    
+
+# Categories for the check. Eg: forensics-ready, security, etc.
+Categories: []
+
+# Dependencies on other checks
+DependsOn: []
+
+# Related checks
+RelatedTo: []
+
+# Side notes
+Notes: Infrastructure Protection
