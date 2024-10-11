@@ -1,0 +1,29 @@
+
+Provider: aws
+CheckID: ec2_microsoft_sql_server_end_of_support
+CheckTitle: Check if any EC2 instance is using AMI with Microsoft SQL Server that has reached end of support
+CheckType: []
+ServiceName: ec2
+SubServiceName:  ""
+ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
+Severity: medium
+ResourceType: AwsEc2Instance
+Description: Check if any EC2 instance is using AMI with Microsoft SQL Server that has reached end of support
+Risk: Running EC2 instances with unsupported SQL Server versions can lead to security vulnerabilities, non-compliance with best practices, and lack of vendor support in case of issues. This could result in potential data breaches or disruptions in service
+RelatedUrl: https://tevi.co
+Remediation:
+  Code: 
+    CLI: ""
+    NativeIaC: ""
+    Other: ""
+    Terraform: ""
+  Recommendation:
+    Text: Migrate EC2 instances running unsupported SQL Server versions to supported versions like SQL Server 2019 or later. Consider using AWS License Manager or System Manager for identifying and managing SQL Server versions on EC2
+    Url: https://aws.amazon.com/rds/sqlserver/
+
+Categories:
+ - Infrastructure Protection
+DependsOn: []
+RelatedTo: []
+
+Notes: Infrastructure Protection
