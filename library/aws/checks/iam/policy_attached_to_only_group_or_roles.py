@@ -1,22 +1,8 @@
 """
-AUTHOR: 
-DATE: 
+AUTHOR: Mohd Asif
+DATE: 11 oct 2024
 """
 
-# import boto3
-
-# from tevico.engine.entities.report.check_model import CheckReport
-# from tevico.engine.entities.check.check import Check
-
-
-# class policy_attached_to_only_group_or_roles(Check):
-
-#     def execute(self, connection: boto3.Session) -> CheckReport:
-#         report = CheckReport(name=__name__)
-
-#         # Add your check logic here
-        
-#         return report
 
 import boto3
 from tevico.engine.entities.report.check_model import CheckReport

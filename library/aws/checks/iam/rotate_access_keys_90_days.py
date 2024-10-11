@@ -1,22 +1,8 @@
 """
-AUTHOR: 
-DATE: 
+AUTHOR: Mohd Asif
+DATE: 11 oct 2024
 """
 
-# import boto3
-
-# from tevico.engine.entities.report.check_model import CheckReport
-# from tevico.engine.entities.check.check import Check
-
-
-# class rotate_access_keys_90_days(Check):
-
-#     def execute(self, connection: boto3.Session) -> CheckReport:
-#         report = CheckReport(name=__name__)
-
-#         # Add your check logic here
-        
-#         return report
 
 import boto3
 from datetime import datetime, timedelta, timezone
