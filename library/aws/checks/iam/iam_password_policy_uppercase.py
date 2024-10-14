@@ -1,8 +1,7 @@
 """
 AUTHOR: Supriyo Bhakat <supriyo.bhakat@comprinno.net>
-DATE: 2024/10/10
+DATE: 2024-10-10
 """
-
 import boto3
 
 from tevico.engine.entities.report.check_model import CheckReport
