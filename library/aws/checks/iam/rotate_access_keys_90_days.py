@@ -1,6 +1,6 @@
 """
-AUTHOR: Mohd Asif
-DATE: 11 oct 2024
+AUTHOR: Mohd Asif <mohd.asif@comprinno.net>
+DATE: 2024-10-10
 """
 
 
