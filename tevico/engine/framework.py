@@ -211,7 +211,7 @@ class TevicoFramework():
         providers = self.__get_providers()
         checks: List[CheckReport] = []
         
-        OUTPUT_PATH = './tevico/report/output.json'
+        OUTPUT_PATH = './tevico/report/public/output.json'
         
         for p in providers:
             try:
