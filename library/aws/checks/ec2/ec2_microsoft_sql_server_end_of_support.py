@@ -1,6 +1,7 @@
 """
-AUTHOR: deepak.puri@comprinno.net
-DATE: 11-10-2024
+AUTHOR: Deepak Puri
+EMAIL: deepak.puri@comprinno.net
+DATE: 2024-10-11
 """
 
 import boto3

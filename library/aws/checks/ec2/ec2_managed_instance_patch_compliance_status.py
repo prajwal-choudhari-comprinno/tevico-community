@@ -1,6 +1,7 @@
 """
-AUTHOR: deepak.puri@comprinno.net
-DATE: 10-10-2024 
+AUTHOR: Deepak Puri
+EMAIL: deepak.puri@comprinno.net
+DATE: 2024-10-10
 """
 
 from time import process_time_ns
