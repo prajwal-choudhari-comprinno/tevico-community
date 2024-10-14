@@ -2,6 +2,7 @@
 from functools import reduce
 import json
 import os
+import subprocess
 from typing import Dict, List
 
 from jinja2 import Environment, FileSystemLoader
@@ -184,7 +185,6 @@ class TevicoFramework():
 
     def __create_provider(self) -> None:
         raise NotImplementedError('Provider create not implemented.')
-
     
     def create(self, config: CreateParams) -> None:
         """
@@ -210,6 +210,45 @@ class TevicoFramework():
             return self.__create_framework(provider=config.provider, name=config.name, config=config.options)
         else:
             raise Exception('Invalid entity type.')
+        
+        
+    def __build_report(self) -> None:
+        print(f'{'\n'}🛠️  Building zipped package')
+        
+        build_dir = './tevico/report'
+        dist_folder = 'dist'
+        dist_path = f'{build_dir}/{dist_folder}'
+        zip_file_path = './report.zip'
+        
+        if os.path.exists(dist_path):
+            subprocess.run(['rm', '-rf', dist_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        report_process = subprocess.Popen(['npm', 'run', 'build'], cwd=build_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        _, stderr = report_process.communicate()
+        
+        if report_process.returncode != 0:
+            print(f'\n❌ Error building report: {stderr}')
+            os._exit(1)
+        
+        # Save the current directory
+        original_dir = os.getcwd()
+
+        try:
+            # Change to the dist directory
+            os.chdir('./tevico/report/dist')
+            
+            # Run the zip command
+            subprocess.run(['zip', '-r', '../../../report.zip', '.'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        finally:
+            # Change back to the original directory
+            os.chdir(original_dir)
+        
+        if not os.path.exists(zip_file_path):
+            print(f'\n❌ Error creating zip file: {zip_file_path}')
+            os._exit(1)
+        
+        print(f'\n📦 Report zipped successfully: {zip_file_path}')
         
         
     def run(self):
@@ -256,5 +295,7 @@ class TevicoFramework():
         print(f'✅ Success  : {acc['success']}')
         print(f'❌ Failed   : {acc['failed']}')
         
-        print(f'\n📄 Output written to: {OUTPUT_PATH}')
+        self.__build_report()
+        
+        # print(f'\n📄 Output written to: {OUTPUT_PATH}')
         print('\n👋👋👋 Bye!')
