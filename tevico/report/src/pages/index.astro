@@ -3,7 +3,58 @@ import "@/styles/globals.css";
 import MainLayout from "@/components/MainLayout.astro";
 import { pageNames, pages } from "@/lib/utils";
 import { MetricCard } from "@/components/tevico/metric-card";
-console.log(MetricCard);
+import { CustomChart } from "@/components/tevico/customChart";
+import { CustomBarChart } from "@/components/tevico/customBarChart";
+import { CustomHorBarChart } from "@/components/tevico/customHorBarChart";
+import { CustomPieChart } from "@/components/tevico/customPieChart";
+import { DataTable } from "@/components/tevico/data-table/data-table";
+
+const chartData = [
+  { browser: "chrome", visitors: 275, fill: "hsl(var(--chart-1))" },
+  { browser: "safari", visitors: 200, fill: "hsl(var(--chart-2))" },
+  { browser: "firefox", visitors: 187, fill: "hsl(var(--chart-3))" },
+  { browser: "edge", visitors: 173, fill: "hsl(var(--chart-4))" },
+  { browser: "other", visitors: 90, fill: "hsl(var(--chart-5))" },
+];
+
+const barChartData = [
+  { month: "January", desktop: 186, mobile: 80 },
+  { month: "February", desktop: 305, mobile: 200 },
+  { month: "March", desktop: 237, mobile: 120 },
+  { month: "April", desktop: 73, mobile: 190 },
+  { month: "May", desktop: 209, mobile: 130 },
+  { month: "June", desktop: 214, mobile: 140 },
+]
+
+const tableData = [
+  {
+    id: "728ed52f",
+    amount: 100,
+    status: "pending",
+    email: "m@example.com",
+  },
+  {
+    id: "489e1d42",
+    amount: 125,
+    status: "processing",
+    email: "example@gmail.com",
+  }
+]
+
+const columns = [
+  {
+    accessorKey: "status",
+    header: "Status",
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+  },
+  {
+    accessorKey: "amount",
+    header: "Amount",
+  },
+]
 ---
 
 <MainLayout activePage={pages[pageNames.index]}>
@@ -13,4 +64,20 @@ console.log(MetricCard);
     <MetricCard title="Total Number of Checks" value={30} />
     <MetricCard title="Total Number of Checks" value={30} />
   </div>
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+    <CustomChart chartData={chartData} />
+    <CustomChart chartData={chartData} />
+    <CustomPieChart chartData={chartData} />
+    <CustomPieChart chartData={chartData} />
+  </div>
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+    <CustomBarChart chartData={barChartData} />
+    <CustomBarChart chartData={barChartData} />
+    <CustomHorBarChart chartData={barChartData} />
+    <CustomHorBarChart chartData={barChartData} />
+  </div>
+  <div class="container mx-auto py-10">
+    <DataTable columns={columns} data={tableData} />
+  </div>
+
 </MainLayout>
