@@ -164,3 +164,6 @@ scripts/**/*.yaml
 .DS_Store
 
 tevico/report/data/*
+
+# vscode setting folder
+.vscode/
