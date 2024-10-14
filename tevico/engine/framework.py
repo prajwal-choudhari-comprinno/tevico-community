@@ -11,6 +11,7 @@ from tevico.engine.core.utils import CoreUtils
 from tevico.engine.entities.provider.provider import Provider
 from tevico.engine.entities.provider.provider_model import ProviderMetadata
 from tevico.engine.entities.report.check_model import CheckReport
+from datetime import datetime
 
 class TevicoFramework():
     
@@ -106,7 +107,16 @@ class TevicoFramework():
             file.write(metadata_template.render(check_id=name, provider=provider))
             
         with open(check_file_path, 'w') as file:
-            file.write(check_template.render(check_id=name))
+            current_date = datetime.now().strftime('%Y-%m-%d')
+            git_user_email = os.popen('git config user.email').read().strip()
+            git_user_name = os.popen('git config user.name').read().strip()
+            
+            file.write(check_template.render(
+                check_id=name,
+                author=git_user_name,
+                email=git_user_email,
+                date=current_date,
+            ))
             
         print(f'\n✅ Check created successfully: {check_file_path}')
         
