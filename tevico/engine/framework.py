@@ -213,7 +213,6 @@ class TevicoFramework():
         
         
     def __build_report(self) -> None:
-        print(f'{'\n'}🛠️  Building zipped package')
         
         build_dir = './tevico/report'
         dist_folder = 'dist'
@@ -247,7 +246,7 @@ class TevicoFramework():
         if not os.path.exists(zip_file_path):
             print(f'\n❌ Error creating zip file: {zip_file_path}')
             os._exit(1)
-        
+
         print(f'\n📦 Report zipped successfully: {zip_file_path}')
         
         
@@ -295,7 +294,8 @@ class TevicoFramework():
         print(f'✅ Success  : {acc['success']}')
         print(f'❌ Failed   : {acc['failed']}')
         
+        print(f'{'\n'}🛠️  Building zipped package')
+        
         self.__build_report()
         
-        # print(f'\n📄 Output written to: {OUTPUT_PATH}')
         print('\n👋👋👋 Bye!')
