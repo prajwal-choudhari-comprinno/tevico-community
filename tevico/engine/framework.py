@@ -89,14 +89,17 @@ class TevicoFramework():
             raise Exception(f'Provider checks directory does not exist: {provider_checks_dir}')
         
         check_dir = f'{provider_checks_dir}'
+        file_prefix = ''
         
         if config is not None and 'service' in config:
             service_name = config['service']
             os.makedirs(f'{provider_checks_dir}/{service_name}', exist_ok=True)
             check_dir = f'{provider_checks_dir}/{service_name}'
+            if not name.startswith(service_name):
+                file_prefix = f'{service_name}_'
         
-        check_file_path = f'{check_dir}/{name}.py'
-        metadata_file_path = f'{check_dir}/{name}.yaml'
+        check_file_path = f'{check_dir}/{file_prefix}{name}.py'
+        metadata_file_path = f'{check_dir}/{file_prefix}{name}.yaml'
         
         j2_env = Environment(loader=FileSystemLoader('./tevico/templates'), trim_blocks=True)
         
