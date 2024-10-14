@@ -1,6 +1,6 @@
 """
 AUTHOR: SUPRIYO BHAKAT
-DATE: 10/10/2024
+DATE: 2024/10/10
 """
 
 import boto3

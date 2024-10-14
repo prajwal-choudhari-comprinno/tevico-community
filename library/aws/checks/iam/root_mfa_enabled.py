@@ -1,6 +1,6 @@
 """
-AUTHOR: SUPRIYO BHAKAT
-DATE: 09/10/2024
+AUTHOR: Supriyo Bhakat <supriyo.bhakat@comprinno.net>
+DATE: 2024/10/10
 """
 
 import boto3
