@@ -229,19 +229,15 @@ class TevicoFramework():
         if report_process.returncode != 0:
             print(f'\n❌ Error building report: {stderr}')
             os._exit(1)
-        
-        # Save the current directory
-        original_dir = os.getcwd()
+
+        current_dir = os.getcwd()
 
         try:
-            # Change to the dist directory
             os.chdir('./tevico/report/dist')
             
-            # Run the zip command
             subprocess.run(['zip', '-r', '../../../report.zip', '.'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         finally:
-            # Change back to the original directory
-            os.chdir(original_dir)
+            os.chdir(current_dir)
         
         if not os.path.exists(zip_file_path):
             print(f'\n❌ Error creating zip file: {zip_file_path}')
