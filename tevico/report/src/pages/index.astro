@@ -1,7 +1,7 @@
 ---
 import MainLayout from "@/components/MainLayout.astro";
 import { Chart } from "@/components/tevico/charts";
-import { DataTable } from "@/components/tevico/data-table/data-table";
+// import { DataTable } from "@/components/tevico/data-table/data-table";
 import { StatsWithChart } from "@/components/tevico/statsWithChart";
 import { MetricCard } from "@/components/tevico/metric-card";
 import { pageNames, pages } from "@/lib/utils";
@@ -118,6 +118,6 @@ const data = [
     <StatsWithChart footerData={footerData} chartData={data} />
   </div>
   <div class="container mx-auto py-10">
-    <DataTable columns={columns} data={tableData} />
+    <!-- <DataTable columns={columns} data={tableData} /> -->
   </div>
 </MainLayout>
