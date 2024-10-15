@@ -12,3 +12,8 @@ export interface DropdownFilter {
     icon?: ComponentType<{ className?: string }>;
   }[];
 }
+
+export interface SearchBarFilter {
+    key: string;
+    title: string;
+  }
