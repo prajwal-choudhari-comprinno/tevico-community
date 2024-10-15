@@ -1,7 +1,7 @@
 "use client"
 
 import { TrendingUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 
 import {
   Card,
@@ -47,6 +47,13 @@ interface ChartProps {
   doughnutChartData?: PieChartData,
 }
 
+export function generateChartColor() {
+  const hue = 137 + Math.floor(Math.random() * 6);
+  const saturation = 40 + Math.floor(Math.random() * 49);
+  const lightness = 9 + Math.floor(Math.random() * 36);
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
+
 const BarChartComponent = ({ chartData }: { chartData: ChartData }) => (
   <BarChart width={300} height={300} accessibilityLayer data={chartData.data}>
     <CartesianGrid vertical={false} />
@@ -58,11 +65,9 @@ const BarChartComponent = ({ chartData }: { chartData: ChartData }) => (
       tickFormatter={(value) => value.toString().slice(0, 3)}
     />
     {chartData.config.dataKeys.map((key, index) => (
-      <Bar key={key} dataKey={key} fill={`hsl(var(--chart-${index + 1}))`} radius={8} />
+      <Bar key={key} dataKey={key} fill={`hsl(var(--chart-${index + 1}))` || generateChartColor()} radius={8} />
     ))}
   </BarChart>
-  // <ResponsiveContainer width="100%" height={300}>
-  // </ResponsiveContainer>
 );
 
 const HorizontalBarChartComponent = ({ chartData }: { chartData: ChartData }) => (
@@ -70,7 +75,7 @@ const HorizontalBarChartComponent = ({ chartData }: { chartData: ChartData }) =>
     accessibilityLayer
     data={chartData.data}
     layout="vertical"
-    margin={{ left: -20 }}
+    margin={{ left: -10 }}
   >
     <CartesianGrid horizontal={false} />
     <XAxis type="number" hide />
@@ -83,31 +88,32 @@ const HorizontalBarChartComponent = ({ chartData }: { chartData: ChartData }) =>
       tickFormatter={(value) => value.toString().slice(0, 3)}
     />
     {chartData.config.dataKeys.map((key, index) => (
-      <Bar key={key} dataKey={key} fill={`hsl(var(--chart-${index + 1}))`} radius={5} />
+      <Bar key={key} dataKey={key} fill={`hsl(var(--chart-${index + 1}))` || generateChartColor()} radius={5} />
     ))}
   </BarChart>
-  // <ResponsiveContainer width="100%" height={300}>
-  // </ResponsiveContainer>
 );
 
 const PieChartComponent = ({ chartData }: { chartData: PieChartData }) => (
-  <PieChart width={300} height={300}>
+  <PieChart width={300} height={400}>
+    <Tooltip />
+    <Legend />
     <Pie
       data={chartData.data}
       dataKey={chartData.config.valueKey}
       nameKey={chartData.config.labelKey}
     >
+      <Legend />
       {chartData.data.map((entry, index) => (
         <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
       ))}
     </Pie>
   </PieChart>
-  // <ResponsiveContainer width="100%" height={300}>
-  // </ResponsiveContainer>
 );
 
 const DoughnutChartComponent = ({ chartData }: { chartData: PieChartData }) => (
-  <PieChart width={300} height={300}>
+  <PieChart width={300} height={400}>
+    <Tooltip />
+    <Legend />
     <Pie
       data={chartData.data}
       dataKey={chartData.config.valueKey}
@@ -121,8 +127,6 @@ const DoughnutChartComponent = ({ chartData }: { chartData: PieChartData }) => (
       ))}
     </Pie>
   </PieChart>
-  // <ResponsiveContainer width="100%" height={300}>
-  // </ResponsiveContainer>
 );
 
 export function Chart(props: ChartProps) {
