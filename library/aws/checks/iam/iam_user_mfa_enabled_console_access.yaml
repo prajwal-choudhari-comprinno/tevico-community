@@ -1,5 +1,5 @@
 Provider: aws
-CheckID: user_mfa_enabled_console_access
+CheckID: iam_user_mfa_enabled_console_access
 CheckTitle: Ensure MFA is enabled for the user's account
 CheckType: []
 ServiceName: iam

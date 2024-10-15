@@ -1,5 +1,5 @@
 Provider: aws
-CheckID: user_multiple_active_access_keys
+CheckID: iam_user_multiple_active_access_keys
 CheckTitle: Ensure Multiple active access key for the users
 CheckType: []
 ServiceName: iam

@@ -1,5 +1,5 @@
 Provider: aws
-CheckID: policy_attached_to_only_group_or_roles
+CheckID: iam_policy_attached_to_only_group_or_roles
 CheckTitle: Ensure IAM Policies Are Only Attached to Groups or Roles
 CheckType: []
 ServiceName: iam

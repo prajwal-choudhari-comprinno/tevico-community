@@ -8,7 +8,7 @@ import boto3
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
-class policy_allows_privilege_escalation(Check):
+class iam_policy_allows_privilege_escalation(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
         client = connection.client('iam')
@@ -51,10 +51,10 @@ class policy_allows_privilege_escalation(Check):
                 inline_policies = client.list_user_policies(UserName=username)['PolicyNames']
                 
                 if check_policies(attached_policies):
-                    print(f"Privilege escalation policy found for user: {username}")
+                    # print(f"Privilege escalation policy found for user: {username}")
                     report.resource_ids_status[username] = True
                 else:
-                    print(f"No privilege escalation policy found for user: {username}")
+                    # print(f"No privilege escalation policy found for user: {username}")
                     report.resource_ids_status[username] = False
 
             # Check roles for privilege escalation policies
@@ -64,10 +64,10 @@ class policy_allows_privilege_escalation(Check):
                 inline_policies = client.list_role_policies(RoleName=role_name)['PolicyNames']
 
                 if check_policies(attached_policies):
-                    print(f"Privilege escalation policy found for role: {role_name}")
+                    # print(f"Privilege escalation policy found for role: {role_name}")
                     report.resource_ids_status[role_name] = True
                 else:
-                    print(f"No privilege escalation policy found for role: {role_name}")
+                    # print(f"No privilege escalation policy found for role: {role_name}")
                     report.resource_ids_status[role_name] = False
 
             # Check groups for privilege escalation policies
@@ -77,18 +77,18 @@ class policy_allows_privilege_escalation(Check):
                 inline_policies = client.list_group_policies(GroupName=group_name)['PolicyNames']
 
                 if check_policies(attached_policies):
-                    print(f"Privilege escalation policy found for group: {group_name}")
+                    # print(f"Privilege escalation policy found for group: {group_name}")
                     report.resource_ids_status[group_name] = True
                 else:
-                    print(f"No privilege escalation policy found for group: {group_name}")
+                    # print(f"No privilege escalation policy found for group: {group_name}")
                     report.resource_ids_status[group_name] = False
 
             # Set overall check status
             report.passed = not any(report.resource_ids_status.values())
         
         except Exception as e:
-            print("Error in checking policies for privilege escalation")
-            print(str(e))
+            # print("Error in checking policies for privilege escalation")
+            # print(str(e))
             report.passed = False
         
         return report

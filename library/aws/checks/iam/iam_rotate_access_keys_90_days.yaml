@@ -1,5 +1,5 @@
 Provider: aws
-CheckID: rotate_access_keys_90_days
+CheckID: iam_rotate_access_keys_90_days
 CheckTitle: Ensure IAM Access Keys Are Rotated Every 90 Days
 CheckType: []
 ServiceName: iam
