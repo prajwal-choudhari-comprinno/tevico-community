@@ -167,3 +167,5 @@ tevico/report/data/*
 
 # vscode setting folder
 .vscode/
+
+report.zip
