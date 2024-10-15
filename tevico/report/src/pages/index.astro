@@ -2,6 +2,7 @@
 import MainLayout from "@/components/MainLayout.astro";
 import { Chart } from "@/components/tevico/charts";
 import { DataTable } from "@/components/tevico/data-table/data-table";
+import { StatsWithChart } from "@/components/tevico/statsWithChart";
 import { MetricCard } from "@/components/tevico/metric-card";
 import { pageNames, pages } from "@/lib/utils";
 import "@/styles/globals.css";
@@ -11,6 +12,10 @@ const pieChartData = {
     { browser: "Chrome", visitors: 4344 },
     { browser: "Firefox", visitors: 5435 },
     { browser: "Safari", visitors: 2525 },
+    { browser: "Edge", visitors: 1578 },
+    { browser: "Brave", visitors: 3333 },
+    { browser: "Monice", visitors: 5654 },
+    { browser: "Sameera", visitors: 2505 },
   ],
   config: {
     labelKey: "browser",
@@ -23,6 +28,8 @@ const barChartData = {
     { month: "January", desktop: 186, mobile: 123 },
     { month: "February", desktop: 305, mobile: 234 },
     { month: "March", desktop: 237, mobile: 345 },
+    { month: "April", desktop: 237, mobile: 345 },
+    { month: "May", desktop: 237, mobile: 345 },
   ],
   config: {
     xAxis: "month",
@@ -59,6 +66,33 @@ const columns = [
     header: "Amount",
   },
 ];
+
+const footerData = [
+  { title: "Move", value: 562, unit: "kcal" },
+  { title: "Exercise", value: 70, unit: "min" },
+  { title: "Stand", value: 14, unit: "hr" },
+];
+
+const data = [
+  {
+    title: "stand",
+    value: (8 / 12) * 100,
+    label: "8/12 hr",
+    // fill: "hsl(var(--chart-1))",
+  },
+  {
+    title: "exercise",
+    value: (46 / 60) * 100,
+    label: "46/60 min",
+    // fill: "hsl(var(--chart-2))",
+  },
+  {
+    title: "move",
+    value: (245 / 360) * 100,
+    label: "245/360 kcal",
+    // fill: "hsl(var(--chart-3))",
+  },
+];
 ---
 
 <MainLayout activePage={pages[pageNames.index]}>
@@ -79,6 +113,9 @@ const columns = [
   </div>
   <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
     <Chart type={"DOUGHNUT"} doughnutChartData={pieChartData} />
+  </div>
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
+    <StatsWithChart footerData={footerData} chartData={data} />
   </div>
   <div class="container mx-auto py-10">
     <DataTable columns={columns} data={tableData} />
