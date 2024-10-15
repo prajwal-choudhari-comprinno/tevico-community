@@ -1,6 +1,6 @@
 import { columns } from "./columns";
 import { DataTable } from "@/components/tevico/data-table/data-table";
-import { data, filters } from  './data/data'
+import { data, filters, searchBarFilter } from  './data/data'
 
 export default function ChecksPage() {
   // Log data and columns for debugging
@@ -9,7 +9,7 @@ export default function ChecksPage() {
 
   return (
     <div>
-      <DataTable data={data} columns={columns} dropdownFilter = {filters} />
+      <DataTable data={data} columns={columns} dropdownFilter = {filters} searchBarFilter = {searchBarFilter} />
     </div>
   );
 }

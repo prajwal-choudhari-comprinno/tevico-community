@@ -7,16 +7,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableViewOptions } from "./data-table-view-options"
 import { DataTableFacetedFilter } from "./data-table-faceted-filter"
-import { DropdownFilter } from "./types"
+import { DropdownFilter, SearchBarFilter } from "./types"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>,
-  dropdownFilter: DropdownFilter[]
+  dropdownFilter: DropdownFilter[],
+  searchBarFilter: SearchBarFilter
 }
 
 export function DataTableToolbar<TData>({
   table,
-  dropdownFilter
+  dropdownFilter,
+  searchBarFilter
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
   console.log(table);
@@ -26,10 +28,10 @@ export function DataTableToolbar<TData>({
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
-          placeholder="Filter tasks..."
-          value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+          placeholder={searchBarFilter.title}
+          value={(table.getColumn(searchBarFilter.key)?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("title")?.setFilterValue(event.target.value)
+            table.getColumn(searchBarFilter.key)?.setFilterValue(event.target.value)
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />

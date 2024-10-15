@@ -104,3 +104,9 @@ export const filters = [
     options: priorities
   }
 ];
+
+export const searchBarFilter = {
+  key: 'title',
+  title: 'Search By Title'
+
+}
