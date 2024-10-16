@@ -111,7 +111,6 @@ sections:
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
 
-
   - name: AWS | Well Architechted Review | Security
     description: |
       The Security pillar focuses on the ability to protect data, systems, and assets through risk management and control. 
@@ -126,4 +125,11 @@ sections:
      - ec2_network_acl_allow_ingress_tcp_port_22
      - ec2_security_group_default_restrict_traffic
      - iam_root_hardware_mfa_enabled
-
+     - iam_root_mfa_enabled
+     - iam_no_root_access_keys
+     - iam_password_policy_lowercase
+     - iam_password_policy_minimum_length_14
+     - iam_password_policy_number
+     - iam_password_policy_symbol
+     - iam_password_policy_uppercase
+     - iam_password_policy_reuse_24
