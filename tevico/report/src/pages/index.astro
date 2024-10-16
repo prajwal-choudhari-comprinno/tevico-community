@@ -95,10 +95,10 @@ const data = [
 
 <MainLayout activePage={pages[pageNames.index]}>
   <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-    <MetricCard title="Total Number of Checks" value={30} />
-    <MetricCard title="Total Number of Checks" value={30} />
-    <MetricCard title="Total Number of Checks" value={30} />
-    <MetricCard title="Total Number of Checks" value={30} />
+    <MetricCard icon="dollar" title="Total Number of Checks" value={30} />
+    <MetricCard icon="dollar" title="Total Number of Upgrades" value={70} />
+    <MetricCard icon="users" title="Total Number of Checks" value={-30} content="+180.1% from last month" />
+    <MetricCard icon="users" title="Total Number of Checks" value={30} />
   </div>
   <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
     <Chart type={"BAR"} barChartData={barChartData} />
