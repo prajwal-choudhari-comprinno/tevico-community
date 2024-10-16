@@ -6,6 +6,7 @@ import { StatsWithChart } from "@/components/tevico/statsWithChart";
 import { MetricCard } from "@/components/tevico/metric-card";
 import { pageNames, pages } from "@/lib/utils";
 import "@/styles/globals.css";
+import { TableComponent } from "@/components/tevico/table";
 
 const pieChartData: PieChartData = {
   data: {
@@ -35,20 +36,28 @@ const barChartData = {
   },
 };
 
-const tableData = [
-  {
-    id: "728ed52f",
-    amount: 100,
-    status: "pending",
-    email: "m@example.com",
-  },
-  {
-    id: "489e1d42",
-    amount: 125,
-    status: "processing",
-    email: "example@gmail.com",
-  },
-];
+const tableData = {
+  headers: [
+    { key: "id", label: "ID" },
+    { key: "amount", label: "Amount" },
+    { key: "status", label: "Status" },
+    { key: "email", label: "Email" },
+  ],
+  data: [
+    {
+      id: "728ed52f",
+      amount: 100,
+      status: "pending",
+      email: "m@example.com",
+    },
+    {
+      id: "489e1d42",
+      amount: 125,
+      status: "processing",
+      email: "example@gmail.com",
+    },
+  ],
+};
 
 const columns = [
   {
@@ -97,7 +106,12 @@ const data = [
   <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
     <MetricCard icon="dollar" title="Total Number of Checks" value={30} />
     <MetricCard icon="dollar" title="Total Number of Upgrades" value={70} />
-    <MetricCard icon="users" title="Total Number of Checks" value={-30} content="+180.1% from last month" />
+    <MetricCard
+      icon="users"
+      title="Total Number of Checks"
+      value={-30}
+      content="+180.1% from last month"
+    />
     <MetricCard icon="users" title="Total Number of Checks" value={30} />
   </div>
   <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
@@ -118,7 +132,7 @@ const data = [
   <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
     <StatsWithChart footerData={footerData} chartData={data} />
   </div>
-  <div class="container mx-auto py-10">
-    <!-- <DataTable columns={columns} data={tableData} /> -->
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
+    <TableComponent tableData={tableData} />
   </div>
 </MainLayout>
