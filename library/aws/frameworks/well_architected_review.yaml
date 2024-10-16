@@ -26,6 +26,22 @@ sections:
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
 
+  - name: AWS | Well Architechted Review | Security
+    description: |
+      The Security pillar includes the ability to protect information, systems, and assets while delivering business
+      value through risk assessments and mitigation strategies.
+
+      This section checks for the presence of a Well Architected Review in the AWS account.
+    checks: 
+      - ec2_ebs_volume_encryption
+      - ec2_ebs_default_encryption
+      - ec2_ebs_snapshot_encrypted
+      - ec2_instance_managed_by_ssm
+      - ec2_instance_secrets_user_data
+      - ec2_launch_template_no_secrets
+      - ec2_instance_profile_attached
+      - ec2_imdsv2_enabled
+
   - name: AWS | Well Architechted Review | Reliability
     description: |
       The Reliability pillar includes the ability of a system to recover from infrastructure or service disruptions,
@@ -33,12 +49,20 @@ sections:
       network issues.
 
       This section checks for the presence of a Well Architected Review in the AWS account.
+
     checks:
       - cloudformation_stacks_termination_protection_enabled
       - dynamodb_tables_pitr_enabled
       - elb_logging_enabled
       - opensearch_service_domains_audit_logging_enabled
       - opensearch_service_domains_cloudwatch_logging_enabled
+      - iam_user_mfa_enabled_console_access
+      - iam_user_multiple_active_access_keys
+      - iam_avoid_root_usage
+      - iam_rotate_access_keys_90_days
+      - iam_policy_allows_privilege_escalation
+      - iam_policy_attached_to_only_group_or_roles
+      - iam_support_role_created
       # - rds_instance_backup_enabled
       # - rds_instance_deletion_protection
       # - rds_instance_enhanced_monitoring_enabled
@@ -56,12 +80,12 @@ sections:
           network issues.
 
           This section checks for the presence of a Well Architected Review in the AWS account.
-        checks:
-          - rds_instance_backup_enabled
-          - rds_instance_deletion_protection
-          - rds_instance_enhanced_monitoring_enabled
-          - rds_instance_integration_cloudwatch_logs
-          - rds_instance_multi_az
+        checks: []
+          # - rds_instance_backup_enabled
+          # - rds_instance_deletion_protection
+          # - rds_instance_enhanced_monitoring_enabled
+          # - rds_instance_integration_cloudwatch_logs
+          # - rds_instance_multi_az
 
   - name: AWS | Well Architechted Review | Performance Efficiency
     description: |
@@ -87,13 +111,20 @@ sections:
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
 
-  - name: AWS | Well Architechted Review | Secuirity
+  - name: AWS | Well Architechted Review | Security
     description: |
-      The Operational Excellence pillar includes the ability to run and monitor systems to deliver business value and to
-      continually improve supporting processes and procedures.
-
+      The Security pillar focuses on the ability to protect data, systems, and assets through risk management and control. 
+      
       This section checks for the presence of a Well Architected Review in the AWS account.
-    checks: 
+    checks:
+     - ec2_image_builder_enabled
+     - ec2_instance_managed_by_ssm
+     - ec2_managed_instance_patch_compliance_status
+     - ec2_microsoft_sql_server_end_of_support
+     - ec2_network_acl_allow_ingress_any_port
+     - ec2_network_acl_allow_ingress_tcp_port_22
+     - ec2_security_group_default_restrict_traffic
+     - iam_root_hardware_mfa_enabled
      - iam_root_mfa_enabled
      - iam_no_root_access_keys
      - iam_password_policy_lowercase

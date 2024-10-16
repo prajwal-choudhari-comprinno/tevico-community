@@ -1,0 +1,26 @@
+Provider: aws
+CheckID: ec2_network_acl_allow_ingress_any_port
+CheckTitle: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to any port
+CheckType: []
+ServiceName: ec2
+SubServiceName: networkacl
+ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
+Severity: medium
+ResourceType: AwsEc2NetworkAcl
+Description: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to any port
+Risk: Even with a perimeter firewall in place, open network ACLs can allow any user or malware with VPC access to scan for well-known and sensitive ports, potentially gaining access to instances.
+RelatedUrl: https://tevi.co
+Remediation:
+  Code:
+    CLI: ""
+    NativeIaC: ""
+    Other: ""
+    Terraform: ""
+  Recommendation:
+    Text: Apply Zero Trust approach. Implement a process to scan and remediate unrestricted or overly permissive network ACLs. Recommended best practices is to narrow the definition for the minimum ports required
+    Url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html
+Categories:
+ - Infrastructure Protection
+DependsOn: []
+RelatedTo: []
+Notes: Infrastructure Protection

@@ -1,0 +1,68 @@
+
+########### PLEASE NOTE ###########
+# For better readability of the metadata file, kindly remove all the comments before using the template.
+###################################
+
+Provider: aws
+
+# Eg: cloudformation_stacks_termination_protection_enabled
+CheckID: ec2_ebs_volume_encryption
+
+# Short title/description of the check
+CheckTitle: Ensure there are no EBS Volumes unencrypted.
+
+# Check Type
+CheckType: 
+  - "Data Protection"
+
+# Service Name. Eg: cloudformation, ec2, s3, etc.
+ServiceName: ec2
+
+# Sub Service Name. Eg: ec2_instance, s3_bucket, etc.
+SubServiceName: volume
+
+# Resource Template
+ResourceIdTemplate: arn:partition:cloudformation:region:account-id:stack/resource-id
+
+# Severity of the check. Allowed values: critical, high, medium, low
+Severity: medium
+
+# Resource Type. Eg: AwsCloudFormationStack, AwsEC2Instance, AwsS3Bucket, etc.
+ResourceType: AwsEc2Volume
+
+# Description of the check
+Description: Ensure there are no EBS Volumes unencrypted.
+
+# Explanation of the risk associated with the check
+Risk: Data encryption at rest prevents data visibility in the event of its unauthorized access or theft.
+
+# Related URL for the check
+RelatedUrl: https://tevi.co
+
+# Help section on how to fix the issue
+Remediation:
+  Code:
+    # Eg: aws cloudformation update-termination-protection --region <REGION_NAME> --stack-name <STACK_NAME> --enable-termination-protection
+    CLI: 
+      
+    NativeIaC: 
+    Other: 
+    Terraform: 
+  Recommendation:
+    # Eg: Ensure termination protection is enabled for the cloudformation stacks.
+    Text: Encrypt all EBS volumes and Enable Encryption by default You can configure your AWS account to enforce the encryption of the new EBS volumes and snapshot copies that you create. For example, Amazon EBS encrypts the EBS volumes created when you launch an instance and the snapshots that you copy from an unencrypted snapshot.
+    # Eg: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-protect-stacks.html
+    Url: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html
+
+# Categories for the check. Eg: forensics-ready, security, etc.
+Categories: 
+  - encryption
+
+# Dependencies on other checks
+DependsOn: []
+
+# Related checks
+RelatedTo: []
+
+# Side notes
+Notes: Infrastructure Protection
