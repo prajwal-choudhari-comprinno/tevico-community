@@ -1,4 +1,3 @@
-
 Provider: aws
 CheckID: ec2_instance_managed_by_ssm
 CheckTitle: Check if EC2 instances are managed by Systems Manager.
@@ -15,13 +14,14 @@ RelatedUrl: https://tevi.co
 Remediation:
   Code:
     CLI: ""
-    NativeIaC: ""
+    NativeIaC: "" 
     Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/SSM/ssm-managed-instances.html
     Terraform: ""
   Recommendation:
-    Text: Verify and apply Systems Manager Prerequisites.
+    Text: Verify and apply Systems Manager Prerequisites
     Url: https://docs.aws.amazon.com/systems-manager/latest/userguide/managed_instances.html
-Categories: []
+Categories:
+ - Infrastructure Protection
 DependsOn: []
 RelatedTo: []
 Notes: Infrastructure Protection
