@@ -1,5 +1,5 @@
 "use client"
-import type { Task } from "./data/schema"
+import { Task } from "./data/schema"
 import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 
