@@ -49,12 +49,20 @@ sections:
       network issues.
 
       This section checks for the presence of a Well Architected Review in the AWS account.
-    checks: []
-      # - cloudformation_stacks_termination_protection_enabled
-      # - dynamodb_tables_pitr_enabled
-      # - elb_logging_enabled
-      # - opensearch_service_domains_audit_logging_enabled
-      # - opensearch_service_domains_cloudwatch_logging_enabled
+
+    checks:
+      - cloudformation_stacks_termination_protection_enabled
+      - dynamodb_tables_pitr_enabled
+      - elb_logging_enabled
+      - opensearch_service_domains_audit_logging_enabled
+      - opensearch_service_domains_cloudwatch_logging_enabled
+      - iam_user_mfa_enabled_console_access
+      - iam_user_multiple_active_access_keys
+      - iam_avoid_root_usage
+      - iam_rotate_access_keys_90_days
+      - iam_policy_allows_privilege_escalation
+      - iam_policy_attached_to_only_group_or_roles
+      - iam_support_role_created
       # - rds_instance_backup_enabled
       # - rds_instance_deletion_protection
       # - rds_instance_enhanced_monitoring_enabled
