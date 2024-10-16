@@ -1,7 +1,7 @@
 "use client"
 
 import { TrendingUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Label, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 
 import {
   Card,
@@ -11,17 +11,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-type DataKey = string;
-type DataValue = number | string;
+import React from "react";
 
 type ChartDataPoint = {
-  [key: DataKey]: DataValue;
+  [key: string]: number | string;
 };
 
 type ChartConfig = {
-  xAxis: DataKey;
-  dataKeys: DataKey[];
+  xAxis: string;
+  dataKeys: string[];
 };
 
 type ChartData = {
@@ -29,21 +27,27 @@ type ChartData = {
   config: ChartConfig;
 };
 
-type PieChartConfig = {
-  labelKey: DataKey;
-  valueKey: DataKey;
+type PieChartDataPoint = {
+  [key: string]: number;
 };
 
-type PieChartData = {
-  data: ChartDataPoint[];
+type PieChartConfig = {
+  labelKey: string;
+  valueKey: string;
+  titleKey?: string;
+};
+
+export type PieChartData = {
+  data: PieChartDataPoint;
   config: PieChartConfig;
 };
 
 interface ChartProps {
-  type: "BAR" | "HORIZONTAL_BAR" | "PIE" | "DOUGHNUT",
+  type: "BAR" | "HORIZONTAL_BAR" | "PIE" | "PIE_WITH_STATS" | "DOUGHNUT",
   barChartData?: ChartData,
   horizontalBarChartData?: ChartData,
   pieChartData?: PieChartData,
+  pieChartWithStatsData?: PieChartData,
   doughnutChartData?: PieChartData,
 }
 
@@ -93,57 +97,127 @@ const HorizontalBarChartComponent = ({ chartData }: { chartData: ChartData }) =>
   </BarChart>
 );
 
-const PieChartComponent = ({ chartData }: { chartData: PieChartData }) => (
-  <PieChart width={300} height={400}>
-    <Tooltip />
-    <Legend />
-    <Pie
-      data={chartData.data}
-      dataKey={chartData.config.valueKey}
-      nameKey={chartData.config.labelKey}
-    >
+const PieChartComponent = ({ chartData }: { chartData: PieChartData }) => {
+  const dataAsArray = Object.keys(chartData.data).map(key => Object.assign({
+    [chartData.config.labelKey]: key,
+    [chartData.config.valueKey]: chartData.data[key]
+  }));
+  return (
+    <PieChart width={300} height={400}>
+      <Tooltip />
       <Legend />
-      {chartData.data.map((entry, index) => (
-        <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
-      ))}
-    </Pie>
-  </PieChart>
-);
+      <Pie
+        data={dataAsArray}
+        dataKey={chartData.config.valueKey}
+        nameKey={chartData.config.labelKey}
+      >
+        <Legend />
+        {dataAsArray.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
+        ))}
+      </Pie>
+    </PieChart>
+  )
+};
 
-const DoughnutChartComponent = ({ chartData }: { chartData: PieChartData }) => (
-  <PieChart width={300} height={400}>
-    <Tooltip />
-    <Legend />
-    <Pie
-      data={chartData.data}
-      dataKey={chartData.config.valueKey}
-      nameKey={chartData.config.labelKey}
-      innerRadius={60}
-      outerRadius={80}
-      label
-    >
-      {chartData.data.map((entry, index) => (
-        <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
-      ))}
-    </Pie>
-  </PieChart>
-);
+const PieV2ChartComponent = ({ chartData }: { chartData: PieChartData }) => {
+  const dataAsArray = Object.keys(chartData.data).map(key => Object.assign({
+    [chartData.config.labelKey]: key,
+    [chartData.config.valueKey]: chartData.data[key]
+  }));
+  const totalVisitors = React.useMemo(() => {
+    const key: string = chartData.config.valueKey;
+    return dataAsArray.reduce((acc, curr) => acc + (curr[key] || 0), 0);
+  }, [chartData.config.valueKey, chartData.data]);
+
+  return (
+    <PieChart width={300} height={400}>
+      <Pie
+        data={dataAsArray}
+        dataKey={chartData.config.valueKey}
+        nameKey={chartData.config.labelKey}
+        innerRadius={60}
+        strokeWidth={5}
+      >
+        <Label
+          content={({ viewBox }) => {
+            if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+              return (
+                <text
+                  x={viewBox.cx}
+                  y={viewBox.cy}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                >
+                  <tspan
+                    x={viewBox.cx}
+                    y={viewBox.cy}
+                    className="fill-foreground text-3xl font-bold"
+                  >
+                    {totalVisitors.toLocaleString()}
+                  </tspan>
+                  <tspan
+                    x={viewBox.cx}
+                    y={(viewBox.cy || 0) + 24}
+                    className="fill-muted-foreground"
+                  >
+                    {chartData.config.titleKey}
+                  </tspan>
+                </text>
+              )
+            }
+          }}
+        />
+        {dataAsArray.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
+        ))}
+      </Pie>
+    </PieChart>
+  )
+};
+
+const DoughnutChartComponent = ({ chartData }: { chartData: PieChartData }) => {
+  const dataAsArray = Object.keys(chartData.data).map(key => Object.assign({
+    [chartData.config.labelKey]: key,
+    [chartData.config.valueKey]: chartData.data[key]
+  }));
+  return (
+    <PieChart width={300} height={400}>
+      <Tooltip />
+      <Legend />
+      <Pie
+        data={dataAsArray}
+        dataKey={chartData.config.valueKey}
+        nameKey={chartData.config.labelKey}
+        innerRadius={60}
+        outerRadius={80}
+        label
+      >
+        {dataAsArray.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
+        ))}
+      </Pie>
+    </PieChart>
+  )
+};
 
 export function Chart(props: ChartProps) {
-  const renderChart = () => {
+  const renderChart = React.useMemo(() => {
     switch (props.type) {
       case 'BAR':
-        return props.barChartData ? <BarChartComponent chartData={props.barChartData} /> : null;
+        return props.barChartData && <BarChartComponent chartData={props.barChartData} />;
       case 'HORIZONTAL_BAR':
-        return props.horizontalBarChartData ? <HorizontalBarChartComponent chartData={props.horizontalBarChartData} /> : null;
+        return props.horizontalBarChartData && <HorizontalBarChartComponent chartData={props.horizontalBarChartData} />;
       case 'PIE':
-        return props.pieChartData ? <PieChartComponent chartData={props.pieChartData} /> : null;
+        return props.pieChartData && <PieChartComponent chartData={props.pieChartData} />;
       case 'DOUGHNUT':
-        return props.doughnutChartData ? <DoughnutChartComponent chartData={props.doughnutChartData} /> : null;
+        return props.doughnutChartData && <DoughnutChartComponent chartData={props.doughnutChartData} />;
+      case 'PIE_WITH_STATS':
+        return props.pieChartWithStatsData && <PieV2ChartComponent chartData={props.pieChartWithStatsData} />;
       default:
         return null;
     }
-  };
+  }, [props.type, props.barChartData, props.horizontalBarChartData, props.pieChartData, props.doughnutChartData, props.pieChartWithStatsData]);
 
   return (
     <Card>
@@ -152,7 +226,7 @@ export function Chart(props: ChartProps) {
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
       <CardContent className="min-h-[300px]">
-        {renderChart()}
+        {renderChart}
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
@@ -163,5 +237,5 @@ export function Chart(props: ChartProps) {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }
