@@ -2,6 +2,7 @@
 from functools import reduce
 import json
 import os
+import subprocess
 from typing import Dict, List
 
 from jinja2 import Environment, FileSystemLoader
@@ -11,6 +12,7 @@ from tevico.engine.core.utils import CoreUtils
 from tevico.engine.entities.provider.provider import Provider
 from tevico.engine.entities.provider.provider_model import ProviderMetadata
 from tevico.engine.entities.report.check_model import CheckReport
+from datetime import datetime
 
 class TevicoFramework():
     
@@ -88,14 +90,17 @@ class TevicoFramework():
             raise Exception(f'Provider checks directory does not exist: {provider_checks_dir}')
         
         check_dir = f'{provider_checks_dir}'
+        file_prefix = ''
         
         if config is not None and 'service' in config:
             service_name = config['service']
             os.makedirs(f'{provider_checks_dir}/{service_name}', exist_ok=True)
             check_dir = f'{provider_checks_dir}/{service_name}'
+            if not name.startswith(service_name):
+                file_prefix = f'{service_name}_'
         
-        check_file_path = f'{check_dir}/{name}.py'
-        metadata_file_path = f'{check_dir}/{name}.yaml'
+        check_file_path = f'{check_dir}/{file_prefix}{name}.py'
+        metadata_file_path = f'{check_dir}/{file_prefix}{name}.yaml'
         
         j2_env = Environment(loader=FileSystemLoader('./tevico/templates'), trim_blocks=True)
         
@@ -106,7 +111,16 @@ class TevicoFramework():
             file.write(metadata_template.render(check_id=name, provider=provider))
             
         with open(check_file_path, 'w') as file:
-            file.write(check_template.render(check_id=name))
+            current_date = datetime.now().strftime('%Y-%m-%d')
+            git_user_email = os.popen('git config user.email').read().strip()
+            git_user_name = os.popen('git config user.name').read().strip()
+            
+            file.write(check_template.render(
+                check_id=name,
+                author=git_user_name,
+                email=git_user_email,
+                date=current_date,
+            ))
             
         print(f'\n✅ Check created successfully: {check_file_path}')
         
@@ -171,7 +185,6 @@ class TevicoFramework():
 
     def __create_provider(self) -> None:
         raise NotImplementedError('Provider create not implemented.')
-
     
     def create(self, config: CreateParams) -> None:
         """
@@ -199,6 +212,40 @@ class TevicoFramework():
             raise Exception('Invalid entity type.')
         
         
+    def __build_report(self) -> None:
+        
+        build_dir = './tevico/report'
+        dist_folder = 'dist'
+        dist_path = f'{build_dir}/{dist_folder}'
+        zip_file_path = './report.zip'
+        
+        if os.path.exists(dist_path):
+            subprocess.run(['rm', '-rf', dist_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        report_process = subprocess.Popen(['npm', 'run', 'build'], cwd=build_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        _, stderr = report_process.communicate()
+        
+        if report_process.returncode != 0:
+            print(f'\n❌ Error building report: {stderr}')
+            os._exit(1)
+
+        current_dir = os.getcwd()
+
+        try:
+            os.chdir('./tevico/report/dist')
+            
+            subprocess.run(['zip', '-r', '../../../report.zip', '.'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        finally:
+            os.chdir(current_dir)
+        
+        if not os.path.exists(zip_file_path):
+            print(f'\n❌ Error creating zip file: {zip_file_path}')
+            os._exit(1)
+
+        print(f'\n📦 Report zipped successfully: {zip_file_path}')
+        
+        
     def run(self):
         """
         Executes the checks for all providers and generates a report.
@@ -211,7 +258,7 @@ class TevicoFramework():
         providers = self.__get_providers()
         checks: List[CheckReport] = []
         
-        OUTPUT_PATH = './tevico/report/output.json'
+        OUTPUT_PATH = './tevico/report/public/output.json'
         
         for p in providers:
             try:
@@ -243,5 +290,8 @@ class TevicoFramework():
         print(f'✅ Success  : {acc['success']}')
         print(f'❌ Failed   : {acc['failed']}')
         
-        print(f'\n📄 Output written to: {OUTPUT_PATH}')
+        print(f'{'\n'}🛠️  Building zipped package')
+        
+        self.__build_report()
+        
         print('\n👋👋👋 Bye!')
