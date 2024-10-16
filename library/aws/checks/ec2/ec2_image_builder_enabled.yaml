@@ -1,0 +1,26 @@
+Provider: aws
+CheckID: ec2_image_builder_enabled
+CheckTitle: Check if EC2 Image Builder is enabled in the AWS account
+CheckType: []
+ServiceName: ec2
+SubServiceName: imagebuilder
+ResourceIdTemplate: arn:partition:service:region:account-id:image-builder-pipeline/resource-id
+Severity: medium
+ResourceType: AwsEc2ImageBuilderPipeline
+Description: Check if EC2 Image Builder is enabled by verifying if there are any active image pipelines configured in the account.
+Risk: Not enabling EC2 Image Builder may result in inconsistent or insecure virtual machine images, as no image-building automation is in place.
+RelatedUrl: https://docs.aws.amazon.com/imagebuilder/latest/userguide/set-up-ib-env.html
+Remediation:
+  Code:
+    CLI: "aws imagebuilder create-image-pipeline --cli-input-json <file>"
+    NativeIaC: ""
+    Other: https://docs.aws.amazon.com/imagebuilder/latest/userguide/manage-pipelines.html
+    Terraform: ""
+  Recommendation:
+    Text: Ensure EC2 Image Builder is enabled by creating and managing image pipelines to automate image creation and updates.
+    Url: https://docs.aws.amazon.com/imagebuilder/latest/userguide/manage-pipelines.html
+Categories:
+  - Infrastructure Protection
+DependsOn: []
+RelatedTo: []
+Notes: 
