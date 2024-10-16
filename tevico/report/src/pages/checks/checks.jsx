@@ -1,18 +1,18 @@
-// import { columns } from "./columns";
-// import { DataTable } from "@/components/tevico/data-table/data-table";
-// import { data, filters, searchBarFilter } from  './data/data'
+import { columns } from "./columns";
+import { DataTable } from "@/components/tevico/data-table/data-table";
+import { data, filters, searchBarFilter } from  './data/data'
 
-// export default function ChecksPage() {
-//   // Log data and columns for debugging
-//   console.log("Data:", data);
-//   console.log("Columns:", columns);
+export default function ChecksPage() {
+  // Log data and columns for debugging
+  console.log("Data:", data);
+  console.log("Columns:", columns);
 
-//   return (
-//     <div>
-//       <DataTable data={data} columns={columns} dropdownFilter = {filters} searchBarFilter = {searchBarFilter} />
-//     </div>
-//   );
-// }
+  return (
+    <div>
+      <DataTable data={data} columns={columns} dropdownFilter = {filters} searchBarFilter = {searchBarFilter} />
+    </div>
+  );
+}
 
 
 // // import { promises as fs } from "fs";
