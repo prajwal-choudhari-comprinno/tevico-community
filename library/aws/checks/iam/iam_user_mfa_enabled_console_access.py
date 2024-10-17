@@ -18,15 +18,14 @@ class iam_user_mfa_enabled_console_access(Check):
                 # Check if MFA devices are attached to each user
                 mfa_devices = client.list_mfa_devices(UserName=username)['MFADevices']
                 if mfa_devices:
-                    # print(f"MFA enabled for user: {username}")
+
                     report.resource_ids_status[username] = True
                 else:
-                    # print(f"MFA not enabled for user: {username}")
+
                     report.resource_ids_status[username] = False
             report.passed = all(report.resource_ids_status.values())
         except Exception as e:
-            # print("Error in checking MFA for users")
-            # print(str(e))  # Log the error in the resource status
+
             report.passed = False
         return report
 
