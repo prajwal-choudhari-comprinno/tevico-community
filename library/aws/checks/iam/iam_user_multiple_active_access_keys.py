@@ -21,15 +21,14 @@ class iam_user_multiple_active_access_keys(Check):
                 active_keys_count = sum(1 for key in access_keys if key['Status'] == 'Active')
                 
                 if active_keys_count > 1:
-                    # print(f"Multiple active access keys found for user: {username}")
+
                     report.resource_ids_status[username] = True
                 else:
-                    # print(f"User {username} has {active_keys_count} active access key(s).")
+
                     report.resource_ids_status[username] = False
             
             report.passed = not any(report.resource_ids_status.values())
         except Exception as e:
-            # print("Error in checking multiple active access keys for users")
-            # print(str(e))  # Log the error in the resource status
+
             report.passed = False
         return report
