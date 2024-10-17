@@ -1,6 +1,6 @@
 "use client"
 
-import { Bar, BarChart, CartesianGrid, Cell, Label, LabelList, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Label, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 
 import {
   Card,
@@ -103,20 +103,33 @@ const PieChartComponent = ({ chartData }: { chartData: PieChartData }) => {
     [chartData.config.valueKey]: chartData.data[key]
   }));
   return (
-    <PieChart width={300} height={300}>
+    <PieChart width={500} height={200}>
       <Pie
         data={dataAsArray}
         dataKey={chartData.config.valueKey}
         nameKey={chartData.config.labelKey}
+        label={({ payload, ...props }) => {
+          return (
+            <text
+              cx={props.cx}
+              cy={props.cy}
+              x={props.x}
+              y={props.y}
+              textAnchor={props.textAnchor}
+              dominantBaseline={props.dominantBaseline}
+              fill="hsla(var(--foreground))"
+            >
+              {`${payload[chartData.config.labelKey]} (${payload[chartData.config.valueKey]})`}
+            </text>
+          )
+        }}
       >
-        <LabelList dataKey={chartData.config.valueKey} position="top" fontWeight={200} />
         {dataAsArray.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
         ))}
       </Pie>
       <Tooltip />
-      <Legend iconType="circle" iconSize={8} />
-    </PieChart>
+    </PieChart >
   )
 };
 
@@ -131,14 +144,28 @@ const PieV2ChartComponent = ({ chartData }: { chartData: PieChartData }) => {
   }, [chartData.config.valueKey, chartData.data]);
 
   return (
-    <PieChart width={400} height={300}>
+    <PieChart width={500} height={200}>
       <Pie
         data={dataAsArray}
         dataKey={chartData.config.valueKey}
         nameKey={chartData.config.labelKey}
-        innerRadius={60}
+        innerRadius={40}
+        label={({ payload, ...props }) => {
+          return (
+            <text
+              cx={props.cx}
+              cy={props.cy}
+              x={props.x}
+              y={props.y}
+              textAnchor={props.textAnchor}
+              dominantBaseline={props.dominantBaseline}
+              fill="hsla(var(--foreground))"
+            >
+              {`${payload[chartData.config.labelKey]} (${payload[chartData.config.valueKey]})`}
+            </text>
+          )
+        }}
       >
-        <LabelList dataKey={chartData.config.valueKey} position="top" fontWeight={200} />
         <Label
           content={({ viewBox }) => {
             if (viewBox && "cx" in viewBox && "cy" in viewBox) {
@@ -172,7 +199,6 @@ const PieV2ChartComponent = ({ chartData }: { chartData: PieChartData }) => {
           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
         ))}
       </Pie>
-      <Legend iconType="circle" iconSize={8} />
     </PieChart>
   )
 };
@@ -183,20 +209,32 @@ const DoughnutChartComponent = ({ chartData }: { chartData: PieChartData }) => {
     [chartData.config.valueKey]: chartData.data[key]
   }));
   return (
-    <PieChart width={300} height={300}>
+    <PieChart width={500} height={200}>
       <Pie
         data={dataAsArray}
         dataKey={chartData.config.valueKey}
         nameKey={chartData.config.labelKey}
-        innerRadius={60}
+        innerRadius={40}
+        label={({ payload, ...props }) => {
+          return (
+            <text
+              cx={props.cx}
+              cy={props.cy}
+              x={props.x}
+              y={props.y}
+              textAnchor={props.textAnchor}
+              dominantBaseline={props.dominantBaseline}
+              fill="hsla(var(--foreground))"
+            >
+              {`${payload[chartData.config.labelKey]} (${payload[chartData.config.valueKey]})`}
+            </text>
+          )
+        }}
       >
-        <LabelList dataKey={chartData.config.valueKey} position="top" fontWeight={200} />
         {dataAsArray.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
         ))}
       </Pie>
-      <Tooltip />
-      <Legend iconType="circle" iconSize={8} />
     </PieChart>
   )
 };
