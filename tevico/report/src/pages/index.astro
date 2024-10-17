@@ -2,11 +2,11 @@
 import MainLayout from "@/components/MainLayout.astro";
 import { Chart, PieChartData } from "@/components/tevico/charts";
 // import { DataTable } from "@/components/tevico/data-table/data-table";
-import { StatsWithChart } from "@/components/tevico/statsWithChart";
 import { MetricCard } from "@/components/tevico/metric-card";
+import { StatsWithChart } from "@/components/tevico/statsWithChart";
+import { TableComponent } from "@/components/tevico/table";
 import { pageNames, pages } from "@/lib/utils";
 import "@/styles/globals.css";
-import { TableComponent } from "@/components/tevico/table";
 
 const pieChartData: PieChartData = {
   data: {
@@ -33,6 +33,20 @@ const barChartData = {
   config: {
     xAxis: "month",
     dataKeys: ["desktop", "mobile"],
+  },
+};
+
+const hBarChartData = {
+  data: [
+    { month: "January", desktop: 186 },
+    { month: "February", desktop: 305 },
+    { month: "March", desktop: 237 },
+    { month: "April", desktop: 400 },
+    { month: "May", desktop: 150 },
+  ],
+  config: {
+    xAxis: "month",
+    dataKeys: ["desktop"],
   },
 };
 
@@ -115,24 +129,30 @@ const data = [
     <MetricCard icon="users" title="Total Number of Checks" value={30} />
   </div>
   <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
-    <Chart type={"BAR"} barChartData={barChartData} />
-  </div>
-  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
-    <Chart type={"HORIZONTAL_BAR"} horizontalBarChartData={barChartData} />
-  </div>
-  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
-    <Chart type={"PIE"} pieChartData={pieChartData} />
-  </div>
-  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
-    <Chart type={"DOUGHNUT"} doughnutChartData={pieChartData} />
-  </div>
-  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
-    <Chart type={"PIE_WITH_STATS"} pieChartWithStatsData={pieChartData} />
-  </div>
-  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
+    <Chart type={"BAR"} barChartData={barChartData} cardTitle="Bar Chart" />
+    <Chart
+      type={"HORIZONTAL_BAR"}
+      horizontalBarChartData={hBarChartData}
+      cardTitle="Bar Chart v2"
+    />
+    <Chart type={"PIE"} pieChartData={pieChartData} cardTitle="Pie Chart" />
+    <Chart
+      type={"DOUGHNUT"}
+      doughnutChartData={pieChartData}
+      cardTitle="Doughnut Chart"
+    />
+    <Chart
+      type={"PIE_WITH_STATS"}
+      pieChartWithStatsData={pieChartData}
+      cardTitle="Pie Chart With Stats"
+    />
     <StatsWithChart footerData={footerData} chartData={data} />
   </div>
-  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
-    <TableComponent tableData={tableData} tableHeading="Transaction" tableDescription="Recent transactions from your store." />
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2 xl:grid-cols-1">
+    <TableComponent
+      tableData={tableData}
+      tableHeading="Transaction"
+      tableDescription="Recent transactions from your store."
+    />
   </div>
 </MainLayout>
