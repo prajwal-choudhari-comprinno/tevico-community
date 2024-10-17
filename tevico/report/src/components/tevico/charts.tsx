@@ -1,15 +1,13 @@
 "use client"
 
-import { TrendingUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Label, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Label, LabelList, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import React from "react";
 
@@ -49,6 +47,8 @@ interface ChartProps {
   pieChartData?: PieChartData,
   pieChartWithStatsData?: PieChartData,
   doughnutChartData?: PieChartData,
+  cardTitle: string;
+  cardDescription?: string;
 }
 
 export function generateChartColor() {
@@ -59,7 +59,7 @@ export function generateChartColor() {
 }
 
 const BarChartComponent = ({ chartData }: { chartData: ChartData }) => (
-  <BarChart width={300} height={300} accessibilityLayer data={chartData.data}>
+  <BarChart width={400} height={200} accessibilityLayer data={chartData.data}>
     <CartesianGrid vertical={false} />
     <XAxis
       dataKey={chartData.config.xAxis}
@@ -75,7 +75,7 @@ const BarChartComponent = ({ chartData }: { chartData: ChartData }) => (
 );
 
 const HorizontalBarChartComponent = ({ chartData }: { chartData: ChartData }) => (
-  <BarChart width={300} height={300}
+  <BarChart width={400} height={200}
     accessibilityLayer
     data={chartData.data}
     layout="vertical"
@@ -103,19 +103,19 @@ const PieChartComponent = ({ chartData }: { chartData: PieChartData }) => {
     [chartData.config.valueKey]: chartData.data[key]
   }));
   return (
-    <PieChart width={300} height={400}>
-      <Tooltip />
-      <Legend />
+    <PieChart width={300} height={300}>
       <Pie
         data={dataAsArray}
         dataKey={chartData.config.valueKey}
         nameKey={chartData.config.labelKey}
       >
-        <Legend />
+        <LabelList dataKey={chartData.config.valueKey} position="top" fontWeight={200} />
         {dataAsArray.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
         ))}
       </Pie>
+      <Tooltip />
+      <Legend iconType="circle" iconSize={8} />
     </PieChart>
   )
 };
@@ -125,20 +125,20 @@ const PieV2ChartComponent = ({ chartData }: { chartData: PieChartData }) => {
     [chartData.config.labelKey]: key,
     [chartData.config.valueKey]: chartData.data[key]
   }));
-  const totalVisitors = React.useMemo(() => {
+  const totalCount = React.useMemo(() => {
     const key: string = chartData.config.valueKey;
     return dataAsArray.reduce((acc, curr) => acc + (curr[key] || 0), 0);
   }, [chartData.config.valueKey, chartData.data]);
 
   return (
-    <PieChart width={300} height={400}>
+    <PieChart width={400} height={300}>
       <Pie
         data={dataAsArray}
         dataKey={chartData.config.valueKey}
         nameKey={chartData.config.labelKey}
         innerRadius={60}
-        strokeWidth={5}
       >
+        <LabelList dataKey={chartData.config.valueKey} position="top" fontWeight={200} />
         <Label
           content={({ viewBox }) => {
             if (viewBox && "cx" in viewBox && "cy" in viewBox) {
@@ -152,9 +152,9 @@ const PieV2ChartComponent = ({ chartData }: { chartData: PieChartData }) => {
                   <tspan
                     x={viewBox.cx}
                     y={viewBox.cy}
-                    className="fill-foreground text-3xl font-bold"
+                    className="fill-foreground text-xl font-bold"
                   >
-                    {totalVisitors.toLocaleString()}
+                    {totalCount.toLocaleString()}
                   </tspan>
                   <tspan
                     x={viewBox.cx}
@@ -172,6 +172,7 @@ const PieV2ChartComponent = ({ chartData }: { chartData: PieChartData }) => {
           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
         ))}
       </Pie>
+      <Legend iconType="circle" iconSize={8} />
     </PieChart>
   )
 };
@@ -182,21 +183,20 @@ const DoughnutChartComponent = ({ chartData }: { chartData: PieChartData }) => {
     [chartData.config.valueKey]: chartData.data[key]
   }));
   return (
-    <PieChart width={300} height={400}>
-      <Tooltip />
-      <Legend />
+    <PieChart width={300} height={300}>
       <Pie
         data={dataAsArray}
         dataKey={chartData.config.valueKey}
         nameKey={chartData.config.labelKey}
         innerRadius={60}
-        outerRadius={80}
-        label
       >
+        <LabelList dataKey={chartData.config.valueKey} position="top" fontWeight={200} />
         {dataAsArray.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
         ))}
       </Pie>
+      <Tooltip />
+      <Legend iconType="circle" iconSize={8} />
     </PieChart>
   )
 };
@@ -220,22 +220,29 @@ export function Chart(props: ChartProps) {
   }, [props.type, props.barChartData, props.horizontalBarChartData, props.pieChartData, props.doughnutChartData, props.pieChartWithStatsData]);
 
   return (
-    <Card>
+    <Card className="flex flex-col">
       <CardHeader>
-        <CardTitle>Chart</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>{props.cardTitle}</CardTitle>
+        {
+          props.cardDescription && (
+            <CardDescription className="text-sm text-muted-foreground">
+              {props.cardDescription}
+            </CardDescription>
+          )
+        }
       </CardHeader>
-      <CardContent className="min-h-[300px]">
+      <CardContent className="flex-1 flex justify-center items-center gap-2 text-sm">
         {renderChart}
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
+      {/* <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
           Showing total visitors for the last 6 months
         </div>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   );
+
 }
