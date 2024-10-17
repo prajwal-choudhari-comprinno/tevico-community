@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 // import Link from "next/link"
 import { Button } from "../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { ArrowUpRight } from "lucide-react";
 
 type headers = {
     key: string,
@@ -15,46 +16,29 @@ type TableData = {
 
 interface Props {
     tableData: TableData;
+    tableHeading: string;
+    tableDescription?: string;
 }
 
 export function TableComponent(props: Props) {
-    // return (
-    //     <Card>
-    //         <CardHeader className="flex flex-row items-center">
-    //             <div className="grid gap-2">
-    //                 <CardTitle>Transactions</CardTitle>
-    //                 <CardDescription>
-    //                     Recent transactions from your store.
-    //                 </CardDescription>
-    //             </div>
-    //             <Button asChild size="sm" className="ml-auto gap-1">
-    //                 {/* <Link href="#">
-    //                     View All
-    //                     <ArrowUpRight className="h-4 w-4" />
-    //                 </Link> */}
-    //             </Button>
-    //         </CardHeader>
-    //         <CardContent>
-    //             <div>
-    //                 <DataTable data={data} columns={columns} dropdownFilter={filters} searchBarFilter={searchBarFilter} />
-    //             </div>
-    //         </CardContent>
-    //     </Card>
-    // )
     return (
         <Card>
             <CardHeader className="flex flex-row items-center">
                 <div className="grid gap-2">
-                    <CardTitle>Transactions</CardTitle>
-                    <CardDescription>
-                        Recent transactions from your store.
-                    </CardDescription>
+                    <CardTitle>{props.tableHeading}</CardTitle>
+                    {
+                        props.tableDescription && (
+                            <CardDescription>
+                                {props.tableDescription}
+                            </CardDescription>
+                        )
+                    }
                 </div>
                 <Button asChild size="sm" className="ml-auto gap-1">
-                    {/* <Link href="#">
+                    <a href="#">
                         View All
                         <ArrowUpRight className="h-4 w-4" />
-                    </Link> */}
+                    </a>
                 </Button>
             </CardHeader>
             <CardContent>
