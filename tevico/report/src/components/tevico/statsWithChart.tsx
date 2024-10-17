@@ -56,7 +56,8 @@ export function StatsWithChart({ footerData, chartData }: StatsProps) {
                             dataKey="label"
                             fill="white"
                             offset={8}
-                            fontSize={12}
+                            fontSize={14}
+                            fontWeight={600}
                         />
                     </Bar>
                 </BarChart>
