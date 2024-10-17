@@ -1,4 +1,3 @@
-
 ########### PLEASE NOTE ###########
 # For better readability of the metadata file, kindly remove all the comments before using the template.
 ###################################
@@ -43,19 +42,17 @@ RelatedUrl: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
 # Help section on how to fix the issue
 Remediation:
   Code:
-    CLI:
-      aws rds modify-db-instance --db-instance-identifier <db_instance_id> --backup-retention-period
-      7 --apply-immediately
+    CLI: |
+      aws iam detach-user-policy --user-name <user_name> --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
     NativeIaC: ""
-    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/RDS/rds-automated-backups-enabled.html
-    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-rds-instances-have-backup-policy#terraform
+    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/iam/iam-users-no-admin-access.html
+    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-iam-users-do-not-have-administrator-access
   Recommendation:
-    Text:
-      Enable automated backup for production data. Define a retention period and
-      periodically test backup restoration. A Disaster Recovery process should be
-      in place to govern Data Protection approach.
-    Url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
-    
+    Text: |
+      Review IAM users and roles, and detach any AdministratorAccess policies. 
+      Implement the principle of least privilege by assigning only necessary permissions.
+    Url: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
+
 # Categories for the check. Eg: forensics-ready, security, etc.
 Categories: 
   - security

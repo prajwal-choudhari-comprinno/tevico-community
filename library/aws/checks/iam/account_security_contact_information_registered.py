@@ -1,67 +1,51 @@
 """
-AUTHOR: Ronit Chauhan
-DATE: 11-10-2024
+AUTHOR: 
+DATE: 
 """
 
 import boto3
-from typing import Dict, List, Optional
+
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
-class account_security_contact_information_registered(Check):
-    # Define the fields to check
-    security_checks_to_perform: List[str] = ['security_contact_name', 'security_contact_phone', 'security_contact_email']
 
-    # Define metadata for the check
-    check_title = "Account Security Contact Information Registered"
-    service_name = "IAM"
-    sub_service_name = "Account Management"
-    resource_type = "User"
-    risk = "High"
-    description = "Ensures that all users have registered security contact information."
-    remediation_recommendation = {
-        "Text": "Please register the security contact information for the user."
-    }
+class account_security_contact_information_registered(Check):
 
     def execute(self, connection: boto3.Session) -> CheckReport:
-        report = CheckReport(name=__name__, title=self.check_title, service=self.service_name, sub_service=self.sub_service_name)
+        report = CheckReport(name=__name__)
 
-        iam_client = connection.client('iam')
-        users = iam_client.list_users()['Users']
-        print(f"Total users found: {len(users)}")
+        # Initialize the Account client
+        account_client = connection.client('account')
+        
+        report = CheckReport(name=__name__)
 
-        for user in users:
-            username = user['UserName']
-            print(f"Checking security contact info for user: {username}")
-
-            # Fetch security contact info for user
-            security_info = self.get_security_contact_info(username)
-            print(f"Security info for {username}: {security_info}")
-
-            # Check required fields
-            missing_fields = [field for field in self.security_checks_to_perform if field in security_info and not security_info[field]]
-            if not missing_fields:
-                report.resource_ids_status[username] = True
-                print(f"✅ All security contact information is present for user: {username}")
+        # Check if SECURITY contact is registered
+        try:
+            security_contact = account_client.get_alternate_contact(AlternateContactType='SECURITY')
+            # print(security_contact['AlternateContact'])
+            
+            if 'AlternateContact' in security_contact and security_contact['AlternateContact']:
+                report.passed = True
+                # print("Security contact information is registered.")
+                report.resource_ids_status['SECURITY_CONTACT'] = True
             else:
                 report.passed = False
-                report.resource_ids_status[username] = False
-                print(f"❌ Missing security contact information for user: {username}. Missing fields: {missing_fields}")
+                # print("Security contact information is NOT registered.")
+                report.resource_ids_status['SECURITY_CONTACT'] = False
 
-        # Add report metadata
-        report.report_metadata = {
-            'UserCount': len(users),
-            'CheckedFields': self.security_checks_to_perform
-        }
-        print(f"Report generated with metadata: {report.report_metadata}")
+        except account_client.exceptions.ResourceNotFoundException:
+            # Raised if the security contact is not set
+            report.passed = False
+            # print("Security contact information is NOT registered.")
+            report.resource_ids_status['SECURITY_CONTACT'] = False
+
+        except Exception as e:
+            # Catch any other unexpected exceptions
+            report.passed = False
+            # print(f"An unexpected error occurred: {str(e)}")
+            report.resource_ids_status['SECURITY_CONTACT'] = False
 
         return report
 
-    def get_security_contact_info(self, username: str) -> Dict[str, Optional[str]]:
-        # Simulated function to fetch security contact information
-        # Replace with actual logic to fetch this information
-        return {
-            'security_contact_name': None,  # Simulated value
-            'security_contact_phone': None,
-            'security_contact_email': None
-        }
+# The check will return **True (passed)** if all required fields (`FullName`, `Title`, `EmailAddress`, and `PhoneNumber`) are present and not empty in Security Contact .
+# The check will return **False (failed)** if any of these fields are missing or empty, or if an error occurs while fetching the contact information.

@@ -1,71 +1,48 @@
-
 ########### PLEASE NOTE ###########
 # For better readability of the metadata file, kindly remove all the comments before using the template.
 ###################################
 
 Provider: aws
 
-# Eg: cloudformation_stacks_termination_protection_enabled
 CheckID: customer_attached_policy_admin_privileges_found
 
-# Short title/description of the check
 CheckTitle: Ensure IAM Users Do Not Have Administrator Access Policy Attached
 
-# Check Type
 CheckType:
   - Software and Configuration Checks
   - Industry and Regulatory Standards
   - CIS AWS Foundations Benchmark
 
-# Service Name. Eg: cloudformation, ec2, s3, etc.
 ServiceName: iam
 
-# Sub Service Name. Eg: ec2_instance, s3_bucket, etc.
 SubServiceName: ""
 
-# Resource Template
-ResourceIdTemplate: arn:partition:cloudformation:region:account-id:stack/resource-id
+ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 
-# Severity of the check. Allowed values: critical, high, medium, low
 Severity: high
 
-# Resource Type. Eg: AwsCloudFormationStack, AwsEC2Instance, AwsS3Bucket, etc.
 ResourceType: AwsIamUser
 
-# Description of the check
 Description: Ensure that no IAM user has the AdministratorAccess policy attached.
 
-# Explanation of the risk associated with the check
 Risk: Attaching administrative privileges to users and roles increases the security risk.
 
-# Related URL for the check
 RelatedUrl: https://tevi.co
 
-# Help section on how to fix the issue
 Remediation:
   Code:
-    CLI:
-      aws rds modify-db-instance --db-instance-identifier <db_instance_id> --backup-retention-period
-      7 --apply-immediately
+    CLI: "aws iam detach-user-policy --user-name <user_name> --policy-arn <policy_arn>"
     NativeIaC: ""
-    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/RDS/rds-automated-backups-enabled.html
-    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-rds-instances-have-backup-policy#terraform
+    Other: "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html"
+    Terraform: "https://docs.prowler.com/checks/aws/general-policies/ensure-that-rds-instances-have-backup-policy#terraform"
   Recommendation:
-    Text:
-      Enable automated backup for production data. Define a retention period and
-      periodically test backup restoration. A Disaster Recovery process should be
-      in place to govern Data Protection approach.
-    Url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
-    
+    Text: "It is more secure to start with a minimum set of permissions and grant additional permissions as necessary, rather than starting with permissions that are too lenient and then trying to tighten them later. List policies and analyze if permissions are the least possible to conduct business activities."
+    Url: "http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
 
-# Categories for the check. Eg: forensics-ready, security, etc.
 Categories: []
 
-# Dependencies on other checks
 DependsOn: []
 
-# Related checks
 RelatedTo: []
 
-# Side notes
 Notes: Infrastructure Protection

@@ -94,13 +94,12 @@ sections:
 
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks:
-      # - attached_policy_admin_privileges_found
-      # - inline_policy_admin_privileges_found
-      # - account_maintain_current_contact_details
-      # - account_security_contact_information_registered
-      # - account_security_questions_registered    
-      # - customer_attached_policy_admin_privileges_found    
-      # - customer_unattached_policy_admin_privileges_foun
+      - attached_policy_admin_privileges_found
+      - inline_policy_admin_privileges_found
+      - account_maintain_current_contact_details
+      - account_security_contact_information_registered
+      - customer_attached_policy_admin_privileges_found    
+      - customer_unattached_policy_admin_privileges_found
       - organizations_account_part_of_organizations
 
 

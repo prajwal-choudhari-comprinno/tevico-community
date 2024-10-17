@@ -1,68 +1,80 @@
-import boto3
+# """
+# AUTHOR: RONIT CHAUHAN 
+# DATE: 2024-10-11
+# """
 
-from typing import Any, List
-from tevico.engine.core.enums import FrameworkDimension
-from tevico.engine.entities.check.check import Check
-from tevico.engine.entities.report.check_model import CheckReport
+# import boto3
+# from typing import List, Dict, Optional, Any
+# from datetime import datetime
+# from tevico.engine.entities.report.check_model import CheckReport
+# from tevico.engine.entities.check.check import Check
 
+# class account_maintain_current_contact_details(Check):
 
-class KMSKeyRotationcheck(Check):
-    
-    __check_name = 'aws_kms_key_rotation_check'
-    
-    framework_dimensions = [FrameworkDimension.security]
-    
-    def __get_check_model(self, provider: str, profile: str) -> CheckReport:
-        check = CheckReport(
-            name=self.__check_name,
-            provider=provider,
-            profile=profile,
-            dimensions=self.framework_dimensions
-        )
-        
-        check.description = """Rotating AWS KMS keys is the process of periodically generating new encryption keys to replace old ones.This is a critical security best practice to mitigate the risk of compromised keys."""
-        
-        check.success_message = """Hooray!!! All your keys are rotating on a timely basis."""
-        
-        check.failure_message = """Oh Snap!!! Some of your keys are not rotated on a timely basis. You need to fix this ASAP! Check metadata for more insights."""
-        
-        return check
-    
-    def execute(self, connection: boto3.Session) -> CheckReport:
-        # Initiate the check model
-        check = self.__get_check_model(
-            provider=provider,
-            profile=profile
-        )
-        
-        # Define required variables for metadata and check
-        key_rotation_status = {}
-        
-        # Get client & list all keys
-        client = connection.client('kms')
-        pages = client.get_paginator('list_keys')
-        
-        # Get list of keys and check for each key check if rotation is enabled
-        for res in pages.paginate():
-            for key in res['Keys']:
-                # Get the key ID
-                key_id = key['KeyId']
-                
-                # Check if rotation is enabled for the key or not
-                k_rot_status = client.get_key_rotation_status(KeyId=key_id)
-                
-                # Apply the status in the key rotation status dictionary
-                key_rotation_status[key_id] = k_rot_status['KeyRotationEnabled']
-                
-                # If any one of the key has key rotation disabled then fail the check
-                if k_rot_status['KeyRotationEnabled'] is False:
-                    check.passed = False
-             
-        # Append key rotation status to metadata
-        check.metadata = {
-            'key_rotation_status': key_rotation_status
-        }
-        
-        return check
+#     def execute(self, connection: boto3.Session) -> CheckReport:
+#         report = CheckReport(name=__name__)
+#         print("Starting the account contact details check...")
 
+#         # List of attributes to check
+#         checks_to_perform: List[str] = [
+#             'full_name', 'phone_number', 'company_name', 'address', 'email',  
+#         ]
+        
+#         print("Attributes to check:", checks_to_perform)
 
+#         # Get the current account information from AWS
+#         client = connection.client('account')
+
+#         try:
+#             # Fetch account contact details using the AWS Account API
+#             print("Fetching account contact information...")
+#             contact_info = client.get_contact_information()
+#             print("Contact information fetched successfully.")
+#             print("Raw response:", contact_info)  # Debugging line
+            
+#             # Extract relevant fields from the fetched information
+#             account_details = {
+#                 'full_name': contact_info.get('FullName'),
+#                 'phone_number': contact_info.get('PhoneNumber'),
+#                 'company_name': contact_info.get('CompanyName'),
+#                 'address': contact_info.get('AddressLine1'),  # assuming primary address field
+#                 'email': contact_info.get('EmailAddress'),
+#                 'billing_contact': contact_info.get('BillingContact'), 
+#                 'operations_contact': contact_info.get('OperationsContact'), 
+#                 'security_contact': contact_info.get('SecurityContact')
+#             }
+
+#             print("Account details retrieved:", account_details)
+
+#             # Compare the retrieved account details with the checks_to_perform list
+#             all_checks_passed = True
+#             for check in checks_to_perform:
+#                 if not account_details.get(check):
+#                     print(f"Check failed: '{check}' is missing or empty.")
+#                     all_checks_passed = False
+#                     report.resource_ids_status[check] = False
+#                 else:
+#                     print(f"Check passed: '{check}' is present.")
+#                     report.resource_ids_status[check] = True
+
+#             # Set the final report status based on whether all checks passed
+#             report.passed = all_checks_passed
+#             if report.passed:
+#                 print("All checks passed successfully.")
+#             else:
+#                 print("Some checks failed.")
+
+#         except client.exceptions.NoSuchEntityException:
+#             # Handle the case where contact information cannot be found
+#             report.passed = False
+#             report.report_metadata = {"error": "No contact information found for this account"}
+#             print("Error: No contact information found for this account.")
+        
+#         except Exception as e:
+#             # Handle any other exceptions
+#             report.passed = False
+#             report.report_metadata = {"error": str(e)}
+#             print(f"An unexpected error occurred: {e}")
+
+#         print("Check execution completed.")
+#         return report

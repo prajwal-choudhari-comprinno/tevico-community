@@ -1,39 +1,40 @@
-
 ########### PLEASE NOTE ###########
 # For better readability of the metadata file, kindly remove all the comments before using the template.
 ###################################
 
+AUTHOR: RONIT CHAUHAN 
+DATE: 2024-10-17
+
 Provider: aws
 
-# Eg: cloudformation_stacks_termination_protection_enabled
 CheckID: account_maintain_current_contact_details
 
 # Short title/description of the check
-CheckTitle: "IAM Account Maintain Current Contact Details Check"
+CheckTitle: Verify AWS Account Contact Details
 
 # Check Type
-CheckType: []
+CheckType: [contact_information_check]
 
 # Service Name. Eg: cloudformation, ec2, s3, etc.
-ServiceName: iam
+ServiceName: account
 
 # Sub Service Name. Eg: ec2_instance, s3_bucket, etc.
-SubServiceName: ""
+SubServiceName: contact_details
 
 # Resource Template
-ResourceIdTemplate: arn:partition:iam::account-id:role/resource-id
+ResourceIdTemplate: arn:aws:account::account-id:*
 
 # Severity of the check. Allowed values: critical, high, medium, low
 Severity: medium
 
 # Resource Type. Eg: AwsCloudFormationStack, AwsEC2Instance, AwsS3Bucket, etc.
-ResourceType: "AwsIAMUser"
+ResourceType: AwsAccount
 
 # Description of the check
-Description: "Check if IAM account maintains current contact details."
+Description: Checks whether the AWS account has all required contact details updated.
 
 # Explanation of the risk associated with the check
-Risk: "Missing contact information may lead to communication issues."
+Risk: Incomplete or outdated contact information may hinder communication during critical account issues or security incidents.
 
 # Related URL for the check
 RelatedUrl: https://tevi.co
@@ -41,21 +42,33 @@ RelatedUrl: https://tevi.co
 # Help section on how to fix the issue
 Remediation:
   Code:
-    CLI:
-      aws rds modify-db-instance --db-instance-identifier <db_instance_id> --backup-retention-period
-      7 --apply-immediately
-    NativeIaC: ""
-    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/RDS/rds-automated-backups-enabled.html
-    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-rds-instances-have-backup-policy#terraform
+    CLI: |
+      # Use the AWS Management Console to update your contact details:
+      # 1. Sign in to the AWS Management Console
+      # 2. Go to the Billing & Cost Management Dashboard
+      # 3. Select your AWS account name and then My Account
+      # 4. Click Edit next to Contact Information
+      # 5. Enter your updated contact information
+      # 6. Click Update to save the changes
+
+    NativeIaC: |
+      # Ensure your infrastructure as code is updated with the correct account information.
+
+    Other: |
+      # Verify that all relevant contacts are updated in your organization’s internal systems as well.
+
+    Terraform: |
+      # No specific Terraform commands; update account information via AWS Management Console.
+
   Recommendation:
-    Text:
+    Text: |
       Enable automated backup for production data. Define a retention period and
       periodically test backup restoration. A Disaster Recovery process should be
       in place to govern Data Protection approach.
     Url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
-    
+
 # Categories for the check. Eg: forensics-ready, security, etc.
-Categories: []
+Categories: [infrastructure_protection, security]
 
 # Dependencies on other checks
 DependsOn: []

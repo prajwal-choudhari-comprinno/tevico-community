@@ -1,4 +1,3 @@
-
 ########### PLEASE NOTE ###########
 # For better readability of the metadata file, kindly remove all the comments before using the template.
 ###################################
@@ -6,7 +5,7 @@
 Provider: aws
 
 # Eg: cloudformation_stacks_termination_protection_enabled
-CheckID: inline_policy_admin_privileges_found
+CheckID: iam_inline_policy_admin_privileges_found
 
 # Short title/description of the check
 CheckTitle: Ensure IAM inline policies with administrative privileges are not attached
@@ -43,19 +42,13 @@ RelatedUrl: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
 # Help section on how to fix the issue
 Remediation:
   Code:
-    CLI:
-      aws rds modify-db-instance --db-instance-identifier <db_instance_id> --backup-retention-period
-      7 --apply-immediately
+    CLI: "https://docs.prowler.com/checks/aws/iam-policies/iam_47#cli-command"
     NativeIaC: ""
-    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/RDS/rds-automated-backups-enabled.html
-    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-rds-instances-have-backup-policy#terraform
+    Other: "https://docs.prowler.com/checks/aws/iam-policies/iam_47#aws-console"
+    Terraform: "https://docs.prowler.com/checks/aws/iam-policies/iam_47#terraform"
   Recommendation:
-    Text:
-      Enable automated backup for production data. Define a retention period and
-      periodically test backup restoration. A Disaster Recovery process should be
-      in place to govern Data Protection approach.
-    Url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
-    
+    Text: "It is more secure to start with a minimum set of permissions and grant additional permissions as necessary, rather than starting with permissions that are too lenient and then trying to tighten them later. List policies an analyze if permissions are the least possible to conduct business activities."
+    Url: "http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
 
 # Categories for the check. Eg: forensics-ready, security, etc.
 Categories: 
@@ -69,4 +62,4 @@ DependsOn: []
 RelatedTo: []
 
 # Side notes
-Notes: Best practices for IAM privilege management.
+Notes: Infrastructure Protection

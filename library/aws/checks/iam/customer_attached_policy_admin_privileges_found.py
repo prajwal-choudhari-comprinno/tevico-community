@@ -1,66 +1,86 @@
 """
-AUTHOR: RONIT CHAUHAN
-DATE: 11-10-24
+AUTHOR: RONIT CHAUHAN 
+DATE: 2024-10-11
 """
 
 import boto3
-from typing import Dict, Any, List
-from datetime import datetime
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
 class customer_attached_policy_admin_privileges_found(Check):
-
     def execute(self, connection: boto3.Session) -> CheckReport:
-        # Create a report object to hold the result of the check
         report = CheckReport(name=__name__)
-        report.created_on = datetime.now()  # Track when the check was created
-        
-        # Initialize the IAM client using the provided connection session
+
+        # Initialize the IAM client
         iam_client = connection.client('iam')
+        # print("[INFO] Initialized IAM client.")
 
-        # Initialize an empty list to store any findings
+        # Fetch all users
+        users = iam_client.list_users()['Users']
+        # print(f"[INFO] Retrieved {len(users)} IAM users.")
+
         findings = []
-        report.passed = True  # Assume the check passes unless an issue is found
 
-        # Fetch all users and check their attached policies
-        paginator = iam_client.get_paginator('list_users')
-        for page in paginator.paginate():
-            for user in page['Users']:
-                user_name = user['UserName']
+        for user in users:
+            user_name = user['UserName']
+            # print(f"[INFO] Processing IAM user: {user_name}")
 
-                # Fetch attached customer-managed policies for the user
-                attached_policies = iam_client.list_attached_user_policies(UserName=user_name)['AttachedPolicies']
-                
-                for policy in attached_policies:
-                    policy_arn = policy['PolicyArn']
-                    policy_name = policy['PolicyName']
-                    print(f"Checking attached policy {policy_name} for user {user_name}")
+            # Fetch attached policies for the user (only custom managed policies)
+            attached_policies = iam_client.list_attached_user_policies(UserName=user_name)['AttachedPolicies']
+            # print(f"[INFO] {user_name} has {len(attached_policies)} attached custom policies.")
 
-                    # Get the policy document
-                    policy_document = iam_client.get_policy_version(
-                        PolicyArn=policy_arn,
-                        VersionId=iam_client.get_policy(PolicyArn=policy_arn)['Policy']['DefaultVersionId']
-                    )['PolicyVersion']['Document']
+            for policy in attached_policies:
+                policy_arn = policy['PolicyArn']
 
-                    # Check if the attached policy contains administrative privileges
-                    if self._has_admin_privileges(policy_document):
-                        findings.append(f"User {user_name} has an attached policy {policy_name} with administrative privileges.")
-                        report.resource_ids_status[user_name] = False  # Mark the user as having an issue
-                        report.passed = False  # The check failed since admin privileges were found
+                # Fetch policy details to check if it's a custom managed policy
+                policy_details = iam_client.get_policy(PolicyArn=policy_arn)
+                if policy_details['Policy']['Arn'].startswith('arn:aws:iam::aws:policy/'):
+                    # Skip AWS managed policies
+                    # print(f"[INFO] Skipping AWS managed policy: {policy['PolicyName']}")
+                    continue
+
+                # print(f"[INFO] Checking details for attached custom policy: {policy['PolicyName']}")
+
+                # Get the policy document
+                policy_version = policy_details['Policy']['DefaultVersionId']
+                policy_document = iam_client.get_policy_version(PolicyArn=policy_arn, VersionId=policy_version)['PolicyVersion']['Document']
+
+                # Check if the policy grants full administrative privileges
+                if 'Statement' in policy_document:
+                    for statement in policy_document['Statement']:
+                        if statement.get('Effect') == 'Allow':
+                            actions = statement.get('Action', [])
+                            resources = statement.get('Resource', [])
+                            
+                            # Check if actions allow all actions and resources ('*:*' means admin privileges)
+                            if actions == "*" and resources == "*":
+                                # print(f"[WARNING] Custom managed policy {policy['PolicyName']} grants full administrative privileges to user {user_name}.")
+                                findings.append(f"User {user_name} has custom managed policy {policy['PolicyName']} with full administrative privileges.")
+                                break  # Stop after detecting full admin privileges
+                            elif isinstance(actions, list) and "*" in actions and isinstance(resources, list) and "*" in resources:
+                                # print(f"[WARNING] Custom managed policy {policy['PolicyName']} grants full administrative privileges to user {user_name}.")
+                                findings.append(f"User {user_name} has custom managed policy {policy['PolicyName']} with full administrative privileges.")
+                                break  # Stop after detecting full admin privileges
                     else:
-                        report.resource_ids_status[user_name] = True  # No issues found for this user
+                        # print(f"[INFO] Custom managed policy {policy['PolicyName']} does not grant full administrative privileges.")
+                        pass
+                else:
+                    # print(f"[INFO] No statements found in policy {policy['PolicyName']}.")
+                    pass
 
-        # Attach any findings to the report metadata
-        report.report_metadata = {"findings": findings}
+        # Determine report status based on findings
+        if findings:
+            report.passed = False  # Indicate that the check failed
+            report.resource_ids_status = {user['UserName']: False for user in users}  # Mark users as having issues
+            report.report_metadata = {"findings": findings}  # Store findings in report metadata
+            # print(f"[FAIL] Administrative privileges found for {len(findings)} policies.")
+        else:
+            report.passed = True  # Indicate that the check passed
+            report.resource_ids_status = {user['UserName']: True for user in users}  # Mark all users as having no issues
+            # print("[PASS] No administrative privileges found in attached custom policies.")
+
         return report
 
-    def _has_admin_privileges(self, policy_document: Dict[str, Any]) -> bool:
-        """Check if the policy document contains administrative privileges ('*:*')."""
-        for statement in policy_document.get("Statement", []):
-            # Check if the statement allows all actions ('*') on all resources ('*')
-            if (statement.get("Effect") == "Allow" and
-                    ('*' in statement.get("Action", []) or '*:*' in statement.get("Action", [])) and
-                    '*' in statement.get("Resource", [])):
-                return True
-        return False
+    
+# The check will **pass** if no attached custom managed policies grant full administrative privileges (i.e., no policies have both `"Action": "*"` and `"Resource": "*"`).
+# It will **fail** if any custom managed policy grants full administrative privileges to any user.

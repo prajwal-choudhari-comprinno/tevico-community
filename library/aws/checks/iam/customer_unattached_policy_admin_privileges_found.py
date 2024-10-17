@@ -1,74 +1,70 @@
 """
-AUTHOR: RONIT CHAUHAN
-DATE: 11-10-24
+AUTHOR: RONIT CHAUHAN 
+DATE: 2024-10-11
 """
 
 import boto3
-from typing import Dict, Any, List
-from datetime import datetime
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
 class customer_unattached_policy_admin_privileges_found(Check):
-
     def execute(self, connection: boto3.Session) -> CheckReport:
-        # Create a report object to hold the result of the check
         report = CheckReport(name=__name__)
-        report.created_on = datetime.now()  # Track when the check was created
-        
-        # Initialize the IAM client using the provided connection session
+
+        # Initialize the IAM client
         iam_client = connection.client('iam')
 
-        # Initialize an empty list to store any findings
         findings = []
-        report.passed = True  # Assume the check passes unless an issue is found
 
-        # Fetch all customer-managed policies
-        paginator = iam_client.get_paginator('list_policies')
-        for page in paginator.paginate(Scope='Local'):
-            for policy in page['Policies']:
-                policy_arn = policy['Arn']
-                policy_name = policy['PolicyName']
-                attachment_count = policy['AttachmentCount']
+        # Fetch all policies
+        policies = iam_client.list_policies(Scope='Local')['Policies']
+
+        for policy in policies:
+            policy_arn = policy['Arn']
+
+            # Check if the policy is custom and not attached to any user, group, or role
+            if policy['AttachmentCount'] == 0 and policy['DefaultVersionId'] != 'aws-managed':
+                # Fetch policy details
+                policy_details = iam_client.get_policy(PolicyArn=policy_arn)
+
+                # Get the policy document
+                policy_version = policy_details['Policy']['DefaultVersionId']
+                policy_document = iam_client.get_policy_version(PolicyArn=policy_arn, VersionId=policy_version)['PolicyVersion']['Document']
+
+                # Initialize report for the policy
+                report_entry = {
+                    "resource_arn": policy_arn,
+                    "resource_id": policy['PolicyName'],
+                    "resource_tags": policy.get('Tags', {}),
+                    "status": "PASS",
+                    "status_extended": f"Custom policy {policy['PolicyName']} is unattached and does not allow '*:*' administrative privileges."
+                }
+
+                # Check if the policy grants full administrative privileges
+                if 'Statement' in policy_document:
+                    for statement in policy_document['Statement']:
+                        if statement.get('Effect') == 'Allow':
+                            actions = statement.get('Action', [])
+                            resources = statement.get('Resource', [])
+                            
+                            # Check if actions allow all actions and resources ('*:*' means admin privileges)
+                            if actions == "*" and resources == "*":
+                                report_entry['status'] = "FAIL"
+                                report_entry['status_extended'] = f"Custom policy {policy['PolicyName']} is unattached and allows '*:*' administrative privileges."
+                                break  # Stop after detecting full admin privileges
+                            elif isinstance(actions, list) and "*" in actions and isinstance(resources, list) and "*" in resources:
+                                report_entry['status'] = "FAIL"
+                                report_entry['status_extended'] = f"Custom policy {policy['PolicyName']} is unattached and allows '*:*' administrative privileges."
+                                break  # Stop after detecting full admin privileges
                 
-                # Check only for unattached policies
-                if attachment_count == 0:
-                    print(f"Checking unattached policy {policy_name}")
+                findings.append(report_entry)
 
-                    # Get the policy document
-                    policy_document = iam_client.get_policy_version(
-                        PolicyArn=policy_arn,
-                        VersionId=iam_client.get_policy(PolicyArn=policy_arn)['Policy']['DefaultVersionId']
-                    )['PolicyVersion']['Document']
+        # Determine report status based on findings
+        report.passed = all(entry['status'] == "PASS" for entry in findings)  # Indicate that the check passed only if all reports are "PASS"
+        report.resource_ids_status = {entry['resource_id']: (entry['status'] == "PASS") for entry in findings}  # Mark policies as having issues or not
+        report.report_metadata = {"findings": findings}  # Store findings in report metadata
 
-                    # Check if the unattached policy contains administrative privileges
-                    if self._has_admin_privileges(policy_document):
-                        findings.append(f"Unattached policy {policy_name} has administrative privileges.")
-                        report.passed = False  # The check failed since admin privileges were found
-                    else:
-                        print(f"Unattached policy {policy_name} does not have administrative privileges.")
-
-        # Attach any findings to the report metadata
-        report.report_metadata = {"findings": findings}
         return report
-
-    def _has_admin_privileges(self, policy_document: Dict[str, Any]) -> bool:
-        """Check if the policy document contains administrative privileges ('*:*', 'service_name:*', '*:service_name')."""
-        for statement in policy_document.get("Statement", []):
-            if statement.get("Effect") == "Allow":
-                actions = statement.get("Action", [])
-                resources = statement.get("Resource", [])
-                
-                # Check for various patterns indicating admin privileges
-                if (
-                    ('*' in actions or '*:*' in actions) and
-                    ('*' in resources or '*' in resources)
-                ):
-                    return True
-                # Check for specific service-based permissions
-                for action in actions:
-                    if ':' in action:
-                        service_name = action.split(':')[0]
-                        if f"{service_name}:*" in actions or f"*:{service_name}" in actions:
-                            return True
-        return False
+    
+    #The code fails if any unattached custom policy is found that allows full administrative privileges (i.e., has both "Action": "*" and "Resource": "*"), indicating a security risk.
+    #The code passes if all unattached custom policies do not grant full administrative privileges, ensuring that no excessive permissions are left unchecked.
