@@ -29,7 +29,7 @@ export function StatsWithChart({ footerData, chartData }: StatsProps) {
     return (
         <Card>
             <CardContent className="flex gap-4 p-4 pb-2">
-                <BarChart width={500} height={300}
+                <BarChart width={500} height={200}
                     margin={{
                         left: 10,
                         right: 0,
