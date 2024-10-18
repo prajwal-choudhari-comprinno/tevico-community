@@ -9,7 +9,7 @@ from datetime import datetime
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
-class account_maintain_current_contact_details(Check):
+class iam_account_maintain_current_contact_details(Check):
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
@@ -17,7 +17,7 @@ class account_maintain_current_contact_details(Check):
 
         # List of attributes to check
         checks_to_perform: List[str] = [
-            'full_name', 'company_name', 'address', 'phone_number', 'website_url'
+            'full_name', 'company_name', 'address', 'phone_number', 
         ]
         
         # print("Attributes to check:", checks_to_perform)

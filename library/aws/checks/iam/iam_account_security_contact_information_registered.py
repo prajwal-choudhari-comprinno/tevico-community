@@ -9,7 +9,7 @@ from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
 
-class account_security_contact_information_registered(Check):
+class iam_account_security_contact_information_registered(Check):
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)

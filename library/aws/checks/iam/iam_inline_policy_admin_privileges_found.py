@@ -7,7 +7,7 @@ import boto3
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
-class inline_policy_admin_privileges_found(Check):
+class iam_inline_policy_admin_privileges_found(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
 

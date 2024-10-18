@@ -5,7 +5,7 @@
 Provider: aws
 
 # Eg: cloudformation_stacks_termination_protection_enabled
-CheckID: account_security_contact_information_registered
+CheckID: iam_account_security_contact_information_registered
 
 # Short title/description of the check
 CheckTitle: Check for Attached Administrator Policies
