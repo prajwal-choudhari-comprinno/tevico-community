@@ -8,6 +8,7 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "verbatimModuleSyntax": false
   }
 }

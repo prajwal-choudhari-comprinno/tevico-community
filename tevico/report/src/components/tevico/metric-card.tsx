@@ -1,18 +1,16 @@
 
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Users } from 'lucide-react';
 
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
 
-import { Progress } from '@/components/ui/progress';
-
 interface MetricCardProps {
+  icon: string,
   title: string;
   value: number;
   content?: string;
@@ -20,15 +18,28 @@ interface MetricCardProps {
 
 export function MetricCard(props: MetricCardProps) {
   return (
-    <Card x-chunk="dashboard-01-chunk-0">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">
+    <Card>
+      <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium basis-2/3 xl:basis-5/6">
           {props.title}
         </CardTitle>
-        <DollarSign className="h-4 w-4 text-muted-foreground" />
+        <div className='basis-auto'>
+          {(() => {
+            switch (props.icon) {
+              case 'users':
+                return <Users className="h-4 w-4 text-muted-foreground" />;
+              case 'dollar':
+                return <DollarSign className="h-4 w-4 text-muted-foreground" />;
+              default:
+                null;
+            }
+          })()}
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{props.value}</div>
+        <div className="text-2xl font-bold">
+          {props.value}
+        </div>
         {
           props.content && (
             <CardDescription className="text-sm text-muted-foreground">
