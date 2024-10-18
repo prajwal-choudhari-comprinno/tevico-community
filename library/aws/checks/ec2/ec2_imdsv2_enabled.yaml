@@ -1,5 +1,5 @@
 Provider: aws
-CheckID: ec2_instance_imdsv2_enabled
+CheckID: ec2_imdsv2_enabled
 CheckTitle: Check if EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required.
 CheckType:
   - Infrastructure Security

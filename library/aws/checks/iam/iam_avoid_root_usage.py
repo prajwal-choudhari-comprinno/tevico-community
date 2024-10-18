@@ -4,8 +4,7 @@ DATE: 2024-10-10
 """
 
 import boto3
-import datetime
-import pytz
+from datetime import datetime, timezone
 from dateutil import parser
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
@@ -44,8 +43,7 @@ class iam_avoid_root_usage(Check):
                         last_accessed = parser.parse(access_key_2_last_used)
 
                     if last_accessed:
-                        days_since_accessed = (datetime.datetime.now(pytz.utc) - last_accessed).days
-
+                        days_since_accessed = (datetime.now(timezone.utc) - last_accessed).days
 
                         # Evaluate against maximum access days
                         if days_since_accessed <= maximum_access_days:

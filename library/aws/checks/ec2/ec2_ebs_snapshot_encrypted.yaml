@@ -1,5 +1,5 @@
 Provider: aws
-CheckID: ec2_ebs_snapshots_encrypted
+CheckID: ec2_ebs_snapshot_encrypted
 CheckTitle: Check if EBS snapshots are encrypted.
 CheckType:
   - Data Protection
