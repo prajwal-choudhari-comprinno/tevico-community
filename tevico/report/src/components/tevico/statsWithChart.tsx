@@ -27,8 +27,8 @@ export function StatsWithChart({ footerData, chartData }: StatsProps) {
         fill: `hsl(var(--chart-${index + 1}))` || generateChartColor(),
     }));
     return (
-        <Card>
-            <CardContent className="flex gap-4 p-4 pb-2">
+        <Card className="flex flex-col">
+            <CardContent className="flex-1 flex justify-center items-center gap-4 p-4 pb-2">
                 <BarChart width={500} height={200}
                     margin={{
                         left: 10,
