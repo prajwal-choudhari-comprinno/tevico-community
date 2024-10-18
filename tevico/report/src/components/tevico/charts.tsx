@@ -51,6 +51,10 @@ interface ChartProps {
   cardDescription?: string;
 }
 
+const chartHeight: number = 250;
+const barChartWidth: number = 400;
+const pieChartWidth: number = 500;
+
 export function generateChartColor() {
   const hue = 137 + Math.floor(Math.random() * 6);
   const saturation = 40 + Math.floor(Math.random() * 49);
@@ -59,7 +63,7 @@ export function generateChartColor() {
 }
 
 const BarChartComponent = ({ chartData }: { chartData: ChartData }) => (
-  <BarChart width={400} height={200} accessibilityLayer data={chartData.data}>
+  <BarChart width={barChartWidth} height={chartHeight} accessibilityLayer data={chartData.data}>
     <CartesianGrid vertical={false} />
     <XAxis
       dataKey={chartData.config.xAxis}
@@ -75,7 +79,7 @@ const BarChartComponent = ({ chartData }: { chartData: ChartData }) => (
 );
 
 const HorizontalBarChartComponent = ({ chartData }: { chartData: ChartData }) => (
-  <BarChart width={400} height={200}
+  <BarChart width={barChartWidth} height={chartHeight}
     accessibilityLayer
     data={chartData.data}
     layout="vertical"
@@ -103,7 +107,7 @@ const PieChartComponent = ({ chartData }: { chartData: PieChartData }) => {
     [chartData.config.valueKey]: chartData.data[key]
   }));
   return (
-    <PieChart width={500} height={200}>
+    <PieChart width={pieChartWidth} height={chartHeight}>
       <Pie
         data={dataAsArray}
         dataKey={chartData.config.valueKey}
@@ -144,12 +148,12 @@ const PieV2ChartComponent = ({ chartData }: { chartData: PieChartData }) => {
   }, [chartData.config.valueKey, chartData.data]);
 
   return (
-    <PieChart width={500} height={200}>
+    <PieChart width={pieChartWidth} height={chartHeight}>
       <Pie
         data={dataAsArray}
         dataKey={chartData.config.valueKey}
         nameKey={chartData.config.labelKey}
-        innerRadius={40}
+        innerRadius={60}
         label={({ payload, ...props }) => {
           return (
             <text
@@ -209,12 +213,12 @@ const DoughnutChartComponent = ({ chartData }: { chartData: PieChartData }) => {
     [chartData.config.valueKey]: chartData.data[key]
   }));
   return (
-    <PieChart width={500} height={200}>
+    <PieChart width={pieChartWidth} height={chartHeight}>
       <Pie
         data={dataAsArray}
         dataKey={chartData.config.valueKey}
         nameKey={chartData.config.labelKey}
-        innerRadius={40}
+        innerRadius={60}
         label={({ payload, ...props }) => {
           return (
             <text
