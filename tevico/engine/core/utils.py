@@ -4,7 +4,11 @@ import importlib.util
 import os
 from typing import Optional
 
+import yaml
+
 from tevico.engine.configs.config import TevicoConfig
+from tevico.engine.entities.check.check import Check
+from tevico.engine.entities.report.check_model import CheckMetadata
 
 
 class CoreUtils():
@@ -71,3 +75,62 @@ class CoreUtils():
         """
         
         return TevicoConfig()
+    
+    def get_metadata_path(self, check_name: str, provider_path: str) -> str | None:
+        file_name = f'{check_name}.yaml'
+        
+        for root, _, files in os.walk(provider_path):
+            if file_name in files:
+                return os.path.join(root, file_name)
+
+        return None
+    
+    def get_check_path(self, check_name: str, provider_path: str) -> str | None:
+        file_name = f'{check_name}.py'
+        
+        for root, _, files in os.walk(provider_path):
+            if file_name in files:
+                return os.path.join(root, file_name)
+        
+        return None
+    
+    def get_check_metadata(self, check_name: str, provider_path: str) -> CheckMetadata | None:
+        metadata_path = self.get_metadata_path(
+            check_name=check_name,
+            provider_path=provider_path
+        )
+        
+        if metadata_path is not None:
+            with open(metadata_path, 'r') as f:
+                m = yaml.safe_load(f)
+                return CheckMetadata(**m)
+        
+        return None
+    
+    def get_check_class(self, check_path: str, metadata: CheckMetadata) -> Check | None:
+        check_name = metadata.check_id
+        
+        module_name = self.get_package_name(check_path)
+        cls = self.get_provider_class(module_name, check_name)
+        
+        if cls is None:
+            return None
+        
+        return cls(metadata)
+    
+    def load_check(self, check_name: str, provider_path: str) -> Check | None:
+        
+        check_path = self.get_check_path(
+            check_name=check_name,
+            provider_path=provider_path
+        )
+        
+        metadata = self.get_check_metadata(check_name, provider_path)
+        
+        if check_path is None:
+            return None
+        
+        if metadata is None:
+            return None
+        
+        return self.get_check_class(check_path, metadata)

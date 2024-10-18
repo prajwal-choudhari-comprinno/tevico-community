@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import Future, ThreadPoolExecutor
+from logging import config
 import os
 from typing import Any, Dict, List
 
 import yaml
 
-from tevico.engine.configs.config import ConfigUtils
+from tevico.engine.configs.config import ConfigUtils, TevicoConfig
 from tevico.engine.core.utils import CoreUtils
 from tevico.engine.entities.framework.framework_model import FrameworkModel, FrameworkSection
 from tevico.engine.entities.profile.profile_model import ProfileModel
@@ -16,7 +17,7 @@ class Provider(ABC):
     
     provider_path: str
     utils: CoreUtils = CoreUtils()
-    config_utils: ConfigUtils = ConfigUtils()
+    config: TevicoConfig = ConfigUtils().get_config()
     
     def __init__(self, path) -> None:
         self.provider_path = path
@@ -91,7 +92,7 @@ class Provider(ABC):
         return result
 
     def start_execution(self) -> List[CheckReport]:
-        thread_pool = ThreadPoolExecutor(max_workers=5)
+        thread_pool = ThreadPoolExecutor(max_workers=self.config.thread_workers)
         check_reports: List[CheckReport] = []
         futures: List[Future[CheckReport]] = []
 
@@ -106,45 +107,6 @@ class Provider(ABC):
             check_reports = [f.result() for f in futures]
             
         return check_reports
-
-    def __get_metadata_path(self, check_name) -> str | None:
-        file_name = f'{check_name}.yaml'
-        
-        for root, _, files in os.walk(self.provider_path):
-            if file_name in files:
-                return os.path.join(root, file_name)
-
-        return None
-    
-    def __get_check_path(self, check_name) -> str | None:
-        file_name = f'{check_name}.py'
-        
-        for root, _, files in os.walk(self.provider_path):
-            if file_name in files:
-                return os.path.join(root, file_name)
-        
-        return None
-    
-    def __load_check(self, check_name: str) -> Check | None:
-        metadata_path = self.__get_metadata_path(check_name=check_name)
-        check_path = self.__get_check_path(check_name=check_name)
-        
-        metadata = None
-        
-        if metadata_path is not None:
-            with open(metadata_path, 'r') as f:
-                m = yaml.safe_load(f)
-                metadata = CheckMetadata(**m)
-                
-        # print(f'Metadata = {metadata}')
-        
-        if check_path is not None:
-            module_name = self.utils.get_package_name(check_path)
-            cls = self.utils.get_provider_class(module_name, check_name)
-            if cls is not None:
-                return cls(metadata)
-        
-        return None
     
     def __load_profile(self, profile_name: str) -> ProfileModel | None:
         profile_metadata_path = f'{self.provider_path}/profiles/{profile_name}.yaml'
@@ -157,11 +119,10 @@ class Provider(ABC):
             return ProfileModel(**profile_raw_data)
     
     def __is_check_included(self, check_name: str) -> bool:
-        config = self.config_utils.get_config()
-        if config.profile is None:
+        if self.config.profile is None:
             return True
         
-        profile = self.__load_profile(config.profile)
+        profile = self.__load_profile(self.config.profile)
         
         if profile is None:
             return True
@@ -186,7 +147,11 @@ class Provider(ABC):
                 if not self.__is_check_included(check_name):
                     continue
                 
-                check = self.__load_check(check_name=check_name)
+                # check = self.__load_check(check_name=check_name)
+                check = self.utils.load_check(
+                    check_name=check_name,
+                    provider_path=self.provider_path
+                )
                 if check is not None:
                     checks.append(check)
             
