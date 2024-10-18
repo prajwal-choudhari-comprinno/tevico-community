@@ -17,7 +17,7 @@ class iam_account_maintain_current_contact_details(Check):
 
         # List of attributes to check
         checks_to_perform: List[str] = [
-            'full_name', 'company_name', 'address', 'phone_number', 
+            'full_name', 'company_name', 'address', 'phone_number', 'website_url'
         ]
         
         # print("Attributes to check:", checks_to_perform)
