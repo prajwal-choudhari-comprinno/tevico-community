@@ -1,0 +1,163 @@
+---
+import MainLayout from "@/components/MainLayout.astro";
+import { Chart, PieChartData } from "@/components/tevico/charts";
+// import { DataTable } from "@/components/tevico/data-table/data-table";
+import { MetricCard } from "@/components/tevico/metric-card";
+import { StatsWithChart } from "@/components/tevico/statsWithChart";
+import { TableComponent } from "@/components/tevico/table";
+import { pageNames, pages } from "@/lib/utils";
+import "@/styles/globals.css";
+
+const pieChartData: PieChartData = {
+  data: {
+    Chrome: 4344,
+    Firefox: 5435,
+    Safari: 2525,
+    Edge: 1578,
+  },
+  config: {
+    labelKey: "browser",
+    valueKey: "visitors",
+    titleKey: "Visitors",
+  },
+};
+
+const barChartData = {
+  data: [
+    { month: "January", desktop: 186, mobile: 123 },
+    { month: "February", desktop: 305, mobile: 234 },
+    { month: "March", desktop: 237, mobile: 345 },
+    { month: "April", desktop: 237, mobile: 345 },
+    { month: "May", desktop: 237, mobile: 345 },
+  ],
+  config: {
+    xAxis: "month",
+    dataKeys: ["desktop", "mobile"],
+  },
+};
+
+const hBarChartData = {
+  data: [
+    { month: "January", desktop: 186 },
+    { month: "February", desktop: 305 },
+    { month: "March", desktop: 237 },
+    { month: "April", desktop: 400 },
+    { month: "May", desktop: 150 },
+  ],
+  config: {
+    xAxis: "month",
+    dataKeys: ["desktop"],
+  },
+};
+
+const tableData = {
+  headers: [
+    { key: "id", label: "ID" },
+    { key: "amount", label: "Amount" },
+    // { key: "status", label: "Status" },
+    // { key: "email", label: "Email" },
+  ],
+  data: [
+    {
+      id: "728ed52f",
+      amount: 100,
+      status: "pending",
+      email: "m@example.com",
+    },
+    {
+      id: "489e1d42",
+      amount: 125,
+      status: "processing",
+      email: "example@gmail.com",
+    },
+  ],
+};
+
+const columns = [
+  {
+    accessorKey: "status",
+    header: "Status",
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+  },
+  {
+    accessorKey: "amount",
+    header: "Amount",
+  },
+];
+
+const footerData = [
+  { title: "Move", value: 562, unit: "kcal" },
+  { title: "Exercise", value: 70, unit: "min" },
+  { title: "Stand", value: 14, unit: "hr" },
+];
+
+const data = [
+  {
+    title: "stand",
+    value: (8 / 12) * 100,
+    label: "8/12 hr",
+    // fill: "hsl(var(--chart-1))",
+  },
+  {
+    title: "exercise",
+    value: (46 / 60) * 100,
+    label: "46/60 min",
+    // fill: "hsl(var(--chart-2))",
+  },
+  {
+    title: "move",
+    value: (245 / 360) * 100,
+    label: "245/360 kcal",
+    // fill: "hsl(var(--chart-3))",
+  },
+];
+---
+
+<MainLayout activePage={pages[pageNames.index]}>
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+    <MetricCard icon="dollar" title="Total Number of Checks" value={30} />
+    <MetricCard icon="dollar" title="Total Number of Upgrades" value={70} />
+    <MetricCard
+      icon="users"
+      title="Total Number of Checks"
+      value={-30}
+      content="+180.1% from last month"
+    />
+    <MetricCard icon="users" title="Total Number of Checks" value={30} />
+  </div>
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
+    <Chart type={"BAR"} barChartData={barChartData} cardTitle="Bar Chart" />
+    <Chart
+      type={"HORIZONTAL_BAR"}
+      horizontalBarChartData={hBarChartData}
+      cardTitle="Bar Chart v2"
+    />
+    <Chart type={"PIE"} pieChartData={pieChartData} cardTitle="Pie Chart" />
+    <Chart
+      type={"DOUGHNUT"}
+      doughnutChartData={pieChartData}
+      cardTitle="Doughnut Chart"
+    />
+    <Chart
+      type={"PIE_WITH_STATS"}
+      pieChartWithStatsData={pieChartData}
+      cardTitle="Pie Chart With Stats"
+    />
+    <StatsWithChart footerData={footerData} chartData={data} />
+  </div>
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2 xl:grid-cols-2">
+    <TableComponent
+      tableData={tableData}
+      tableHeading="Transaction"
+      tableDescription="Recent transactions from your store."
+    />
+    <TableComponent
+      tableData={tableData}
+      tableHeading="Transaction"
+      tableDescription="Recent transactions from your store."
+    />
+  </div>
+</MainLayout>

@@ -1,0 +1,30 @@
+Provider: aws
+CheckID: iam_rotate_access_keys_90_days
+CheckTitle: Ensure IAM Access Keys Are Rotated Every 90 Days
+CheckType: []
+ServiceName: iam
+SubServiceName: ''
+ResourceIdTemplate: 'arn:partition:service:region:account-id:resource-id'
+Severity: critical
+ResourceType: AwsIamUser
+Description: Ensure that IAM access keys are rotated every 90 days. Regular key rotation reduces the potential risk of compromised access keys by limiting the time window in which a key can be exploited.
+
+Risk: >-
+ If access keys are not rotated regularly, they can become vulnerable to unauthorized use, especially if exposed or compromised. Stale access keys increase the likelihood of security breaches, as long-standing keys could potentially fall into malicious hands. Regular rotation of access keys ensures a more secure environment by reducing the risk of long-term exposure.
+RelatedUrl: ''
+Remediation:
+  Code:
+    CLI: ''
+    NativeIaC: ''
+    Other: ''
+    Terraform: ''
+  Recommendation:
+    Text: >-
+      Using IAM console navigate to Dashboard and expand Activate MFA on your
+      user's account.
+    Url: >-
+      https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_mfa
+Categories: []
+DependsOn: []
+RelatedTo: []
+Notes: ''
