@@ -9,7 +9,6 @@ import {
   CardTitle
 } from '@/components/ui/card';
 
-
 interface MetricCardProps {
   icon: string,
   title: string;
@@ -19,9 +18,9 @@ interface MetricCardProps {
 
 export function MetricCard(props: MetricCardProps) {
   return (
-    <Card x-chunk="dashboard-01-chunk-0">
+    <Card>
       <CardHeader className="flex flex-row justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium basis-2/3">
+        <CardTitle className="text-sm font-medium basis-2/3 xl:basis-5/6">
           {props.title}
         </CardTitle>
         <div className='basis-auto'>
