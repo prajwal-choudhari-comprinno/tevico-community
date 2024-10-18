@@ -54,8 +54,8 @@ const tableData = {
   headers: [
     { key: "id", label: "ID" },
     { key: "amount", label: "Amount" },
-    { key: "status", label: "Status" },
-    { key: "email", label: "Email" },
+    // { key: "status", label: "Status" },
+    // { key: "email", label: "Email" },
   ],
   data: [
     {
@@ -148,7 +148,12 @@ const data = [
     />
     <StatsWithChart footerData={footerData} chartData={data} />
   </div>
-  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2 xl:grid-cols-1">
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2 xl:grid-cols-2">
+    <TableComponent
+      tableData={tableData}
+      tableHeading="Transaction"
+      tableDescription="Recent transactions from your store."
+    />
     <TableComponent
       tableData={tableData}
       tableHeading="Transaction"
