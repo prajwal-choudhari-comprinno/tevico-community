@@ -1,0 +1,68 @@
+########### PLEASE NOTE ###########
+# For better readability of the metadata file, kindly remove all the comments before using the template.
+###################################
+
+Provider: aws
+
+# Check ID
+CheckID: attached_policy_admin_privileges_found
+
+# Short title/description of the check
+CheckTitle: "Ensure no IAM user or role has AdministratorAccess policy attached"
+
+# Check Type
+CheckType: 
+  - Software and Configuration Checks
+  - Security Best Practices
+
+# Service Name
+ServiceName: iam
+
+# Sub Service Name
+SubServiceName: ""
+
+# Resource Template
+ResourceIdTemplate: arn:aws:iam::{account-id}:{resource-type}/{resource-name}
+
+# Severity of the check. Allowed values: critical, high, medium, low
+Severity: high
+
+# Resource Type
+ResourceType: AwsIamUser, AwsIamRole
+
+# Description of the check
+Description: "This check ensures that no IAM user or role has an AdministratorAccess policy attached, as such policies grant excessive privileges and can pose security risks."
+
+# Explanation of the risk associated with the check
+Risk: "Attaching AdministratorAccess policy to IAM users or roles grants full administrative privileges, increasing the risk of unintentional or malicious changes to your AWS account."
+
+# Related URL for the check
+RelatedUrl: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
+
+# Help section on how to fix the issue
+Remediation:
+  Code:
+    CLI: |
+      aws iam detach-user-policy --user-name <user_name> --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+    NativeIaC: ""
+    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/iam/iam-users-no-admin-access.html
+    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-iam-users-do-not-have-administrator-access
+  Recommendation:
+    Text: |
+      Review IAM users and roles, and detach any AdministratorAccess policies. 
+      Implement the principle of least privilege by assigning only necessary permissions.
+    Url: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
+
+# Categories for the check. Eg: forensics-ready, security, etc.
+Categories: 
+  - security
+  - least privilege
+
+# Dependencies on other checks
+DependsOn: []
+
+# Related checks
+RelatedTo: []
+
+# Side notes
+Notes: "It's a best practice to avoid granting full administrative privileges unless absolutely necessary."
