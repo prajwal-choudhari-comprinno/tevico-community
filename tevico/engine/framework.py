@@ -260,8 +260,8 @@ class TevicoFramework():
         providers = self.__get_providers()
         checks: List[CheckReport] = []
         
-        CHECK_REPORTS_PATH = './tevico/report/public/check_reports.json'
-        CHECK_ANALYTICS_PATH = './tevico/report/public/check_analytics.json'
+        CHECK_REPORTS_PATH = './tevico/report/src/data/check_reports.json'
+        CHECK_ANALYTICS_PATH = './tevico/report/src/data/check_analytics.json'
         
         for p in providers:
             try:

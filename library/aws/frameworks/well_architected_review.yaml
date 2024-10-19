@@ -18,7 +18,7 @@ description: |
   https://aws.amazon.com/architecture/well-architected/
 
 sections:
-  - name: AWS | Well Architechted Review | Operational Excellence
+  - name: Operational Excellence
     description: |
       The Security pillar includes the ability to protect information, systems, and assets while delivering business
       value through risk assessments and mitigation strategies.
@@ -26,7 +26,7 @@ sections:
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
 
-  - name: AWS | Well Architechted Review | Security
+  - name: Security
     description: |
       The Security pillar includes the ability to protect information, systems, and assets while delivering business
       value through risk assessments and mitigation strategies.
@@ -42,7 +42,7 @@ sections:
       - ec2_instance_profile_attached
       - ec2_imdsv2_enabled
 
-  - name: AWS | Well Architechted Review | Reliability
+  - name: Reliability
     description: |
       The Reliability pillar includes the ability of a system to recover from infrastructure or service disruptions,
       dynamically acquire computing resources to meet demand, and mitigate disruptions such as misconfigurations or transient
@@ -92,7 +92,7 @@ sections:
           # - rds_instance_integration_cloudwatch_logs
           # - rds_instance_multi_az
 
-  - name: AWS | Well Architechted Review | Performance Efficiency
+  - name: Performance Efficiency
     description: |
       The Performance Efficiency pillar includes the ability to use computing resources efficiently to meet system
       requirements and to maintain that efficiency as demand changes and technologies evolve.
@@ -100,7 +100,7 @@ sections:
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
 
-  - name: AWS | Well Architechted Review | Cost Optimization
+  - name: Cost Optimization
     description: |
       The Cost Optimization pillar includes the ability to avoid or eliminate unneeded cost or suboptimal resources.
 
@@ -108,7 +108,7 @@ sections:
     checks: []
 
 
-  - name: AWS | Well Architechted Review | Operational Excellence
+  - name: Operational Excellence
     description: |
       The Operational Excellence pillar includes the ability to run and monitor systems to deliver business value and to
       continually improve supporting processes and procedures.
@@ -116,7 +116,7 @@ sections:
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
 
-  - name: AWS | Well Architechted Review | Security
+  - name: Security
     description: |
       The Security pillar focuses on the ability to protect data, systems, and assets through risk management and control. 
       
