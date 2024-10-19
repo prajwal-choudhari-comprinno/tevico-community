@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import Future, ThreadPoolExecutor
-from logging import config
 import os
 from typing import Any, Dict, List
 
@@ -10,7 +9,7 @@ from tevico.engine.configs.config import ConfigUtils, TevicoConfig
 from tevico.engine.core.utils import CoreUtils
 from tevico.engine.entities.framework.framework_model import FrameworkModel, FrameworkSection
 from tevico.engine.entities.profile.profile_model import ProfileModel
-from tevico.engine.entities.report.check_model import CheckMetadata, CheckReport
+from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
 class Provider(ABC):
@@ -73,7 +72,6 @@ class Provider(ABC):
     def execute_checks_in_section(
         self,
         section: FrameworkSection,
-        profile_name: str,
         thread_pool: ThreadPoolExecutor,
         framework: FrameworkModel
     ) -> List[Future[CheckReport]]:
@@ -87,7 +85,7 @@ class Provider(ABC):
         
         if section.sections is not None:
             for sub_section in section.sections:
-                result.extend(self.execute_checks_in_section(sub_section, profile_name, thread_pool, framework))
+                result.extend(self.execute_checks_in_section(sub_section, thread_pool, framework))
         
         return result
 
@@ -101,7 +99,7 @@ class Provider(ABC):
             
             if framework.sections is not None:
                 for section in framework.sections:
-                    res = self.execute_checks_in_section(section, "test", thread_pool, framework)
+                    res = self.execute_checks_in_section(section, thread_pool, framework)
                     futures.extend(res)
             
             check_reports = [f.result() for f in futures]
