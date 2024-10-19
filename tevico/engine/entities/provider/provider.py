@@ -61,7 +61,7 @@ class Provider(ABC):
     
     def handle_check_execution(self, check: Check, profile_name: str) -> CheckReport:
         res = check.get_report(profile_name=profile_name, connection=self.connection)
-        
+
         if res is not None and res.passed:
             print(f'\t\t* Check Passed ✅: {res.name}')
         else:

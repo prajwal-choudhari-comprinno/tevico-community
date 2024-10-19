@@ -3,6 +3,7 @@ from functools import reduce
 import json
 import os
 import subprocess
+import traceback
 from typing import Dict, List
 
 from jinja2 import Environment, FileSystemLoader
@@ -268,6 +269,7 @@ class TevicoFramework():
                 checks.extend(result)
             except Exception as e:
                 print(f'\n❌ Error: {e}')
+                print(traceback.format_exc())
                 os._exit(1)
         
         data = [s.model_dump(mode='json') for s in checks]
