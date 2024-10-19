@@ -5,7 +5,7 @@
 Provider: aws
 
 # Check ID
-CheckID: attached_policy_admin_privileges_found
+CheckID: iam_attached_policy_admin_privileges_found
 
 # Short title/description of the check
 CheckTitle: "Ensure no IAM user or role has AdministratorAccess policy attached"

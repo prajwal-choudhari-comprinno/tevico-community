@@ -7,7 +7,7 @@ DATE: 2024-10-17
 
 Provider: aws
 
-CheckID: account_maintain_current_contact_details
+CheckID: iam_account_maintain_current_contact_details
 
 # Short title/description of the check
 CheckTitle: Verify AWS Account Contact Details

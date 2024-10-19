@@ -145,3 +145,10 @@ sections:
      - customer_attached_policy_admin_privileges_found    
      - customer_unattached_policy_admin_privileges_found
      - organizations_account_part_of_organizations
+     - iam_account_maintain_current_contact_details
+     - iam_account_security_contact_information_registered
+     - iam_attached_policy_admin_privileges_found
+     - iam_customer_attached_policy_admin_privileges_found
+     - iam_customer_unattached_policy_admin_privileges_found
+     - iam_inline_policy_admin_privileges_found
+     - organizations_account_part_of_organizations

@@ -4,7 +4,7 @@
 
 Provider: aws
 
-CheckID: customer_attached_policy_admin_privileges_found
+CheckID: iam_customer_attached_policy_admin_privileges_found
 
 CheckTitle: Ensure IAM Users Do Not Have Administrator Access Policy Attached
 
