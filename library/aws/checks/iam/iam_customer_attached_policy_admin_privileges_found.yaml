@@ -1,0 +1,48 @@
+########### PLEASE NOTE ###########
+# For better readability of the metadata file, kindly remove all the comments before using the template.
+###################################
+
+Provider: aws
+
+CheckID: iam_customer_attached_policy_admin_privileges_found
+
+CheckTitle: Ensure IAM Users Do Not Have Administrator Access Policy Attached
+
+CheckType:
+  - Software and Configuration Checks
+  - Industry and Regulatory Standards
+  - CIS AWS Foundations Benchmark
+
+ServiceName: iam
+
+SubServiceName: ""
+
+ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
+
+Severity: high
+
+ResourceType: AwsIamUser
+
+Description: Ensure that no IAM user has the AdministratorAccess policy attached.
+
+Risk: Attaching administrative privileges to users and roles increases the security risk.
+
+RelatedUrl: https://tevi.co
+
+Remediation:
+  Code:
+    CLI: "aws iam detach-user-policy --user-name <user_name> --policy-arn <policy_arn>"
+    NativeIaC: ""
+    Other: "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html"
+    Terraform: "https://docs.prowler.com/checks/aws/general-policies/ensure-that-rds-instances-have-backup-policy#terraform"
+  Recommendation:
+    Text: "It is more secure to start with a minimum set of permissions and grant additional permissions as necessary, rather than starting with permissions that are too lenient and then trying to tighten them later. List policies and analyze if permissions are the least possible to conduct business activities."
+    Url: "http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+
+Categories: []
+
+DependsOn: []
+
+RelatedTo: []
+
+Notes: Infrastructure Protection
