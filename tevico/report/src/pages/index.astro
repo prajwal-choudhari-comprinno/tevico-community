@@ -1,12 +1,58 @@
 ---
 import MainLayout from "@/components/MainLayout.astro";
 import { Chart, PieChartData } from "@/components/tevico/charts";
-// import { DataTable } from "@/components/tevico/data-table/data-table";
+// import { DataTable } from '@/components/tevico/data-table/data-table';
 import { MetricCard } from "@/components/tevico/metric-card";
-import { StatsWithChart } from "@/components/tevico/statsWithChart";
+import { StatsWithChart, StatsProps } from "@/components/tevico/statsWithChart";
 import { TableComponent } from "@/components/tevico/table";
 import { pageNames, pages } from "@/lib/utils";
+import { AnalyticsReport } from "@/components/tevico/types/analyticsTypes";
+import { CheckReport, Severity } from "@/components/tevico/types/checkTypes";
+
+import CheckAnalytics from "@/data/check_analytics.json";
+import CheckReports from "@/data/check_reports.json";
+
 import "@/styles/globals.css";
+
+import { BookCheck, ShieldAlert, ShieldCheck } from "lucide-react";
+
+console.log(CheckReports)
+
+const checkAnalytics = CheckAnalytics as AnalyticsReport;
+const checkReport = CheckReports as unknown as CheckReport[];
+
+const progressProps: StatsProps = {
+  cardTitle: "Checks by Severity",
+  chartData: Object.keys(checkAnalytics.severity)
+    .map((key) => {
+      return {
+        title: key as Severity,
+        value:
+          (checkAnalytics.severity[key as Severity] / checkAnalytics.check_status.total) *
+          100,
+        label: key,
+      };
+    })
+    .sort((a, b) => b.value - a.value),
+  footerData: Object.keys(checkAnalytics.severity).map((key) => {
+    return {
+      title: key as Severity,
+      value: checkAnalytics.severity[key as Severity],
+      unit: "checks",
+    };
+  }),
+};
+
+const severityScore =
+  checkReport.reduce((acc, check) => {
+    const scores: { [key in Severity]: number } = {
+      critical: 4,
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
+    return acc + scores[check.check_metadata.severity];
+  }, 0) / checkReport.length;
 
 const pieChartData: PieChartData = {
   data: {
@@ -54,8 +100,8 @@ const tableData = {
   headers: [
     { key: "id", label: "ID" },
     { key: "amount", label: "Amount" },
-    // { key: "status", label: "Status" },
-    // { key: "email", label: "Email" },
+    // { key: 'status', label: 'Status' },
+    // { key: 'email', label: 'Email' },
   ],
   data: [
     {
@@ -99,65 +145,124 @@ const data = [
     title: "stand",
     value: (8 / 12) * 100,
     label: "8/12 hr",
-    // fill: "hsl(var(--chart-1))",
+    // fill: 'hsl(var(--chart-1))',
   },
   {
     title: "exercise",
     value: (46 / 60) * 100,
     label: "46/60 min",
-    // fill: "hsl(var(--chart-2))",
+    // fill: 'hsl(var(--chart-2))',
   },
   {
     title: "move",
     value: (245 / 360) * 100,
     label: "245/360 kcal",
-    // fill: "hsl(var(--chart-3))",
+    // fill: 'hsl(var(--chart-3))',
   },
 ];
 ---
 
 <MainLayout activePage={pages[pageNames.index]}>
   <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-    <MetricCard icon="dollar" title="Total Number of Checks" value={30} />
-    <MetricCard icon="dollar" title="Total Number of Upgrades" value={70} />
     <MetricCard
-      icon="users"
-      title="Total Number of Checks"
-      value={-30}
-      content="+180.1% from last month"
+      icon="dollar"
+      title="Total Checks"
+      value={checkAnalytics.check_status.total}
+      content="Successfully executed"
     />
-    <MetricCard icon="users" title="Total Number of Checks" value={30} />
+    <MetricCard
+      icon="dollar"
+      title="Passed"
+      value={checkAnalytics.check_status.passed}
+      content={`out of ${checkAnalytics.check_status.total}`}
+    />
+    <MetricCard
+      icon="dollar"
+      title="Failed"
+      value={checkAnalytics.check_status.failed}
+      content={`out of ${checkAnalytics.check_status.total}`}
+    />
+    <MetricCard
+      icon="dollar"
+      title="Severity Score"
+      value={`${((severityScore / 4) * 100).toFixed(2)}%`}
+      content="Lower the better!"
+    />
+    <MetricCard icon="dollar" title="Critical" value={70} />
+    <MetricCard
+      icon="dollar"
+      title="Major Impact On"
+      value={"EC2"}
+      content={"with " + 84 + " failed checks"}
+    />
+    <MetricCard
+      icon="dollar"
+      title="Area of Focus"
+      value={"Security"}
+      content={"with " + 84 + " failed checks"}
+    />
+
+    <!-- <MetricCard icon='dollar' title='Passed' value={70} /> -->
+    <!-- <MetricCard
+      icon='users'
+      title='Total Number of Checks'
+      value={-30}
+      content='+180.1% from last month'
+    /> -->
   </div>
   <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
-    <Chart type={"BAR"} barChartData={barChartData} cardTitle="Bar Chart" />
-    <Chart
-      type={"HORIZONTAL_BAR"}
-      horizontalBarChartData={hBarChartData}
-      cardTitle="Bar Chart v2"
+    <StatsWithChart {...progressProps} />
+  </div>
+  <!-- <StatsWithChart footerData={footerData} chartData={data} cardTitle="Test" /> -->
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
+    <TableComponent
+      tableData={tableData}
+      tableHeading="Top Critical Services"
+      tableDescription="Services that needs immediate attention."
     />
-    <Chart type={"PIE"} pieChartData={pieChartData} cardTitle="Pie Chart" />
+    <TableComponent
+      tableData={tableData}
+      tableHeading="Transaction"
+      tableDescription="Recent transactions from your store."
+    />
+  </div>
+  <div class="inline-flex">
+    <h1 class="text-lg font-semibold md:text-2xl">
+      Checks that Failed
+    </h1><ShieldAlert className="m-1" />
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
     <Chart
-      type={"DOUGHNUT"}
-      doughnutChartData={pieChartData}
-      cardTitle="Doughnut Chart"
+      type={"PIE_WITH_STATS"}
+      pieChartWithStatsData={pieChartData}
+      cardTitle="By Severity"
+      cardType="Error"
     />
     <Chart
       type={"PIE_WITH_STATS"}
       pieChartWithStatsData={pieChartData}
-      cardTitle="Pie Chart With Stats"
+      cardTitle="By Sections"
+      cardType="Error"
     />
-    <StatsWithChart footerData={footerData} chartData={data} />
   </div>
-  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2 xl:grid-cols-2">
-    <TableComponent
-      tableData={tableData}
-      tableHeading="Transaction"
-      tableDescription="Recent transactions from your store."
+
+  <div class="inline-flex">
+    <h1 class="text-lg font-semibold md:text-2xl">
+      Checks that Passed
+    </h1><ShieldCheck className="m-1" />
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
+    <Chart
+      type={"PIE_WITH_STATS"}
+      pieChartWithStatsData={pieChartData}
+      cardTitle="By Severity"
     />
-    <TableComponent
-      tableData={tableData}
-      tableHeading="Transaction"
-      tableDescription="Recent transactions from your store."
+    <Chart
+      type={"PIE_WITH_STATS"}
+      pieChartWithStatsData={pieChartData}
+      cardTitle="By Service"
     />
   </div>
 </MainLayout>

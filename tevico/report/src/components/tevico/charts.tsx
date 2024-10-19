@@ -6,10 +6,12 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
 import React from "react";
+import { TrendingUp } from "lucide-react";
 
 type ChartDataPoint = {
   [key: string]: number | string;
@@ -49,6 +51,7 @@ interface ChartProps {
   doughnutChartData?: PieChartData,
   cardTitle: string;
   cardDescription?: string;
+  cardType?: string;
 }
 
 const chartHeight: number = 250;
@@ -235,7 +238,7 @@ const DoughnutChartComponent = ({ chartData }: { chartData: PieChartData }) => {
           )
         }}
       >
-        {dataAsArray.map((entry, index) => (
+        {dataAsArray.map((_, index) => (
           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
         ))}
       </Pie>
@@ -261,8 +264,15 @@ export function Chart(props: ChartProps) {
     }
   }, [props.type, props.barChartData, props.horizontalBarChartData, props.pieChartData, props.doughnutChartData, props.pieChartWithStatsData]);
 
+  const { cardType } = props;
+  const style: React.CSSProperties = {};
+
+  if (cardType === 'Error') {
+    style.backgroundColor = 'rgba(255, 0, 0, 0.05)';
+  }
+
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col" style={style}>
       <CardHeader>
         <CardTitle>{props.cardTitle}</CardTitle>
         {
@@ -276,14 +286,14 @@ export function Chart(props: ChartProps) {
       <CardContent className="flex-1 flex justify-center items-center gap-2 text-sm">
         {renderChart}
       </CardContent>
-      {/* <CardFooter className="flex-col items-start gap-2 text-sm">
+      <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
           Showing total visitors for the last 6 months
         </div>
-      </CardFooter> */}
+      </CardFooter>
     </Card>
   );
 

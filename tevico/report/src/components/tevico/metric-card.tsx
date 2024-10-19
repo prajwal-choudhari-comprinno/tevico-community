@@ -12,7 +12,7 @@ import {
 interface MetricCardProps {
   icon: string,
   title: string;
-  value: number;
+  value: number | string;
   content?: string;
 }
 

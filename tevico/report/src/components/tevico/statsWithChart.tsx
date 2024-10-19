@@ -1,5 +1,5 @@
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts";
-import { Card, CardContent, CardFooter } from "../ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
 import { generateChartColor } from "./charts";
 
@@ -16,18 +16,22 @@ type FooterData = {
     unit: string;
 };
 
-interface StatsProps {
+export interface StatsProps {
+    cardTitle?: string;
     footerData: FooterData[];
     chartData: ChartData[];
 }
 
-export function StatsWithChart({ footerData, chartData }: StatsProps) {
+export function StatsWithChart({ footerData, chartData, cardTitle }: StatsProps) {
     const coloredChartData = chartData.map((data, index) => ({
         ...data,
         fill: `hsl(var(--chart-${index + 1}))` || generateChartColor(),
     }));
     return (
         <Card className="flex flex-col">
+            <CardHeader>
+                {cardTitle && (<CardTitle>{cardTitle}</CardTitle>)}
+            </CardHeader>
             <CardContent className="flex-1 flex justify-center items-center gap-4 p-4 pb-2">
                 <BarChart width={500} height={200}
                     margin={{

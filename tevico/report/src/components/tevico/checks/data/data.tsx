@@ -17,6 +17,55 @@ export const data = [
     label: "bug",
     priority: "high",
   },
+  {
+    id: "TASK-7839",
+    title: "We need to bypass the neural TCP card!",
+    status: "todo",
+    label: "bug",
+    priority: "high",
+  },
+  {
+    id: "TASK-7839",
+    title: "We need to bypass the neural TCP card!",
+    status: "todo",
+    label: "bug",
+    priority: "high",
+  },
+  {
+    id: "TASK-7839",
+    title: "We need to bypass the neural TCP card!",
+    status: "todo",
+    label: "bug",
+    priority: "high",
+  },
+  {
+    id: "TASK-7839",
+    title: "We need to bypass the neural TCP card!",
+    status: "todo",
+    label: "bug",
+    priority: "high",
+  },
+  {
+    id: "TASK-7839",
+    title: "We need to bypass the neural TCP card!",
+    status: "todo",
+    label: "bug",
+    priority: "high",
+  },
+  {
+    id: "TASK-7839",
+    title: "We need to bypass the neural TCP card!",
+    status: "todo",
+    label: "bug",
+    priority: "high",
+  },
+  {
+    id: "TASK-7839",
+    title: "We need to bypass the neural TCP card!",
+    status: "todo",
+    label: "bug",
+    priority: "high",
+  },
 ];
 
 export const labels = [

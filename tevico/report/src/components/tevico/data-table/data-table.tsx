@@ -71,7 +71,7 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
-  console.log("DATA", table);
+  // console.log("DATA", table);
 
 
   return (

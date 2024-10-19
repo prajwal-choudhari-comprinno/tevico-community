@@ -14,6 +14,6 @@ export interface DropdownFilter {
 }
 
 export interface SearchBarFilter {
-    key: string;
-    title: string;
-  }
+  key: string;
+  title: string;
+}

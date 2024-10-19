@@ -43,6 +43,7 @@ export const pages: PageConfig = {
   },
   [pageNames.index]: {
     name: 'index',
-    pageTitle: 'Tevico Report | Summary'
+    pageTitle: 'Tevico Report | Summary',
+    pageHeader: 'Summary',
   }
 }

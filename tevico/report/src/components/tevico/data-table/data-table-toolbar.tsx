@@ -21,7 +21,7 @@ export function DataTableToolbar<TData>({
   searchBarFilter
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-  console.log(table);
+  // console.log(table);
 
 
   return (

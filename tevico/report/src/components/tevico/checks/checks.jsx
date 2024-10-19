@@ -4,8 +4,8 @@ import { data, filters, searchBarFilter } from  './data/data'
 
 export default function ChecksPage() {
   // Log data and columns for debugging
-  console.log("Data:", data);
-  console.log("Columns:", columns);
+  // console.log("Data:", data);
+  // console.log("Columns:", columns);
 
   return (
     <div>
