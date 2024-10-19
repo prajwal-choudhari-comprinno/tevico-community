@@ -59,8 +59,8 @@ class Provider(ABC):
     def connect(self) -> Any:
         raise NotImplementedError()
     
-    def handle_check_execution(self, check: Check, profile_name: str) -> CheckReport:
-        res = check.get_report(profile_name=profile_name, connection=self.connection)
+    def handle_check_execution(self, check: Check, section: str, framework: str) -> CheckReport:
+        res = check.get_report(framework=framework, section=section, connection=self.connection)
 
         if res is not None and res.passed:
             print(f'\t\t* Check Passed ✅: {res.name}')
@@ -80,7 +80,7 @@ class Provider(ABC):
         
         if section.checks is not None:
             for check in section.checks:
-                res = thread_pool.submit(self.handle_check_execution, check, framework.name)
+                res = thread_pool.submit(self.handle_check_execution, check, section.name, framework.name)
                 result.append(res)
         
         if section.sections is not None:

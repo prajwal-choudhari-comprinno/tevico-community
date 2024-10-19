@@ -58,7 +58,8 @@ class CheckReport(BaseModel):
     name: str
     check_metadata: Optional[CheckMetadata] = None
     dimensions: List[FrameworkDimension] = []
-    profile_name: Optional[str] = None
+    framework: Optional[str] = None
+    section: Optional[str] = None
     resource_ids_status: Dict[str, bool] = {}
     report_metadata: Optional[Dict[str, Any]] = None
     created_on: datetime = datetime.now()

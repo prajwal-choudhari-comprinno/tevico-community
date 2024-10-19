@@ -1,5 +1,4 @@
 
-from functools import reduce
 import json
 import os
 import subprocess
@@ -14,6 +13,8 @@ from tevico.engine.entities.provider.provider import Provider
 from tevico.engine.entities.provider.provider_model import ProviderMetadata
 from tevico.engine.entities.report.check_model import CheckReport
 from datetime import datetime
+
+from tevico.engine.entities.report.utils import generate_analytics
 
 class TevicoFramework():
     
@@ -259,7 +260,8 @@ class TevicoFramework():
         providers = self.__get_providers()
         checks: List[CheckReport] = []
         
-        OUTPUT_PATH = './tevico/report/public/output.json'
+        CHECK_REPORTS_PATH = './tevico/report/public/check_reports.json'
+        CHECK_ANALYTICS_PATH = './tevico/report/public/check_analytics.json'
         
         for p in providers:
             try:
@@ -274,23 +276,18 @@ class TevicoFramework():
         
         data = [s.model_dump(mode='json') for s in checks]
         
-        with open(OUTPUT_PATH, 'w') as file:
+        with open(CHECK_REPORTS_PATH, 'w') as file:
             json.dump(data, file, indent=2)
-
-        def accumulator(acc, check):
-            acc['total'] += 1
-            if check.passed:
-                acc['success'] += 1
-            else:
-                acc['failed'] += 1
-            return acc
         
-        acc = reduce(accumulator, checks, { 'total': 0, 'success': 0, 'failed': 0 })
+        analytics_report = generate_analytics(checks)
+        
+        with open(CHECK_ANALYTICS_PATH, 'w') as file:
+            json.dump(analytics_report.model_dump(), file, indent=2)
         
         print('\nReport Overview:')
-        print(f'#️⃣  Total    : {acc['total']}')
-        print(f'✅ Success  : {acc['success']}')
-        print(f'❌ Failed   : {acc['failed']}')
+        print(f'#️⃣ Total    : {analytics_report.check_status.total}')
+        print(f'✅ Passed  : {analytics_report.check_status.passed}')
+        print(f'❌ Failed   : {analytics_report.check_status.failed}')
         
         print(f'{'\n'}🛠️  Building zipped package')
         

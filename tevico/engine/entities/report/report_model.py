@@ -1,12 +1,27 @@
 
-from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, Field
+from typing import List
+from pydantic import BaseModel
 
-from tevico.engine.entities.report.check_model import CheckReport
+class SeverityReport(BaseModel):
+    critical: int = 0
+    high: int = 0
+    medium: int = 0
+    low: int = 0
 
-class ReportModel(BaseModel):
-    reports: list[CheckReport]
-    pass_count: int
-    fail_count: int
+class CheckStatusReport(BaseModel):
+    total: int = 0
+    passed: int = 0
+    failed: int = 0
 
+class GeneralReport(BaseModel):
+    name: str
+    check_status: CheckStatusReport
+    severity: SeverityReport
+
+class AnalyticsReport(BaseModel):
+    check_status: CheckStatusReport
+    severity: SeverityReport
+
+    by_services: List[GeneralReport]
+    
+    by_sections: List[GeneralReport]
