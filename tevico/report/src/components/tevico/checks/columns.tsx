@@ -1,6 +1,5 @@
 "use client"
 import { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import "@/styles/globals.css";
 
@@ -45,8 +44,6 @@ export const columns: ColumnDef<CheckReport>[] = [
     cell: ({ row }) => {
       const passed = row.original.passed;
       const statusLabel = passed ? "Pass" : "Fail";
-      const badgeColor = passed ? "bg-green-500" : "bg-red-500"; // Adjust colors as needed
-
       return (
         <div className="flex w-[100px] items-center">
           {statusLabel}
@@ -54,8 +51,6 @@ export const columns: ColumnDef<CheckReport>[] = [
       )
     },
     filterFn: (row, id, value) => {
-      console.log(value);
-
       const passed = row.original.passed;
       const status = passed ? "pass" : "fail";
       return value.includes(status)
