@@ -25,3 +25,5 @@ class AnalyticsReport(BaseModel):
     by_services: List[GeneralReport]
     
     by_sections: List[GeneralReport]
+    
+    by_severities: List[GeneralReport]

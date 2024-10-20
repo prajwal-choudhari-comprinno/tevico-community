@@ -1,5 +1,5 @@
 
-import { DollarSign, Users } from 'lucide-react';
+import { DollarSign, Info, Users } from 'lucide-react';
 
 import {
   Card,
@@ -8,9 +8,11 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card';
+import { Button } from '../ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 interface MetricCardProps {
-  icon: string,
   title: string;
   value: number | string;
   content?: string;
@@ -24,16 +26,33 @@ export function MetricCard(props: MetricCardProps) {
           {props.title}
         </CardTitle>
         <div className='basis-auto'>
-          {(() => {
-            switch (props.icon) {
-              case 'users':
-                return <Users className="h-4 w-4 text-muted-foreground" />;
-              case 'dollar':
-                return <DollarSign className="h-4 w-4 text-muted-foreground" />;
-              default:
-                null;
-            }
-          })()}
+          <HoverCard>
+            <HoverCardTrigger className='cursor-not-allowed'>
+              <Button variant="icon" size="sm">
+                <Info className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-80">
+              <div className="flex justify-between space-x-4">
+                <Avatar>
+                  <AvatarImage src="https://github.com/vercel.png" />
+                  <AvatarFallback>VC</AvatarFallback>
+                </Avatar>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold">@nextjs</h4>
+                  <p className="text-sm">
+                    The React Framework – created and maintained by @vercel.
+                  </p>
+                  <div className="flex items-center pt-2">
+                    <Info className="mr-2 h-4 w-4 opacity-70" />{" "}
+                    <span className="text-xs text-muted-foreground">
+                      Joined December 2021
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
         </div>
       </CardHeader>
       <CardContent>

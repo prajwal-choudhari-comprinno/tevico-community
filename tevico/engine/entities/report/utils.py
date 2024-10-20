@@ -41,6 +41,13 @@ def __get_services(checks: List[CheckReport]) -> List[str]:
             services.add(check.check_metadata.service_name)
     return list(services)
 
+def __get_severities(checks: List[CheckReport]) -> List[str]:
+    severities = set()
+    for check in checks:
+        if check.check_metadata is not None:
+            severities.add(check.check_metadata.severity)
+    return list(severities)
+
 def generate_analytics(checks: List[CheckReport]) -> AnalyticsReport:
     
     # check_status = CheckStatusReport(total=0, passed=0, failed=0)
@@ -48,6 +55,7 @@ def generate_analytics(checks: List[CheckReport]) -> AnalyticsReport:
     
     by_services: List[GeneralReport] = []
     by_sections: List[GeneralReport] = []
+    by_severities: List[GeneralReport] = []
     
     for service in __get_services(checks):
         service_checks = list(filter(lambda check: check.check_metadata is not None and check.check_metadata.service_name == service, checks))
@@ -65,10 +73,22 @@ def generate_analytics(checks: List[CheckReport]) -> AnalyticsReport:
         section_checks = list(filter(lambda check: check.section == section, checks))
         
         check_status = reduce(__check_status_accumulator, section_checks, CheckStatusReport(total=0, passed=0, failed=0))
-        severity = reduce(__severity_accumulator, section_checks, severity.copy())
+        severity = reduce(__severity_accumulator, section_checks, SeverityReport())
         
         by_sections.append(GeneralReport(
             name=section,
+            check_status=check_status,
+            severity=severity
+        ))
+        
+    for severity_str in __get_severities(checks):
+        severity_checks = list(filter(lambda check: check.check_metadata is not None and check.check_metadata.severity == severity_str, checks))
+        
+        check_status = reduce(__check_status_accumulator, severity_checks, CheckStatusReport(total=0, passed=0, failed=0))
+        severity = reduce(__severity_accumulator, severity_checks, SeverityReport())
+        
+        by_severities.append(GeneralReport(
+            name=severity_str,
             check_status=check_status,
             severity=severity
         ))
@@ -81,7 +101,8 @@ def generate_analytics(checks: List[CheckReport]) -> AnalyticsReport:
         check_status=check_status,
         severity=severity,
         by_services=by_services,
-        by_sections=by_sections
+        by_sections=by_sections,
+        by_severities=by_severities
     )
     
     return analytics

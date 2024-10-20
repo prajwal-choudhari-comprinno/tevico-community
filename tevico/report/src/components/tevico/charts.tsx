@@ -40,9 +40,10 @@ type PieChartConfig = {
 export type PieChartData = {
   data: PieChartDataPoint;
   config: PieChartConfig;
+  limit?: number
 };
 
-interface ChartProps {
+export interface ChartProps {
   type: "BAR" | "HORIZONTAL_BAR" | "PIE" | "PIE_WITH_STATS" | "DOUGHNUT",
   barChartData?: ChartData,
   horizontalBarChartData?: ChartData,
@@ -52,9 +53,13 @@ interface ChartProps {
   cardTitle: string;
   cardDescription?: string;
   cardType?: string;
+  cartFooter?: {
+    trend?: string;
+    description?: string;
+  }
 }
 
-const chartHeight: number = 250;
+const chartHeight: number = 300;
 const barChartWidth: number = 400;
 const pieChartWidth: number = 500;
 
@@ -269,6 +274,8 @@ export function Chart(props: ChartProps) {
 
   if (cardType === 'Error') {
     style.backgroundColor = 'rgba(255, 0, 0, 0.05)';
+  } else if (cardType === 'Success') {
+    style.backgroundColor = 'rgba(0, 255, 0, 0.05)';
   }
 
   return (
@@ -286,14 +293,24 @@ export function Chart(props: ChartProps) {
       <CardContent className="flex-1 flex justify-center items-center gap-2 text-sm">
         {renderChart}
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter>
+      {
+        props.cartFooter && (
+          <CardFooter className="flex-col items-start gap-2 text-sm">
+            {
+              props.cartFooter.trend && (
+                <div className="flex gap-2 font-medium leading-none">
+                  props.cartFooter.trend <TrendingUp className="h-4 w-4" />
+                </div>
+              )
+            }
+            {
+              props.cartFooter.description && (
+                <div className="leading-none text-muted-foreground">
+                  props.cartFooter.trend
+                </div>)
+            }
+          </CardFooter>)
+      }
     </Card>
   );
 

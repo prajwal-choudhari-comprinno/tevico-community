@@ -1,31 +1,27 @@
-interface CheckStatus {
+
+interface CheckStatusReport {
   total: number;
   passed: number;
   failed: number;
 }
 
-interface Severity {
+interface SeverityReport {
   critical: number;
   high: number;
   medium: number;
   low: number;
 }
 
-interface Service {
+export interface Report {
   name: string;
-  check_status: CheckStatus;
-  severity: Severity;
-}
-
-interface Section {
-  name: string;
-  check_status: CheckStatus;
-  severity: Severity;
+  check_status: CheckStatusReport;
+  severity: SeverityReport;
 }
 
 export interface AnalyticsReport {
-  check_status: CheckStatus;
-  severity: Severity;
-  by_services: Service[];
-  by_sections: Section[];
+  check_status: CheckStatusReport;
+  severity: SeverityReport;
+  by_services: Report[];
+  by_sections: Report[];
+  by_severities: Report[];
 }
