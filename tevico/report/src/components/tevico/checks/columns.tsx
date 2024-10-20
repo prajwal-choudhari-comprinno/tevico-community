@@ -1,39 +1,41 @@
 "use client"
-import { Task } from "./data/schema"
 import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import "@/styles/globals.css";
 
-import { labels, priorities, statuses } from "./data/data"
 import { DataTableColumnHeader } from "@/components/tevico/data-table/data-table-column-header";
-import { DataTableRowActions } from "@/components/tevico/data-table/data-table-row-actions";
+import { CheckReport } from "../types/checkTypes";
+import { providers, severity } from "./data/data";
 
-export const columns: ColumnDef<Task>[] = [
-  {
-    accessorKey: "id",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Task" />
-    ),
-    cell: ({ row }) => <div className="w-[80px]">{row.getValue("id")}</div>,
-    enableSorting: false,
-    enableHiding: false,
-  },
+export const columns: ColumnDef<CheckReport>[] = [
   {
     accessorKey: "title",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Title" />
     ),
     cell: ({ row }) => {
-      const label = labels.find((label) => label.value === row.original.label)
-
+      const title = row.original.check_metadata?.check_title || "N/A";
       return (
         <div className="flex space-x-2">
-          {label && <Badge variant="outline">{label.label}</Badge>}
-          <span className="max-w-[500px] truncate font-medium">
-            {row.getValue("title")}
-          </span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <span className="truncate max-w-[500px] font-medium cursor-pointer block overflow-hidden whitespace-nowrap"
+                >
+                  {title}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{title}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
         </div>
       )
     },
+    enableSorting: false,
   },
   {
     accessorKey: "status",
@@ -41,56 +43,67 @@ export const columns: ColumnDef<Task>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-      const status = statuses.find(
-        (status) => status.value === row.getValue("status")
-      )
-
-      if (!status) {
-        return null
-      }
+      const passed = row.original.passed;
+      const statusLabel = passed ? "Pass" : "Fail";
+      const badgeColor = passed ? "bg-green-500" : "bg-red-500"; // Adjust colors as needed
 
       return (
         <div className="flex w-[100px] items-center">
-          {status.icon && (
-            <status.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-          )}
-          <span>{status.label}</span>
+          {statusLabel}
         </div>
       )
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
+      console.log(value);
+
+      const passed = row.original.passed;
+      const status = passed ? "pass" : "fail";
+      return value.includes(status)
     },
+    enableSorting: false,
   },
   {
-    accessorKey: "priority",
+    accessorKey: "severity",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Priority" />
+      <DataTableColumnHeader column={column} title="Severity" />
     ),
     cell: ({ row }) => {
-      const priority = priorities.find(
-        (priority) => priority.value === row.getValue("priority")
-      )
-
-      if (!priority) {
-        return null
-      }
-
+      const rowData = row.original.check_metadata?.severity || "N/A";
+      const label = severity.find((d) => d.value === rowData)?.label
+      if (!label) { return null }
       return (
         <div className="flex items-center">
-          {priority.icon && (
-            <priority.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-          )}
-          <span>{priority.label}</span>
+          {label}
         </div>
       )
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
+      return value.includes(row.original.check_metadata?.severity)
     },
+    enableSorting: false,
   },
   {
-    id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    accessorKey: "provider",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Provider" />
+    ),
+    cell: ({ row }) => {
+      const rowData = row.original.check_metadata?.provider || "N/A";
+      const label = providers.find(
+        (d) => d.value === rowData
+      )?.label
+      if (!label) {
+        return null
+      }
+      return (
+        <div className="flex items-center">
+          <span>{label}</span>
+        </div>
+      )
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.original.check_metadata?.provider)
+    },
+    enableSorting: false,
   },
 ]
