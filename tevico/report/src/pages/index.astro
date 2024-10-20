@@ -2,7 +2,7 @@
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 
 import MainLayout from "@/components/MainLayout.astro";
-import { Chart, PieChartData, ChartProps } from "@/components/tevico/charts";
+import { Chart, ChartProps } from "@/components/tevico/charts";
 import { MetricCard } from "@/components/tevico/metric-card";
 import { StatsWithChart, StatsProps } from "@/components/tevico/statsWithChart";
 import { TableComponent } from "@/components/tevico/table";
@@ -105,20 +105,20 @@ const tableData = {
   ],
 };
 
-const columns = [
-  {
-    accessorKey: "status",
-    header: "Status",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "amount",
-    header: "Amount",
-  },
-];
+// const columns = [
+//   {
+//     accessorKey: "status",
+//     header: "Status",
+//   },
+//   {
+//     accessorKey: "email",
+//     header: "Email",
+//   },
+//   {
+//     accessorKey: "amount",
+//     header: "Amount",
+//   },
+// ];
 ---
 
 <MainLayout activePage={pages[pageNames.index]}>

@@ -136,7 +136,7 @@ const PieChartComponent = ({ chartData }: { chartData: PieChartData }) => {
           )
         }}
       >
-        {dataAsArray.map((entry, index) => (
+        {dataAsArray.map((_, index) => (
           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
         ))}
       </Pie>
@@ -207,7 +207,7 @@ const PieV2ChartComponent = ({ chartData }: { chartData: PieChartData }) => {
             }
           }}
         />
-        {dataAsArray.map((entry, index) => (
+        {dataAsArray.map((_, index) => (
           <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))` || `hsl(${index * 45}, 70%, 60%)`} />
         ))}
       </Pie>

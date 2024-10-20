@@ -1,5 +1,5 @@
 
-import { DollarSign, Info, Users } from 'lucide-react';
+// import { DollarSign, Info, Users } from 'lucide-react';
 
 import {
   Card,
@@ -8,9 +8,9 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card';
-import { Button } from '../ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+// import { HoverCard, HoverCardContent, HoverCardTrigger } from '../ui/hover-card';
+// import { Button } from '../ui/button';
+// import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 interface MetricCardProps {
   title: string;
@@ -26,9 +26,9 @@ export function MetricCard(props: MetricCardProps) {
           {props.title}
         </CardTitle>
         <div className='basis-auto'>
-          <HoverCard>
+          {/* <HoverCard>
             <HoverCardTrigger className='cursor-not-allowed'>
-              <Button variant="icon" size="sm">
+              <Button variant="" size="sm">
                 <Info className="h-4 w-4 text-muted-foreground" />
               </Button>
             </HoverCardTrigger>
@@ -52,7 +52,7 @@ export function MetricCard(props: MetricCardProps) {
                 </div>
               </div>
             </HoverCardContent>
-          </HoverCard>
+          </HoverCard> */}
         </div>
       </CardHeader>
       <CardContent>
