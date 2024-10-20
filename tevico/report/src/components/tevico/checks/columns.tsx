@@ -35,6 +35,10 @@ export const columns: ColumnDef<CheckReport>[] = [
       )
     },
     enableSorting: false,
+    filterFn: (row, id, value) => {
+      const title = row.original.check_metadata?.check_title || "";
+      return title.toLowerCase().includes(value.toLowerCase());
+    },
   },
   {
     accessorKey: "status",
