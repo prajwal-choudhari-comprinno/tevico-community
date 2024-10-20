@@ -64,9 +64,9 @@ export function TableComponent(props: TableProps) {
           <TableBody>
             {
               props.tableData.data.map((ele => (
-                <TableRow>
+                <TableRow key={(Math.random() + 1).toString(36).substring(5)}>
                   {props.tableData.headers.map((e => (
-                    <TableCell>
+                    <TableCell key={e.key}>
                       <div className="font-medium">{ele[e.key]}</div>
                     </TableCell>
                   )))}
