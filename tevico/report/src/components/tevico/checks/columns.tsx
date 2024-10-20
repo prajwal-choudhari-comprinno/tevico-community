@@ -25,7 +25,7 @@ export const columns: ColumnDef<CheckReport>[] = [
                   {title}
                 </span>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="max-w-[400px]">
                 <p>{title}</p>
               </TooltipContent>
             </Tooltip>
