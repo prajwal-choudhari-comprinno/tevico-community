@@ -1,156 +1,55 @@
-import {
-  ArrowDownIcon,
-  ArrowRightIcon,
-  ArrowUpIcon,
-  CheckCircledIcon,
-  CircleIcon,
-  CrossCircledIcon,
-  QuestionMarkCircledIcon,
-  StopwatchIcon,
-} from "@radix-ui/react-icons"
-
-export const data = [
+export const status = [
   {
-    id: "TASK-7839",
-    title: "We need to bypass the neural TCP card!",
-    status: "todo",
-    label: "bug",
-    priority: "high",
+    value: "pass",
+    label: "Pass",
   },
   {
-    id: "TASK-7839",
-    title: "We need to bypass the neural TCP card!",
-    status: "todo",
-    label: "bug",
-    priority: "high",
-  },
-  {
-    id: "TASK-7839",
-    title: "We need to bypass the neural TCP card!",
-    status: "todo",
-    label: "bug",
-    priority: "high",
-  },
-  {
-    id: "TASK-7839",
-    title: "We need to bypass the neural TCP card!",
-    status: "todo",
-    label: "bug",
-    priority: "high",
-  },
-  {
-    id: "TASK-7839",
-    title: "We need to bypass the neural TCP card!",
-    status: "todo",
-    label: "bug",
-    priority: "high",
-  },
-  {
-    id: "TASK-7839",
-    title: "We need to bypass the neural TCP card!",
-    status: "todo",
-    label: "bug",
-    priority: "high",
-  },
-  {
-    id: "TASK-7839",
-    title: "We need to bypass the neural TCP card!",
-    status: "todo",
-    label: "bug",
-    priority: "high",
-  },
-  {
-    id: "TASK-7839",
-    title: "We need to bypass the neural TCP card!",
-    status: "todo",
-    label: "bug",
-    priority: "high",
+    value: "fail",
+    label: "Fail",
   },
 ];
 
-export const labels = [
+export const severity = [
   {
-    value: "backlog",
-    label: "Backlog",
-    icon: QuestionMarkCircledIcon,
-  },
-  {
-    value: "todo",
-    label: "Todo",
-    icon: CircleIcon,
-  },
-  {
-    value: "in progress",
-    label: "In Progress",
-    icon: StopwatchIcon,
-  },
-  {
-    value: "done",
-    label: "Done",
-    icon: CheckCircledIcon,
-  },
-  {
-    value: "canceled",
-    label: "Canceled",
-    icon: CrossCircledIcon,
-  },
-];
-
-export const priorities = [
-  {
-    label: "Low",
     value: "low",
-    icon: ArrowDownIcon,
+    label: "Low",
   },
   {
-    label: "Medium",
     value: "medium",
-    icon: ArrowRightIcon,
+    label: "Medium",
   },
   {
-    label: "High",
     value: "high",
-    icon: ArrowUpIcon,
-  },
-]
-export const statuses = [
-  {
-    value: "backlog",
-    label: "Backlog",
-    icon: QuestionMarkCircledIcon,
+    label: "High",
   },
   {
-    value: "todo",
-    label: "Todo",
-    icon: CircleIcon,
+    value: "critical",
+    label: "Critical",
   },
+];
+
+export const providers = [
   {
-    value: "in progress",
-    label: "In Progress",
-    icon: StopwatchIcon,
-  },
-  {
-    value: "done",
-    label: "Done",
-    icon: CheckCircledIcon,
-  },
-  {
-    value: "canceled",
-    label: "Canceled",
-    icon: CrossCircledIcon,
-  },
-]
+    value: "aws",
+    label: "AWS",
+  }
+];
 
 export const filters = [
   {
     key: 'status',
     title: 'Status',
-    options: labels
+    options: status
   },
   {
-    key: 'priority',
-    title: 'Priority',
-    options: priorities
+    key: 'severity',
+    title: 'Severity',
+    options: severity
+  },
+  {
+    key: 'provider',
+    title: 'Provider',
+    options: providers
   }
 ];
 
