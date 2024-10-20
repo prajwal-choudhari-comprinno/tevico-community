@@ -1,3 +1,5 @@
+import React from "react";
+
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
@@ -80,7 +82,7 @@ export function StatsWithChart({ footerData, chartData, cardTitle, cardType }: S
         <div className="flex w-full items-center gap-2">
           <div className="flex w-full items-center gap-2">
             {footerData.map((item, index) => (
-              <>
+              <React.Fragment key={`fragment-${item.title}-${index}`}>
                 <div className="grid flex-1 auto-rows-min gap-0.5">
                   <div className="text-xs text-muted-foreground">{item.title}</div>
                   <div className="flex items-baseline gap-1 text-2xl font-bold tabular-nums leading-none">
@@ -93,7 +95,7 @@ export function StatsWithChart({ footerData, chartData, cardTitle, cardType }: S
                 {index !== footerData.length - 1 && (
                   <Separator orientation="vertical" className="mx-2 h-10 w-px" />
                 )}
-              </>
+              </React.Fragment>
             ))}
           </div>
         </div>

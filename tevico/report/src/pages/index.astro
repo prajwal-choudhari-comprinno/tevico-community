@@ -5,12 +5,16 @@ import MainLayout from "@/components/MainLayout.astro";
 import { Chart, ChartProps } from "@/components/tevico/charts";
 import { MetricCard } from "@/components/tevico/metric-card";
 import { StatsWithChart, StatsProps } from "@/components/tevico/statsWithChart";
-import { TableComponent } from "@/components/tevico/table";
+import { TableComponent, TableProps } from "@/components/tevico/table";
 import { pageNames, pages } from "@/lib/utils";
 import { AnalyticsReport } from "@/components/tevico/types/analyticsTypes";
 import { CheckReport, Severity } from "@/components/tevico/types/checkTypes";
 
-import { getProgressProps, getPieChartProps } from "@/lib/reportUtils";
+import {
+  getProgressProps,
+  getPieChartProps,
+  getTableProps,
+} from "@/lib/reportUtils";
 
 import CheckAnalytics from "@/data/check_analytics.json";
 import CheckReports from "@/data/check_reports.json";
@@ -78,47 +82,45 @@ const failedChecksBySection: ChartProps = getPieChartProps({
   isDonut: false,
 });
 
-// const passedChecksTableData = {
-//   headers: 
-// };
+const passedChecksTableData: TableProps = getTableProps({
+  reports: checkReport.filter(
+    (check) => check.check_metadata.severity === "critical",
+  ),
+  checkStatus: "passed",
+  columns: {
+    section: "Section",
+    "check_metadata.check_id": "Check ID",
+    "check_metadata.severity": "Severity",
+  },
+  title: "Critical Checks",
+  description: "That passed successfully",
+  cardType: "Success",
+  limit: 4,
+  actionButton: {
+    label: "View All",
+    goToLink: "/browse/index.html",
+  },
+});
 
-const tableData = {
-  headers: [
-    { key: "id", label: "ID" },
-    { key: "amount", label: "Amount" },
-    // { key: 'status', label: 'Status' },
-    // { key: 'email', label: 'Email' },
-  ],
-  data: [
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "489e1d42",
-      amount: 125,
-      status: "processing",
-      email: "example@gmail.com",
-    },
-  ],
-};
-
-// const columns = [
-//   {
-//     accessorKey: "status",
-//     header: "Status",
-//   },
-//   {
-//     accessorKey: "email",
-//     header: "Email",
-//   },
-//   {
-//     accessorKey: "amount",
-//     header: "Amount",
-//   },
-// ];
+const failedChecksTableData: TableProps = getTableProps({
+  reports: checkReport.filter(
+    (check) => check.check_metadata.severity === "critical",
+  ),
+  checkStatus: "failed",
+  columns: {
+    section: "Section",
+    "check_metadata.check_id": "Check ID",
+    "check_metadata.severity": "Severity",
+  },
+  title: "Critical Checks",
+  description: "That failed and needs immediate attention",
+  cardType: "Error",
+  limit: 4,
+  actionButton: {
+    label: "View All",
+    goToLink: "/browse/index.html",
+  },
+});
 ---
 
 <MainLayout activePage={pages[pageNames.index]}>
@@ -200,12 +202,7 @@ const tableData = {
     <StatsWithChart {...progressPropsForPassed} />
     <Chart {...passedChecksByService} />
     <Chart {...passedChecksBySection} />
-    <TableComponent
-      tableData={tableData}
-      tableHeading="Transaction"
-      tableDescription="Recent transactions from your store."
-      cardType="Success"
-    />
+    <TableComponent {...passedChecksTableData} />
   </div>
 
   <div class="inline-flex">
@@ -217,11 +214,6 @@ const tableData = {
     <StatsWithChart {...progressPropsForFailed} />
     <Chart {...failedChecksByService} />
     <Chart {...failedChecksBySection} />
-    <TableComponent
-      tableData={tableData}
-      tableHeading="Transaction"
-      tableDescription="Recent transactions from your store."
-      cardType="Error"
-    />
+    <TableComponent {...failedChecksTableData} />
   </div>
 </MainLayout>

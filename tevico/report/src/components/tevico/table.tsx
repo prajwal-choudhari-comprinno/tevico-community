@@ -14,17 +14,25 @@ type TableData = {
   data: any[]
 }
 
+export type ActionButton = {
+  label: string,
+  goToLink: string,
+}
+
 export interface TableProps {
   tableData: TableData;
   tableHeading: string;
   tableDescription?: string;
   cardType?: string;
+  actionButton?: ActionButton;
 }
 
 export function TableComponent(props: TableProps) {
   const { cardType } = props;
 
   const style: React.CSSProperties = {};
+
+  console.log(props.actionButton)
 
   if (cardType === 'Error') {
     style.backgroundColor = 'rgba(255, 0, 0, 0.05)';
@@ -45,12 +53,14 @@ export function TableComponent(props: TableProps) {
             )
           }
         </div>
-        <Button asChild size="sm" className="ml-auto gap-1">
-          <a href="#">
-            View All
-            <ArrowUpRight className="h-4 w-4" />
-          </a>
-        </Button>
+        {props.actionButton && (
+          <Button asChild size="sm" className="ml-auto gap-1">
+            <a href={props.actionButton.goToLink} target="_blank">
+              {props.actionButton.label}
+              <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         <Table>
@@ -64,9 +74,9 @@ export function TableComponent(props: TableProps) {
           <TableBody>
             {
               props.tableData.data.map((ele => (
-                <TableRow>
+                <TableRow key={(Math.random() + 1).toString(36).substring(5)}>
                   {props.tableData.headers.map((e => (
-                    <TableCell>
+                    <TableCell key={e.key}>
                       <div className="font-medium">{ele[e.key]}</div>
                     </TableCell>
                   )))}

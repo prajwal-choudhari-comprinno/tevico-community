@@ -1,7 +1,12 @@
+// import lodash
+import _ from "lodash";
+import { flatten } from 'flat';
+
 import { ChartProps } from "@/components/tevico/charts";
 import { StatsProps } from "@/components/tevico/statsWithChart";
-// import { TableProps } from "@/components/tevico/table";
+import { ActionButton, TableProps } from "@/components/tevico/table";
 import { Report } from "@/components/tevico/types/analyticsTypes";
+import { CheckReport } from "@/components/tevico/types/checkTypes";
 
 interface ChartParams {
   reports: Report[];
@@ -57,7 +62,7 @@ export function getPieChartProps({
     data: reports
       .sort((a, b) => b.check_status[checkStatus] - a.check_status[checkStatus])
       .slice(0, 5)
-      .reduce((acc: {[key:string]: number}, service: Report) => {
+      .reduce((acc: { [key: string]: number }, service: Report) => {
         if (!acc[service.name]) {
           acc[service.name] = 0;
         }
@@ -86,17 +91,59 @@ export function getPieChartProps({
   return props;
 }
 
-// interface TableParams {
-//   reports: CheckReport[];
-//   checkStatus: 'failed' | 'passed';
-// }
+interface TableParams {
+  reports: CheckReport[];
+  checkStatus: 'failed' | 'passed';
+  cardType: 'Error' | 'Success';
+  columns: { [key: string]: string };
+  title: string;
+  description: string;
+  limit?: number;
+  actionButton: ActionButton;
+}
 
-// export function getTableProps({
-//   reports,
-//   checkStatus,
-// }: TableParams): TableProps {
-//   return {
-//     tableData: reports.filter((report) => report.check_status[checkStatus] > 0),
-//   };
-// }
+export function getTableProps({
+  reports,
+  checkStatus,
+  columns,
+  cardType,
+  title,
+  description,
+  limit,
+  actionButton,
+}: TableParams): TableProps {
+  reports = reports.filter((report) => checkStatus === "failed" ? !report.passed : report.passed);
+
+  if (limit) {
+    reports = reports.slice(0, limit);
+  }
+
+  console.log(reports);
+
+  const headers = Object.keys(columns).map((key) => {
+    return {
+      key: key,
+      label: columns[key],
+    };
+  });
+
+  console.log(headers)
+
+  const data = reports.map((report) => {
+    return flatten(_.pick(report, Object.keys(columns)));
+  });
+
+  console.log(data);
+
+  return {
+    tableData: {
+      headers,
+      data,
+    },
+    actionButton: actionButton,
+    tableHeading: title,
+    tableDescription: description,
+    cardType: cardType,
+  };
+}
 
