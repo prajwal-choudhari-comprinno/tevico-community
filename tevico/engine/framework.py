@@ -1,9 +1,8 @@
-
 import json
 import os
 import subprocess
 import traceback
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from jinja2 import Environment, FileSystemLoader
 from tevico.engine.configs.config import CreateParams
@@ -75,7 +74,7 @@ class TevicoFramework():
         return providers
     
     
-    def __create_check(self, provider: str, name: str, config: Dict[str, str] | None) -> None:
+    def __create_check(self, provider: str, name: str, config: Union[Dict[str, str], None]) -> None:
         """
         Creates a new check for the specified provider.
         Args:
@@ -127,7 +126,7 @@ class TevicoFramework():
         print(f'\n✅ Check created successfully: {check_file_path}')
         
 
-    def __create_framework(self, provider: str, name: str, config: Dict[str, str] | None) -> None:
+    def __create_framework(self, provider: str, name: str, config: Union[Dict[str, str], None]) -> None:
         """
         Creates a new framework for the specified provider.
         Args:
@@ -156,7 +155,7 @@ class TevicoFramework():
         print(f'\n✅ Framework created successfully: {framework_file_path}')
 
 
-    def __create_profile(self, provider: str, name: str, config: Dict[str, str] | None) -> None:
+    def __create_profile(self, provider: str, name: str, config: Union[Dict[str, str], None]) -> None:
         """
         Creates a new profile for the specified provider.
         Args:
