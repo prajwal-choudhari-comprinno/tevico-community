@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import Future, ThreadPoolExecutor
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import yaml
 
@@ -106,7 +106,7 @@ class Provider(ABC):
             
         return check_reports
     
-    def __load_profile(self, profile_name: str) -> ProfileModel | None:
+    def __load_profile(self, profile_name: str) -> Optional[ProfileModel]:
         profile_metadata_path = f'{self.provider_path}/profiles/{profile_name}.yaml'
         
         if not os.path.exists(profile_metadata_path):
@@ -167,7 +167,7 @@ class Provider(ABC):
         return FrameworkSection(**raw_section_data)
 
 
-    def __load_framework(self, raw_framework_data: Dict[str, Any]) -> FrameworkModel | None:
+    def __load_framework(self, raw_framework_data: Dict[str, Any]) -> Optional[FrameworkModel]:
         
         if 'sections' not in raw_framework_data or not isinstance(raw_framework_data['sections'], list):
             return None
@@ -211,5 +211,3 @@ class Provider(ABC):
                 frameworks.append(framework_metadata)
 
         return frameworks
-    
-    
