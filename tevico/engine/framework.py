@@ -288,7 +288,7 @@ class TevicoFramework():
         print(f'✅ Passed  : {analytics_report.check_status.passed}')
         print(f'❌ Failed   : {analytics_report.check_status.failed}')
         
-        print(f'{'\n'}🛠️  Building zipped package')
+        print('\n🛠️  Building zipped package')
         
         self.__build_report()
         
