@@ -38,7 +38,7 @@ function initializeListJS() {
         listClass: 'table-tbody',
         searchClass: 'table-search',
         valueNames: ['sort-check_metadata.check_title', 'sort-check_metadata.severity', 'check_metadata.service_name', 'sort-section'],
-        page: 5,
+        page: 15,
         pagination: true
     };
 
