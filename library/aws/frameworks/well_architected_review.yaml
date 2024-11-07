@@ -131,6 +131,7 @@ sections:
      - ec2_network_acl_allow_ingress_any_port
      - ec2_network_acl_allow_ingress_tcp_port_22
      - ec2_security_group_default_restrict_traffic
+     - dynamodb_tables_kms_cmk_encryption_enabled
      - iam_account_maintain_current_contact_details
      - iam_account_security_contact_information_registered
      - iam_attached_policy_admin_privileges_found
