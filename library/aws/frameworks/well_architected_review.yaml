@@ -131,6 +131,7 @@ sections:
      - ec2_network_acl_allow_ingress_any_port
      - ec2_network_acl_allow_ingress_tcp_port_22
      - ec2_security_group_default_restrict_traffic
+     - ecr_image_private_image_scanning_enabled
      - ecr_repository_scan_images_on_push_enabled
      - dynamodb_tables_kms_cmk_encryption_enabled
      - iam_account_maintain_current_contact_details
