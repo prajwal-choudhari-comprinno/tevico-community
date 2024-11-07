@@ -4,7 +4,7 @@ CheckTitle: Check if ECR image scan on push is enabled
 CheckType: [Infrastructure Protection]
 ServiceName: ecr
 SubServiceName: 
-ResourceIdTemplate: arn:partition:cloudformation:region:account-id:stack/resource-id
+ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 Severity: medium
 ResourceType: AwsEcrRepository
 Description: Check if ECR image scan on push is enabled

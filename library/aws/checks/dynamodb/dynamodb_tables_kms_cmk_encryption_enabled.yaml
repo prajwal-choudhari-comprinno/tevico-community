@@ -4,7 +4,7 @@ CheckTitle: Check if DynamoDB table has encryption at rest enabled using CMK KMS
 CheckType: [Infrastructure Protection]
 ServiceName: dynamodb
 SubServiceName: 
-ResourceIdTemplate: arn:partition:cloudformation:region:account-id:stack/resource-id
+ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 Severity: medium
 ResourceType: AwsDynamoDbTable
 Description: Check if DynamoDB table has encryption at rest enabled using CMK KMS
