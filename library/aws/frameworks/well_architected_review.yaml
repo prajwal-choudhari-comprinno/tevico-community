@@ -133,6 +133,7 @@ sections:
      - ec2_security_group_default_restrict_traffic
      - ecr_image_private_image_scanning_enabled
      - ecr_repository_scan_images_on_push_enabled
+     - ecr_repository_scan_vulnerabilities_in_latest_image
      - dynamodb_tables_kms_cmk_encryption_enabled
      - iam_account_maintain_current_contact_details
      - iam_account_security_contact_information_registered
