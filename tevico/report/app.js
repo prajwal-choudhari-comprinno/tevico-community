@@ -133,8 +133,8 @@ function updateUI(reportsData, analyticsData) {
             console.warn(`Element with ID "${id}" not found`);
         }
 
-        createDynamicTable({ reportsData, passed: false, limit: 5, containerId: 'passedChecksTableContainer' })
-        createDynamicTable({ reportsData, passed: true, limit: 5, containerId: 'failedChecksTableContainer' })
+        createDynamicTable({ reportsData, passed: true, limit: 5, containerId: 'passedChecksTableContainer' })
+        createDynamicTable({ reportsData, passed: false, limit: 5, containerId: 'failedChecksTableContainer' })
 
     } catch (error) {
         console.error('Error updating UI:', error);
