@@ -3,7 +3,7 @@ CheckID: ecr_repository_scan_images_on_push_enabled
 CheckTitle: Check if ECR image scan on push is enabled
 CheckType: [Infrastructure Protection]
 ServiceName: ecr
-SubServiceName: 
+SubServiceName: ""
 ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 Severity: medium
 ResourceType: AwsEcrRepository
@@ -13,9 +13,9 @@ RelatedUrl: https://tevi.co
 Remediation:
   Code:
     CLI: aws ecr create-repository --repository-name <repo_name> --image-scanning-configuration scanOnPush=true--region <region_name>
-    NativeIaC: 
-    Other: 
-    Terraform: 
+    NativeIaC: ""
+    Other: ""
+    Terraform: ""
   Recommendation:
     Text: Enable ECR image scanning and review the scan findings for information about the security of the container images that are being deployed.
     Url: https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html
