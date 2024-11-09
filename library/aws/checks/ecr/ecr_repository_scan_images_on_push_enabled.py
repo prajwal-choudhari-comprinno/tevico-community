@@ -23,12 +23,8 @@ class ecr_repository_scan_images_on_push_enabled(Check):
             for repo in repositories:
                 repo_name = repo['repositoryName']
                 
-                # Describe repository to get scan configuration
-                repo_desc = client.describe_repository(
-                    repositoryName=repo_name
-                )['repository']
-                
-                scan_on_push = repo_desc.get('imageScanningConfiguration', {}).get('scanOnPush', False)
+                # Get scan-on-push configuration directly from repository description
+                scan_on_push = repo.get('imageScanningConfiguration', {}).get('scanOnPush', False)
                 
                 if scan_on_push:
                     # If scan-on-push is enabled, mark it as passed

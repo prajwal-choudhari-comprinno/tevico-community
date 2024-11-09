@@ -19,8 +19,8 @@ class ecr_repository_scan_vulnerabilities_in_latest_image(Check):
         for page in paginator.paginate():
             repositories = page['repositories']
             for repo in repositories:
-                repo_name = repo['repositoryName']
-                # Get the latest image details for the repository
+                repo_name = repo['repositoryName']               
+                # List images in the repository
                 images = client.list_images(
                     repositoryName=repo_name,
                     filter={'tagStatus': 'TAGGED'}
@@ -30,15 +30,29 @@ class ecr_repository_scan_vulnerabilities_in_latest_image(Check):
                     # No images to scan
                     report.resource_ids_status[repo_name] = True
                     continue
-                # Get the latest image by the most recent push
-                latest_image = sorted(images, key=lambda x: x['imagePushedAt'], reverse=True)[0]
+                
+                # Fetch details for each image to get metadata like imagePushedAt
+                image_details = client.describe_images(
+                    repositoryName=repo_name,
+                    imageIds=images
+                )['imageDetails']
+                
+                if not image_details:
+                    # No image details available
+                    report.resource_ids_status[repo_name] = True
+                    continue
+                
+                # Get the latest image based on push time
+                latest_image = sorted(image_details, key=lambda x: x['imagePushedAt'], reverse=True)[0]
+                
                 # Check scan findings for the latest image
                 scan_result = client.describe_image_scan_findings(
                     repositoryName=repo_name,
-                    imageId=latest_image
+                    imageId={'imageDigest': latest_image['imageDigest']}
                 )
+                
                 # Determine if vulnerabilities are found
-                findings_summary = scan_result['imageScanFindingsSummary']
+                findings_summary = scan_result.get('imageScanFindingsSummary', {})
                 vulnerabilities_found = findings_summary.get('findingSeverityCounts', {})
 
                 if vulnerabilities_found:
@@ -50,3 +64,4 @@ class ecr_repository_scan_vulnerabilities_in_latest_image(Check):
                     report.resource_ids_status[repo_name] = True
 
         return report
+
