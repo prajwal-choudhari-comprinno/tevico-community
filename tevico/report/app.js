@@ -1,25 +1,26 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const fetchReports = fetch('./data/check_reports.json').then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok for check_reports.json');
-        }
-        return response.json();
-    });
+    updateUI(check_reports, check_analytics);
+    // const fetchReports = fetch('./data/check_reports.json').then(response => {
+    //     if (!response.ok) {
+    //         throw new Error('Network response was not ok for check_reports.json');
+    //     }
+    //     return response.json();
+    // });
 
-    const fetchAnalytics = fetch('./data/check_analytics.json').then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok for check_analytics.json');
-        }
-        return response.json();
-    });
+    // const fetchAnalytics = fetch('./data/check_analytics.json').then(response => {
+    //     if (!response.ok) {
+    //         throw new Error('Network response was not ok for check_analytics.json');
+    //     }
+    //     return response.json();
+    // });
 
-    Promise.all([fetchReports, fetchAnalytics])
-        .then(([reportsData, analyticsData]) => {
-            updateUI(reportsData, analyticsData);
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
+    // Promise.all([fetchReports, fetchAnalytics])
+    //     .then(([reportsData, analyticsData]) => {
+    //         updateUI(reportsData, analyticsData);
+    //     })
+    //     .catch(error => {
+    //         console.error('There was a problem with the fetch operation:', error);
+    //     });
 });
 
 function updateUI(reportsData, analyticsData) {

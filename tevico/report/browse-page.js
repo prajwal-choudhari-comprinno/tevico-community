@@ -76,20 +76,21 @@ function handlePaginationClick(e) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    fetch('./data/check_reports.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(reportsData => {
-            createDynamicTable({ reportsData });
-            // initializeListJS();
-        })
-        .catch(error => {
-            console.error('Error loading JSON:', error);
-        });
+    createDynamicTable({ reportsData: check_reports });
+    // fetch('./data/check_reports.json')
+    //     .then(response => {
+    //         if (!response.ok) {
+    //             throw new Error('Network response was not ok');
+    //         }
+    //         return response.json();
+    //     })
+    //     .then(reportsData => {
+    //         createDynamicTable({ reportsData });
+    //         // initializeListJS();
+    //     })
+    //     .catch(error => {
+    //         console.error('Error loading JSON:', error);
+    //     });
 });
 
 function createDynamicTable({ reportsData }) {
