@@ -23,4 +23,3 @@ pnpm-debug.log*
 .idea/
 
 output.json
-check_*.json

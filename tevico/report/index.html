@@ -304,7 +304,7 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Total Checks</h3>
-                  <div class="h1 mb-0 me-2">43</div>
+                  <div class="h1 mb-0 me-2" id="total_checks"></div>
                   <div class="text-secondary">Successfully Executed</div>
                 </div>
               </div>
@@ -313,8 +313,8 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Passed</h3>
-                  <div class="h1 mb-0 me-2">20</div>
-                  <div class="text-secondary">out of 43 i.e. 46.51% checks passed</div>
+                  <div class="h1 mb-0 me-2" id="passed_checks"></div>
+                  <div class="text-secondary" id="passed"></div>
                 </div>
               </div>
             </div>
@@ -322,8 +322,8 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Failed</h3>
-                  <div class="h1 mb-0 me-2">23</div>
-                  <div class="text-secondary">out of 43 i.e. 53.49% checks failed</div>
+                  <div class="h1 mb-0 me-2" id="failed_checks"></div>
+                  <div class="text-secondary" id="failed"></div>
                 </div>
               </div>
             </div>
@@ -331,7 +331,7 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Severity Score</h3>
-                  <div class="h1 mb-0 me-2">66.28%</div>
+                  <div class="h1 mb-0 me-2" id="severity_score"></div>
                   <div class="text-secondary">Lower the better!</div>
                 </div>
               </div>
@@ -340,8 +340,8 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Critical Checks Failed</h3>
-                  <div class="h1 mb-0 me-2">8</div>
-                  <div class="text-secondary">out of 23 total failed i.e. 34.78%</div>
+                  <div class="h1 mb-0 me-2" id="critical_checks_failing"></div>
+                  <div class="text-secondary" id="critical_checks_failing_subheading"></div>
                 </div>
               </div>
             </div>
@@ -349,8 +349,8 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Major Impact On</h3>
-                  <div class="h1 mb-0 me-2">IAM</div>
-                  <div class="text-secondary">with 11 failed checks</div>
+                  <div class="h1 mb-0 me-2" id="impacted_service_name"></div>
+                  <div class="text-secondary" id="impacted_service_count"></div>
                 </div>
               </div>
             </div>
@@ -358,8 +358,8 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Area of Focus</h3>
-                  <div class="h1 mb-0 me-2">Infra Security</div>
-                  <div class="text-secondary">with 18 failed checks</div>
+                  <div class="h1 mb-0 me-2" id="area_of_focus"></div>
+                  <div class="text-secondary" id="area_of_focus_count"></div>
                 </div>
               </div>
             </div>
@@ -421,50 +421,11 @@
               <div class="col-lg-6">
                 <div class="card">
                   <div class="card-body">
-                    <h3 class="card-title">Critical Checks</h3>
-                    <div class="table-responsive">
-                      <table class="table table-vcenter">
-                        <thead class="sticky-top">
-                          <tr>
-                            <th>Check</th>
-                            <th>Severity</th>
-                            <th>Service</th>
-                            <th>Section</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>Check 1</td>
-                            <td>High</td>
-                            <td>Service 1</td>
-                            <td>Section 1</td>
-                          </tr>
-                          <tr>
-                            <td>Check 2</td>
-                            <td>High</td>
-                            <td>Service 2</td>
-                            <td>Section 2</td>
-                          </tr>
-                          <tr>
-                            <td>Check 3</td>
-                            <td>High</td>
-                            <td>Service 3</td>
-                            <td>Section 3</td>
-                          </tr>
-                          <tr>
-                            <td>Check 4</td>
-                            <td>High</td>
-                            <td>Service 4</td>
-                            <td>Section 4</td>
-                          </tr>
-                          <tr>
-                            <td>Check 5</td>
-                            <td>High</td>
-                            <td>Service 5</td>
-                            <td>Section 5</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                    <div class="d-flex justify-content-between">
+                      <h3 class="card-title">Critical Checks</h3>
+                      <a href="browse.html" class="btn btn-primary btn-sm">View All</a>
+                    </div>
+                    <div class="table-responsive" id="failedChecksTableContainer" style="min-height: 257px; max-height: 257px; overflow: scroll;">
                     </div>
                   </div>
                 </div>
@@ -476,7 +437,8 @@
               <div class="col">
                 <h2 class="page-title">
                   Checks That Passed
-                  <svg xmlns="http://www.w3.org/2000/svg" style="margin-left: 10px;" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
+                  <svg xmlns="http://www.w3.org/2000/svg" style="margin-left: 10px;" width="24" height="24"
+                    viewBox="0 0 24 24" fill="currentColor"
                     class="icon icon-tabler icons-tabler-filled icon-tabler-shield-check">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path
@@ -515,50 +477,11 @@
               <div class="col-lg-6">
                 <div class="card">
                   <div class="card-body">
-                    <h3 class="card-title">Critical Checks</h3>
-                    <div class="table-responsive">
-                      <table class="table table-vcenter">
-                        <thead class="sticky-top">
-                          <tr>
-                            <th>Check</th>
-                            <th>Severity</th>
-                            <th>Service</th>
-                            <th>Section</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>Check 1</td>
-                            <td>High</td>
-                            <td>Service 1</td>
-                            <td>Section 1</td>
-                          </tr>
-                          <tr>
-                            <td>Check 2</td>
-                            <td>High</td>
-                            <td>Service 2</td>
-                            <td>Section 2</td>
-                          </tr>
-                          <tr>
-                            <td>Check 3</td>
-                            <td>High</td>
-                            <td>Service 3</td>
-                            <td>Section 3</td>
-                          </tr>
-                          <tr>
-                            <td>Check 4</td>
-                            <td>High</td>
-                            <td>Service 4</td>
-                            <td>Section 4</td>
-                          </tr>
-                          <tr>
-                            <td>Check 5</td>
-                            <td>High</td>
-                            <td>Service 5</td>
-                            <td>Section 5</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                    <div class="d-flex justify-content-between">
+                      <h3 class="card-title">Critical Checks</h3>
+                      <a href="browse.html" class="btn btn-primary btn-sm">View All</a>
+                    </div>
+                    <div class="table-responsive" id="passedChecksTableContainer" style="min-height: 257px; max-height: 257px; overflow: scroll;">
                     </div>
                   </div>
                 </div>
@@ -620,6 +543,9 @@
   <!-- <script src="./lib/js/demo.min.js?1692870487" defer></script> -->
 
   <script src="./lib/tevico/js/summary-charts.js"></script>
+
+  <script src="./app.js"></script>
+
 </body>
 
 </html>
