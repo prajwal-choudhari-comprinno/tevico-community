@@ -6,7 +6,7 @@ ServiceName: elb
 SubServiceName: ""
 ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 Severity: medium
-ResourceType: AwsElb
+ResourceType: AwsElbLoadBalancer
 Description: Ensure access logging is enabled for Classic Elastic Load Balancers (ELB) to monitor and analyze traffic.
 Risk: Without access logging, visibility into request patterns and troubleshooting may be limited, impacting security and operational analysis.
 RelatedUrl: ""
