@@ -136,6 +136,7 @@ sections:
      - ecr_repository_scan_vulnerabilities_in_latest_image
      - efs_encryption_at_rest_enabled
      - eks_cluster_kms_cmk_encryption_in_secrets_enabled
+     - eks_cluster_logging_enabled
      - dynamodb_tables_kms_cmk_encryption_enabled
      - iam_account_maintain_current_contact_details
      - iam_account_security_contact_information_registered
