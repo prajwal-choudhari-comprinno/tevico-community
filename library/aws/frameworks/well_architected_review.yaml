@@ -137,6 +137,7 @@ sections:
      - efs_encryption_at_rest_enabled
      - eks_cluster_kms_cmk_encryption_in_secrets_enabled
      - eks_cluster_logging_enabled
+     - eks_control_plane_endpoint_access_restricted
      - dynamodb_tables_kms_cmk_encryption_enabled
      - iam_account_maintain_current_contact_details
      - iam_account_security_contact_information_registered
