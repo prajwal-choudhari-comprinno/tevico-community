@@ -139,6 +139,7 @@ sections:
      - eks_cluster_logging_enabled
      - eks_control_plane_endpoint_access_restricted
      - elb_ssl_listeners_enabled
+     - elb_v2_logging_enabled
      - dynamodb_tables_kms_cmk_encryption_enabled
      - iam_account_maintain_current_contact_details
      - iam_account_security_contact_information_registered
