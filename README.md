@@ -1,4 +1,4 @@
-# Tevico
+# Tevico Overview
 
 Tevico is an extensible open-source, Python-based auditing framework that empowers users to comprehensively check their infrastructure and apps for compliance adherence, security vulnerabilities, and custom operational checks.
 
@@ -13,7 +13,19 @@ Tevico is an extensible open-source, Python-based auditing framework that empowe
 
 ## Getting Started
 
-TODO: Add stuff here.
+To run the project simply copy the following lines of code and run it on your CloudShell.
+
+```bash
+cd /tmp
+rm -rf tevico-community
+git clone https://github.com/comprinnotech/tevico-community.git
+cd tevico-community
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install poetry
+poetry install
+./main run
+```
 
 ## CLI Examples
 
@@ -22,13 +34,21 @@ Following CLI params will help you to get an idea about the project and its capa
 ### `run`: Run the project with given configuration
 
 ```bash
-tevico run
+# To simply run the project with default config
+./main run
+
+# Adding provider and thread config if required
+./main run --aws_config=profile:comprinno --thread_workers=20
 ```
 
 ### `create`: Create project entities with given configuration
 
 ```bash
-tevico create <ENTITY> <NAME>
+# Structure around create command.
+./main create <ENTITY> <NAME>
+
+# Eg:
+./main create check network_acl_allow_ingress_any_port --options=service:ec2,some:other_config --provider=aws
 ```
 
 ## Community Code of Conduct
