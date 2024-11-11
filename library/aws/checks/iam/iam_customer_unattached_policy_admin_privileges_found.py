@@ -42,6 +42,9 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
 
                 # Check if the policy grants full administrative privileges
                 if 'Statement' in policy_document:
+                    if type(policy_document['Statement']) == dict:
+                        policy_document['Statement'] = [policy_document['Statement']]
+                    
                     for statement in policy_document['Statement']:
                         if statement.get('Effect') == 'Allow':
                             actions = statement.get('Action', [])

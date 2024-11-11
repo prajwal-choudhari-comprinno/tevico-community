@@ -1,9 +1,8 @@
-
-from functools import reduce
 import json
 import os
 import subprocess
-from typing import Dict, List
+import traceback
+from typing import Dict, List, Union
 
 from jinja2 import Environment, FileSystemLoader
 from tevico.engine.configs.config import CreateParams
@@ -13,6 +12,8 @@ from tevico.engine.entities.provider.provider import Provider
 from tevico.engine.entities.provider.provider_model import ProviderMetadata
 from tevico.engine.entities.report.check_model import CheckReport
 from datetime import datetime
+
+from tevico.engine.entities.report.utils import generate_analytics
 
 class TevicoFramework():
     
@@ -73,7 +74,7 @@ class TevicoFramework():
         return providers
     
     
-    def __create_check(self, provider: str, name: str, config: Dict[str, str] | None) -> None:
+    def __create_check(self, provider: str, name: str, config: Union[Dict[str, str], None]) -> None:
         """
         Creates a new check for the specified provider.
         Args:
@@ -125,7 +126,7 @@ class TevicoFramework():
         print(f'\n✅ Check created successfully: {check_file_path}')
         
 
-    def __create_framework(self, provider: str, name: str, config: Dict[str, str] | None) -> None:
+    def __create_framework(self, provider: str, name: str, config: Union[Dict[str, str], None]) -> None:
         """
         Creates a new framework for the specified provider.
         Args:
@@ -154,7 +155,7 @@ class TevicoFramework():
         print(f'\n✅ Framework created successfully: {framework_file_path}')
 
 
-    def __create_profile(self, provider: str, name: str, config: Dict[str, str] | None) -> None:
+    def __create_profile(self, provider: str, name: str, config: Union[Dict[str, str], None]) -> None:
         """
         Creates a new profile for the specified provider.
         Args:
@@ -222,20 +223,20 @@ class TevicoFramework():
         if os.path.exists(dist_path):
             subprocess.run(['rm', '-rf', dist_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
-        report_process = subprocess.Popen(['npm', 'run', 'build'], cwd=build_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # report_process = subprocess.Popen(['npm', 'run', 'build'], cwd=build_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
-        _, stderr = report_process.communicate()
+        # _, stderr = report_process.communicate()
         
-        if report_process.returncode != 0:
-            print(f'\n❌ Error building report: {stderr}')
-            os._exit(1)
+        # if report_process.returncode != 0:
+            # print(f'\n❌ Error building report: {stderr}')
+            # os._exit(1)
 
         current_dir = os.getcwd()
 
         try:
-            os.chdir('./tevico/report/dist')
+            os.chdir('./tevico/report')
             
-            subprocess.run(['zip', '-r', '../../../report.zip', '.'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            subprocess.run(['zip', '-r', '../../report.zip', '.'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         finally:
             os.chdir(current_dir)
         
@@ -258,7 +259,8 @@ class TevicoFramework():
         providers = self.__get_providers()
         checks: List[CheckReport] = []
         
-        OUTPUT_PATH = './tevico/report/public/output.json'
+        # CHECK_REPORTS_PATH = './tevico/report/data/check_reports.json'
+        # CHECK_ANALYTICS_PATH = './tevico/report/data/check_analytics.json'
         
         for p in providers:
             try:
@@ -268,29 +270,35 @@ class TevicoFramework():
                 checks.extend(result)
             except Exception as e:
                 print(f'\n❌ Error: {e}')
+                print(traceback.format_exc())
                 os._exit(1)
         
         data = [s.model_dump(mode='json') for s in checks]
         
-        with open(OUTPUT_PATH, 'w') as file:
-            json.dump(data, file, indent=2)
-
-        def accumulator(acc, check):
-            acc['total'] += 1
-            if check.passed:
-                acc['success'] += 1
-            else:
-                acc['failed'] += 1
-            return acc
+        j2_env = Environment(loader=FileSystemLoader('./tevico/templates'), trim_blocks=True)
         
-        acc = reduce(accumulator, checks, { 'total': 0, 'success': 0, 'failed': 0 })
+        check_data_template = j2_env.get_template('check_data.jinja2')
+        
+        data_file_path = f'./tevico/report/data/check_report.js'
+        
+        analytics_report = generate_analytics(checks)
+        
+        with open(data_file_path, 'w') as file:
+            file.write(check_data_template.render(
+                check_reports=data,
+                check_analytics=analytics_report.model_dump()
+            ))
+    
+        
+        # with open(CHECK_ANALYTICS_PATH, 'w') as file:
+        #     json.dump(analytics_report.model_dump(), file, indent=2)
         
         print('\nReport Overview:')
-        print(f'#️⃣  Total    : {acc['total']}')
-        print(f'✅ Success  : {acc['success']}')
-        print(f'❌ Failed   : {acc['failed']}')
+        print(f'#️⃣ Total    : {analytics_report.check_status.total}')
+        print(f'✅ Passed  : {analytics_report.check_status.passed}')
+        print(f'❌ Failed   : {analytics_report.check_status.failed}')
         
-        print(f'{'\n'}🛠️  Building zipped package')
+        print('\n🛠️  Building zipped package')
         
         self.__build_report()
         

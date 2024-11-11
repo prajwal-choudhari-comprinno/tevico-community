@@ -1,22 +1,22 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import Future, ThreadPoolExecutor
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import yaml
 
-from tevico.engine.configs.config import ConfigUtils
+from tevico.engine.configs.config import ConfigUtils, TevicoConfig
 from tevico.engine.core.utils import CoreUtils
 from tevico.engine.entities.framework.framework_model import FrameworkModel, FrameworkSection
 from tevico.engine.entities.profile.profile_model import ProfileModel
-from tevico.engine.entities.report.check_model import CheckMetadata, CheckReport
+from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
 class Provider(ABC):
     
     provider_path: str
     utils: CoreUtils = CoreUtils()
-    config_utils: ConfigUtils = ConfigUtils()
+    config: TevicoConfig = ConfigUtils().get_config()
     
     def __init__(self, path) -> None:
         self.provider_path = path
@@ -59,9 +59,9 @@ class Provider(ABC):
     def connect(self) -> Any:
         raise NotImplementedError()
     
-    def handle_check_execution(self, check: Check, profile_name: str) -> CheckReport:
-        res = check.get_report(profile_name=profile_name, connection=self.connection)
-        
+    def handle_check_execution(self, check: Check, section: str, framework: str) -> CheckReport:
+        res = check.get_report(framework=framework, section=section, connection=self.connection)
+
         if res is not None and res.passed:
             print(f'\t\t* Check Passed ✅: {res.name}')
         else:
@@ -72,7 +72,6 @@ class Provider(ABC):
     def execute_checks_in_section(
         self,
         section: FrameworkSection,
-        profile_name: str,
         thread_pool: ThreadPoolExecutor,
         framework: FrameworkModel
     ) -> List[Future[CheckReport]]:
@@ -81,17 +80,17 @@ class Provider(ABC):
         
         if section.checks is not None:
             for check in section.checks:
-                res = thread_pool.submit(self.handle_check_execution, check, framework.name)
+                res = thread_pool.submit(self.handle_check_execution, check, section.name, framework.name)
                 result.append(res)
         
         if section.sections is not None:
             for sub_section in section.sections:
-                result.extend(self.execute_checks_in_section(sub_section, profile_name, thread_pool, framework))
+                result.extend(self.execute_checks_in_section(sub_section, thread_pool, framework))
         
         return result
 
     def start_execution(self) -> List[CheckReport]:
-        thread_pool = ThreadPoolExecutor(max_workers=5)
+        thread_pool = ThreadPoolExecutor(max_workers=self.config.thread_workers)
         check_reports: List[CheckReport] = []
         futures: List[Future[CheckReport]] = []
 
@@ -100,53 +99,14 @@ class Provider(ABC):
             
             if framework.sections is not None:
                 for section in framework.sections:
-                    res = self.execute_checks_in_section(section, "test", thread_pool, framework)
+                    res = self.execute_checks_in_section(section, thread_pool, framework)
                     futures.extend(res)
             
             check_reports = [f.result() for f in futures]
             
         return check_reports
-
-    def __get_metadata_path(self, check_name) -> str | None:
-        file_name = f'{check_name}.yaml'
-        
-        for root, _, files in os.walk(self.provider_path):
-            if file_name in files:
-                return os.path.join(root, file_name)
-
-        return None
     
-    def __get_check_path(self, check_name) -> str | None:
-        file_name = f'{check_name}.py'
-        
-        for root, _, files in os.walk(self.provider_path):
-            if file_name in files:
-                return os.path.join(root, file_name)
-        
-        return None
-    
-    def __load_check(self, check_name: str) -> Check | None:
-        metadata_path = self.__get_metadata_path(check_name=check_name)
-        check_path = self.__get_check_path(check_name=check_name)
-        
-        metadata = None
-        
-        if metadata_path is not None:
-            with open(metadata_path, 'r') as f:
-                m = yaml.safe_load(f)
-                metadata = CheckMetadata(**m)
-                
-        # print(f'Metadata = {metadata}')
-        
-        if check_path is not None:
-            module_name = self.utils.get_package_name(check_path)
-            cls = self.utils.get_provider_class(module_name, check_name)
-            if cls is not None:
-                return cls(metadata)
-        
-        return None
-    
-    def __load_profile(self, profile_name: str) -> ProfileModel | None:
+    def __load_profile(self, profile_name: str) -> Optional[ProfileModel]:
         profile_metadata_path = f'{self.provider_path}/profiles/{profile_name}.yaml'
         
         if not os.path.exists(profile_metadata_path):
@@ -157,11 +117,10 @@ class Provider(ABC):
             return ProfileModel(**profile_raw_data)
     
     def __is_check_included(self, check_name: str) -> bool:
-        config = self.config_utils.get_config()
-        if config.profile is None:
+        if self.config.profile is None:
             return True
         
-        profile = self.__load_profile(config.profile)
+        profile = self.__load_profile(self.config.profile)
         
         if profile is None:
             return True
@@ -186,7 +145,11 @@ class Provider(ABC):
                 if not self.__is_check_included(check_name):
                     continue
                 
-                check = self.__load_check(check_name=check_name)
+                # check = self.__load_check(check_name=check_name)
+                check = self.utils.load_check(
+                    check_name=check_name,
+                    provider_path=self.provider_path
+                )
                 if check is not None:
                     checks.append(check)
             
@@ -204,7 +167,7 @@ class Provider(ABC):
         return FrameworkSection(**raw_section_data)
 
 
-    def __load_framework(self, raw_framework_data: Dict[str, Any]) -> FrameworkModel | None:
+    def __load_framework(self, raw_framework_data: Dict[str, Any]) -> Optional[FrameworkModel]:
         
         if 'sections' not in raw_framework_data or not isinstance(raw_framework_data['sections'], list):
             return None
@@ -248,5 +211,3 @@ class Provider(ABC):
                 frameworks.append(framework_metadata)
 
         return frameworks
-    
-    
