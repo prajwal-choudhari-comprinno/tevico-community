@@ -163,10 +163,11 @@ cython_debug/
 scripts/**/*.yaml
 .DS_Store
 
-tevico/report/data/*
-
 # vscode setting folder
 .vscode/
 
 report.zip
-report/
+tevico/report/data/*.json
+tevico/report/data/*.js
+
+# *demo*
