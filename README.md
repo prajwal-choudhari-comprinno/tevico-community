@@ -13,18 +13,10 @@ Tevico is an extensible open-source, Python-based auditing framework that empowe
 
 ## Getting Started
 
-To run the project simply copy the following lines of code and run it on your CloudShell.
+To run the project simply copy the following code and run it in your CloudShell.
 
 ```bash
-cd /tmp
-rm -rf tevico-community
-git clone https://github.com/comprinnotech/tevico-community.git
-cd tevico-community
-python3 -m venv .venv
-source .venv/bin/activate
-pip3 install poetry
-poetry install
-./main run
+curl https://raw.githubusercontent.com/comprinnotech/tevico-community/refs/heads/main/run.sh?ts=$(date +%s) | bash
 ```
 
 ## CLI Examples
