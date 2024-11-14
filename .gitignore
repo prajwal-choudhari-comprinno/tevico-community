@@ -10,11 +10,10 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+# dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -164,4 +163,11 @@ cython_debug/
 scripts/**/*.yaml
 .DS_Store
 
-tevico/report/data/*
+# vscode setting folder
+.vscode/
+
+report.zip
+tevico/report/data/*.json
+tevico/report/data/*.js
+
+# *demo*

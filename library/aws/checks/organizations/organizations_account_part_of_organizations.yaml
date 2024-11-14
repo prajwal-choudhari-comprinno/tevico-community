@@ -1,0 +1,65 @@
+########### PLEASE NOTE ###########
+# For better readability of the metadata file, kindly remove all the comments before using the template.
+###################################
+
+Provider: aws
+
+# Eg: cloudformation_stacks_termination_protection_enabled
+CheckID: organizations_account_part_of_organizations
+
+# Short title/description of the check
+CheckTitle: Check if account is part of an AWS Organizations
+
+# Check Type
+CheckType:
+  - Logging and Monitoring
+
+# Service Name. Eg: cloudformation, ec2, s3, etc.
+ServiceName: organizations
+
+# Sub Service Name. Eg: ec2_instance, s3_bucket, etc.
+SubServiceName: ""
+
+# Resource Template
+ResourceIdTemplate: arn:partition:service::account-id:organization/organization-id
+
+# Severity of the check. Allowed values: critical, high, medium, low
+Severity: medium
+
+# Resource Type. Eg: AwsCloudFormationStack, AwsEC2Instance, AwsS3Bucket, etc.
+ResourceType: Other
+
+# Description of the check
+Description:  |
+  Ensure that AWS Organizations service is currently in use. This check verifies if the AWS account is part of an AWS Organization, confirming centralized management.
+
+# Explanation of the risk associated with the check
+Risk: The risk associated with not being part of an AWS Organizations is that it can lead to a lack of centralized management and control over the AWS accounts in an organization. This can make it difficult to enforce security policies consistently across all accounts and can also result in increased costs due to inefficiencies in resource usage. Additionally, not being part of an AWS Organizations can make it harder to track and manage account usage and access.
+
+# Related URL for the check
+RelatedUrl: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_org_create.html
+
+# Help section on how to fix the issue
+Remediation:
+  Code:
+    CLI: 
+      aws organizations create-organization
+    NativeIaC: ""
+    Other: ""
+    Terraform: ""
+  Recommendation:
+    Text: 
+      Create or Join an AWS Organization for effective account management.
+    Url: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_org_create.html
+
+# Categories for the check. Eg: forensics-ready, security, etc.
+Categories: []
+
+# Dependencies on other checks
+DependsOn: []
+
+# Related checks
+RelatedTo: []
+
+# Side notes
+Notes: Infrastructure Protection

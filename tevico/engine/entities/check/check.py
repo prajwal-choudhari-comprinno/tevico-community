@@ -14,10 +14,11 @@ class Check(ABC):
         self.metadata = metadata
         super().__init__()
         
-    def get_report(self, profile_name: str, connection: Any) -> CheckReport:
+    def get_report(self, framework: str, section: str, connection: Any) -> CheckReport:
         check_report = self.execute(connection=connection)
         check_report.check_metadata = self.metadata
-        check_report.profile_name = profile_name
+        check_report.framework = framework
+        check_report.section = section
         return check_report
     
     @abstractmethod

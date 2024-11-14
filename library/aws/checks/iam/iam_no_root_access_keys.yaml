@@ -1,5 +1,5 @@
 Provider: "aws"
-CheckID: "iam_no_root_access_key"
+CheckID: "iam_no_root_access_keys"
 CheckTitle: "Ensure no root account access key exists"
 CheckType: []
 ServiceName: "iam"
