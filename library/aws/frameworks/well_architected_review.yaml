@@ -132,6 +132,7 @@ sections:
      - apigateway_rest_api_client_certificate_enabled
      - apigateway_waf_protection_enabled
      - apigatewayv2_api_access_logging_enabled
+     - cloudfront_access_logging_enabled
      - ec2_image_builder_enabled
      - ec2_instance_managed_by_ssm
      - ec2_managed_instance_patch_compliance_status
