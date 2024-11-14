@@ -18,7 +18,7 @@ description: |
   https://aws.amazon.com/architecture/well-architected/
 
 sections:
-  - name: AWS | Well Architechted Review | Operational Excellence
+  - name: Operational Excellence
     description: |
       The Security pillar includes the ability to protect information, systems, and assets while delivering business
       value through risk assessments and mitigation strategies.
@@ -26,28 +26,57 @@ sections:
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
 
-  - name: AWS | Well Architechted Review | Reliability
+  - name: Security
+    description: |
+      The Security pillar includes the ability to protect information, systems, and assets while delivering business
+      value through risk assessments and mitigation strategies.
+
+      This section checks for the presence of a Well Architected Review in the AWS account.
+    checks: 
+      - ec2_ebs_volume_encryption
+      - ec2_ebs_default_encryption
+      - ec2_ebs_snapshot_encrypted
+      - ec2_instance_managed_by_ssm
+      - ec2_instance_secrets_user_data
+      - ec2_launch_template_no_secrets
+      - ec2_instance_profile_attached
+      - ec2_imdsv2_enabled
+
+  - name: Reliability
     description: |
       The Reliability pillar includes the ability of a system to recover from infrastructure or service disruptions,
       dynamically acquire computing resources to meet demand, and mitigate disruptions such as misconfigurations or transient
       network issues.
 
       This section checks for the presence of a Well Architected Review in the AWS account.
+
     checks:
       - cloudformation_stacks_termination_protection_enabled
       - dynamodb_tables_pitr_enabled
       - elb_logging_enabled
+      - iam_avoid_root_usage
+      - iam_policy_allows_privilege_escalation
+      - iam_policy_attached_to_only_group_or_roles
+      - iam_rotate_access_keys_90_days
+      - iam_support_role_created
+      - iam_user_mfa_enabled_console_access
+      - iam_user_multiple_active_access_keys
       - opensearch_service_domains_audit_logging_enabled
       - opensearch_service_domains_cloudwatch_logging_enabled
+      # - apigateway_restapi_logging_enabled
+      # - apigatewayv2_api_access_logging_enabled
+      # - awslambda_function_invoke_api_operations_cloudtrail_logging_enabled
+      # - cloudformation_stacks_termination_protection_enabled
+      # - cloudtrail_cloudwatch_logging_enabled
+      # - dynamodb_tables_pitr_enabled
+      # - elb_logging_enabled
+      # - opensearch_service_domains_audit_logging_enabled
+      # - opensearch_service_domains_cloudwatch_logging_enabled
       # - rds_instance_backup_enabled
       # - rds_instance_deletion_protection
       # - rds_instance_enhanced_monitoring_enabled
       # - rds_instance_integration_cloudwatch_logs
       # - rds_instance_multi_az
-      # - apigateway_restapi_logging_enabled
-      # - apigatewayv2_api_access_logging_enabled
-      # - awslambda_function_invoke_api_operations_cloudtrail_logging_enabled
-      # - cloudtrail_cloudwatch_logging_enabled
     sections:
       - name: All RDS checks
         description: |
@@ -57,13 +86,13 @@ sections:
 
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
-          - rds_instance_backup_enabled
-          - rds_instance_deletion_protection
-          - rds_instance_enhanced_monitoring_enabled
-          - rds_instance_integration_cloudwatch_logs
-          - rds_instance_multi_az
+          # - rds_instance_backup_enabled
+          # - rds_instance_deletion_protection
+          # - rds_instance_enhanced_monitoring_enabled
+          # - rds_instance_integration_cloudwatch_logs
+          # - rds_instance_multi_az
 
-  - name: AWS | Well Architechted Review | Performance Efficiency
+  - name: Performance Efficiency
     description: |
       The Performance Efficiency pillar includes the ability to use computing resources efficiently to meet system
       requirements and to maintain that efficiency as demand changes and technologies evolve.
@@ -71,7 +100,7 @@ sections:
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
 
-  - name: AWS | Well Architechted Review | Cost Optimization
+  - name: Cost Optimization
     description: |
       The Cost Optimization pillar includes the ability to avoid or eliminate unneeded cost or suboptimal resources.
 
@@ -79,7 +108,7 @@ sections:
     checks: []
 
 
-  - name: AWS | Well Architechted Review | Operational Excellence
+  - name: Operational Excellence
     description: |
       The Operational Excellence pillar includes the ability to run and monitor systems to deliver business value and to
       continually improve supporting processes and procedures.
@@ -87,29 +116,37 @@ sections:
       This section checks for the presence of a Well Architected Review in the AWS account.
     checks: []
 
-  - name: AWS | Well Architechted Review | Secuirity
+  - name: Security
     description: |
-      The Operational Excellence pillar includes the ability to run and monitor systems to deliver business value and to
-      continually improve supporting processes and procedures.
-
+      The Security pillar focuses on the ability to protect data, systems, and assets through risk management and control. 
+      
       This section checks for the presence of a Well Architected Review in the AWS account.
-    checks: 
-    #  - iam_root_mfa_enabled
-    #  - iam_no_root_access_keys
-    #  - iam_password_policy_lowercase
-    #  - iam_password_policy_minimum_length_14
-    #  - iam_password_policy_number
-    #  - iam_password_policy_symbol
-    #  - iam_password_policy_uppercase
-    #  - iam_password_policy_reuse_24
-    #  - iam_root_mfa_enabled
-    #  - iam_no_root_access_keys
-    #  - iam_password_policy_lowercase
-    #  - iam_password_policy_minimum_length_14
-    #  - iam_password_policy_number
-    #  - iam_password_policy_symbol
-    #  - iam_password_policy_uppercase
-    #  - iam_password_policy_reuse_24
+    checks:
+     - account_maintain_current_contact_details
+     - account_security_contact_information_registered
+     - ec2_image_builder_enabled
+     - ec2_instance_managed_by_ssm
+     - ec2_managed_instance_patch_compliance_status
+     - ec2_microsoft_sql_server_end_of_support
+     - ec2_network_acl_allow_ingress_any_port
+     - ec2_network_acl_allow_ingress_tcp_port_22
+     - ec2_security_group_default_restrict_traffic
+     - iam_account_maintain_current_contact_details
+     - iam_account_security_contact_information_registered
+     - iam_attached_policy_admin_privileges_found
+     - iam_customer_attached_policy_admin_privileges_found
+     - iam_customer_unattached_policy_admin_privileges_found
+     - iam_inline_policy_admin_privileges_found
+     - iam_no_root_access_keys
+     - iam_password_policy_lowercase
+     - iam_password_policy_minimum_length_14
+     - iam_password_policy_number
+     - iam_password_policy_reuse_24
+     - iam_password_policy_symbol
+     - iam_password_policy_uppercase
+     - iam_root_hardware_mfa_enabled
+     - iam_root_mfa_enabled
+     - organizations_account_part_of_organizations
      - rds_instance_storage_encrypted
      - rds_instance_integration_cloudwatch_logging_enabled
      - networkfirewall_multi_az_enabled
