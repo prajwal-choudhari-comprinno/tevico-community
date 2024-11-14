@@ -107,12 +107,12 @@ sections:
      - networkfirewall_multi_az_enabled
      - rds_instance_minor_version_upgrade_enabled
      - route53_domains_privacy_protection_enabled
-    #  - s3_bucket_default_encryption
-    #  - s3_bucket_object_versioning
+     - s3_bucket_default_encryption
+     - s3_bucket_object_versioning
      - s3_bucket_secure_transport_policy
-    #  - s3_bucket_no_mfa_delete
+     - s3_bucket_no_mfa_delete
      - secrets_manager_automatic_rotation_enabled
-    #  - securityhub_enabled
+     - securityhub_enabled
      - sns_topics_kms_encryption_at_rest_enabled
      - ssm_document_secrets_present
      - ssm_managed_compliant_patching
