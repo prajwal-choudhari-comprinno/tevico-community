@@ -1,5 +1,5 @@
 Provider: "aws"
-CheckID: "networkfirewall_multi_az"
+CheckID: "networkfirewall_multi_az_enabled"
 CheckTitle: "Ensure all Network Firewall Firewalls are deployed across multiple AZ."
 CheckType:
   - "Software and Configuration Checks/Industry and Regulatory Standards/NIST 800-53 Controls"

@@ -1,5 +1,5 @@
 Provider: aws
-CheckID: vpc_flowlogs_traffic_inspection_check
+CheckID: vpc_flowlogs_traffic_inspection
 CheckTitle: Check if VPC Flow Logs are enabled for traffic inspection.
 CheckType: []
 ServiceName: ec2

@@ -1,5 +1,5 @@
 Provider: aws
-CheckID: wellarchitected_workload_no_high_or_medium_risks_check
+CheckID: "wellarchitected_workload_no_high_or_medium_risks"
 CheckTitle: Check if Well-Architected workload has high or medium risks.
 CheckType: []
 ServiceName: wellarchitected

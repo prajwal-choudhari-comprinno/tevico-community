@@ -1,5 +1,5 @@
 Provider: aws
-CheckID: vpc_service_endpoint_enabled_check
+CheckID:  vpc_service_endpoint_enabled
 CheckTitle: Check if VPC has enabled service endpoints.
 CheckType: []
 ServiceName: ec2

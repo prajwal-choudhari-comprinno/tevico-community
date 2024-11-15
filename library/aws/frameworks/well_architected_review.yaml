@@ -170,3 +170,15 @@ sections:
      - vpc_service_endpoint_enabled
      - vpc_flowlogs_traffic_inspection
      - wellarchitected_workload_no_high_or_medium_risks
+     - cloudfront_waf_protection_enabled
+     - cloudtrail_s3_bucket_access_logging_enabled
+     - cloudtrail_enabled
+     - cloudtrail_cloudwatch_logging_enabled
+     - cloudtrail_multiregion_enabled
+     - cloudwatch_log_metric_filter_root_usage
+     - cloudwatch_log_metric_filter_security_group_changes
+     - cloudwatch_log_metric_filter_unauthorized_api_calls
+     - cloudwatch_log_metric_filter_policy_changes
+     - cloudwatch_log_metric_filter_vpc_alarm_configured
+     - cloudwatch_log_metric_filter_authentication_failures
+     - config_recorder_all_regions_enabled
