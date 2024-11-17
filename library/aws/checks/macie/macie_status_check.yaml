@@ -1,0 +1,25 @@
+Provider: aws
+CheckID: macie_status_check
+CheckTitle: Ensure Macie is enabled
+CheckType: [Data Protection]
+ServiceName: macie
+SubServiceName: ""
+ResourceIdTemplate: arn:partition:access-analyzer:region:account-id:analyzer/resource-id
+Severity: high
+ResourceType: AwsMacie
+Description: Checks if Amazon Macie is enabled for the account to ensure sensitive data monitoring and protection.
+Risk: Without Macie enabled, sensitive data may not be adequately monitored, increasing security and compliance risks.
+RelatedUrl: https://docs.aws.amazon.com/macie/latest/user/getting-started.html
+Remediation:
+  Code:
+    CLI: ""
+    NativeIaC: ""
+    Other: ""
+    Terraform: ""
+  Recommendation:
+    Text: Enable Amazon Macie to monitor and protect sensitive data in your account.
+    Url: https://docs.aws.amazon.com/macie/latest/user/getting-started.html
+Categories: [Data Protection]
+DependsOn: []
+RelatedTo: []
+Notes: This check ensures Macie is enabled in the AWS account.

@@ -4,7 +4,7 @@ CheckTitle: Ensure CloudFront distributions have access logging enabled.
 CheckType: [Detective Control]
 ServiceName: cloudfront
 SubServiceName: ""
-ResourceIdTemplate: arn:partition:service:region:account-id:distribution-id
+ResourceIdTemplate: arn:partition:cloudfront:region:account-id:distribution/resource-id
 Severity: medium
 ResourceType: AwsCloudFrontDistribution
 Description: Ensures CloudFront distributions have access logging enabled to allow monitoring and analysis of access requests.

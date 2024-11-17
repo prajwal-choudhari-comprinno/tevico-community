@@ -124,6 +124,7 @@ sections:
     checks:
      - account_maintain_current_contact_details
      - account_security_contact_information_registered
+     - acl_bidirectional_traffic_restriction_check
      - acm_certificates_expiration_check
      - acm_certificates_transparency_logs_enabled
      - apigateway_execution_logging_enabled
@@ -133,6 +134,8 @@ sections:
      - apigateway_waf_protection_enabled
      - apigatewayv2_api_access_logging_enabled
      - cloudfront_access_logging_enabled
+     - cloudfront_cloudwatch_logging_enabled
+     - cloudfront_distributions_https_enabled
      - ec2_image_builder_enabled
      - ec2_instance_managed_by_ssm
      - ec2_managed_instance_patch_compliance_status
@@ -152,6 +155,7 @@ sections:
      - elb_waf_acl_attached
      - dynamodb_tables_kms_cmk_encryption_enabled
      - guardduty_enabled_centralized
+     - guardduty_is_enabled
      - iam_account_maintain_current_contact_details
      - iam_account_security_contact_information_registered
      - iam_attached_policy_admin_privileges_found
@@ -173,5 +177,9 @@ sections:
      - kms_cmk_are_used
      - lambda_function_invoke_api_operations_cloudtrail_logging_enabled
      - lambda_function_not_publicly_accessible
+     - lambda_function_no_secrets_in_code
+     - lambda_function_no_secrets_in_variables
+     - macie_auto_sensitive_data_discovery_check
+     - macie_status_check
      - networkfirewall_logging_enabled
      - organizations_account_part_of_organizations

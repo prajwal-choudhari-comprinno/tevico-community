@@ -23,9 +23,11 @@ class cloudfront_access_logging_enabled(Check):
                 if items:  
                     for distribution in items:
                         dist_id = distribution['Id']
-                        dist_logging = distribution['Logging']
+                        # Access logging configuration through DistributionConfig
+                        dist_config = distribution.get('DistributionConfig', {})
+                        dist_logging = dist_config.get('Logging', {})
 
-                        if dist_logging['Enabled']:
+                        if dist_logging.get('Enabled', False):
                             report.resource_ids_status[dist_id] = True
                         else:
                             report.resource_ids_status[dist_id] = False
@@ -35,3 +37,4 @@ class cloudfront_access_logging_enabled(Check):
             report.passed = False
             
         return report
+
