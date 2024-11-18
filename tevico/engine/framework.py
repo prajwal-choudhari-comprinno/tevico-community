@@ -223,20 +223,20 @@ class TevicoFramework():
         if os.path.exists(dist_path):
             subprocess.run(['rm', '-rf', dist_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
-        report_process = subprocess.Popen(['npm', 'run', 'build'], cwd=build_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # report_process = subprocess.Popen(['npm', 'run', 'build'], cwd=build_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
-        _, stderr = report_process.communicate()
+        # _, stderr = report_process.communicate()
         
-        if report_process.returncode != 0:
-            print(f'\n❌ Error building report: {stderr}')
-            os._exit(1)
+        # if report_process.returncode != 0:
+            # print(f'\n❌ Error building report: {stderr}')
+            # os._exit(1)
 
         current_dir = os.getcwd()
 
         try:
-            os.chdir('./tevico/report/dist')
+            os.chdir('./tevico/report')
             
-            subprocess.run(['zip', '-r', '../../../report.zip', '.'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            subprocess.run(['zip', '-r', '../../report.zip', '.'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         finally:
             os.chdir(current_dir)
         
@@ -244,7 +244,7 @@ class TevicoFramework():
             print(f'\n❌ Error creating zip file: {zip_file_path}')
             os._exit(1)
 
-        print(f'\n📦 Report zipped successfully: {zip_file_path}')
+        print(f'\n📦 Report zipped successfully: {os.path.abspath(zip_file_path)}')
         
         
     def run(self):
@@ -259,8 +259,8 @@ class TevicoFramework():
         providers = self.__get_providers()
         checks: List[CheckReport] = []
         
-        CHECK_REPORTS_PATH = './tevico/report/src/data/check_reports.json'
-        CHECK_ANALYTICS_PATH = './tevico/report/src/data/check_analytics.json'
+        # CHECK_REPORTS_PATH = './tevico/report/data/check_reports.json'
+        # CHECK_ANALYTICS_PATH = './tevico/report/data/check_analytics.json'
         
         for p in providers:
             try:
@@ -275,13 +275,23 @@ class TevicoFramework():
         
         data = [s.model_dump(mode='json') for s in checks]
         
-        with open(CHECK_REPORTS_PATH, 'w') as file:
-            json.dump(data, file, indent=2)
+        j2_env = Environment(loader=FileSystemLoader('./tevico/templates'), trim_blocks=True)
+        
+        check_data_template = j2_env.get_template('check_data.jinja2')
+        
+        data_file_path = f'./tevico/report/data/check_report.js'
         
         analytics_report = generate_analytics(checks)
         
-        with open(CHECK_ANALYTICS_PATH, 'w') as file:
-            json.dump(analytics_report.model_dump(), file, indent=2)
+        with open(data_file_path, 'w') as file:
+            file.write(check_data_template.render(
+                check_reports=data,
+                check_analytics=analytics_report.model_dump()
+            ))
+    
+        
+        # with open(CHECK_ANALYTICS_PATH, 'w') as file:
+        #     json.dump(analytics_report.model_dump(), file, indent=2)
         
         print('\nReport Overview:')
         print(f'#️⃣ Total    : {analytics_report.check_status.total}')
