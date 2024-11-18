@@ -37,7 +37,7 @@ class wellarchitected_workload_no_high_or_medium_risks(Check):
                         elif question.get('Risk') == 'MEDIUM':
                             medium_risk_count += 1
                         
-                        # Early exit if we already found high or medium risk
+                      
                         if high_risk_count > 0 or medium_risk_count > 0:
                             break
                     if high_risk_count > 0 or medium_risk_count > 0:

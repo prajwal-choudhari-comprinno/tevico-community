@@ -17,13 +17,13 @@ class root_mfa_enabled(Check):
         client = connection.client('iam')
 
         try:
-            # Get account summary to check MFA status for the root account
+            
             account_summary = client.get_account_summary()
             
-            # Extract the value indicating if root MFA is enabled
+           
             root_mfa_enabled = account_summary['SummaryMap']['AccountMFAEnabled']
 
-            # Check if MFA is enabled for the root user
+            
             if root_mfa_enabled == 1:
                 print("pass")
                 report.passed = True
@@ -35,6 +35,6 @@ class root_mfa_enabled(Check):
                 print("MFA Is Disabled")
         except Exception as e:
             print("MFA Is Disabled")
-            print(str(e))  # Log the error in the resource status
+            print(str(e))  
 
         return report

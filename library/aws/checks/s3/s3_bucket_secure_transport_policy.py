@@ -20,9 +20,9 @@ class s3_bucket_secure_transport_policy(Check):
         for bucket in buckets:
             bucket_name = bucket['Name']
             try:
-                # Get the policy as a string and parse it into a dictionary
+                
                 policy = client.get_bucket_policy(Bucket=bucket_name)['Policy']
-                policy_json = json.loads(policy)  # Parse policy string into a dictionary
+                policy_json = json.loads(policy)  
             except client.exceptions.ClientError:
                 policy_json = None
 
@@ -32,7 +32,7 @@ class s3_bucket_secure_transport_policy(Check):
             else:
                 report.passed = False
                 report.resource_ids_status[bucket_name] = False
-                # Now we can safely access the policy as a dictionary
+               
                 for statement in policy_json.get("Statement", []):
                     if (
                         statement.get("Effect") == "Deny"

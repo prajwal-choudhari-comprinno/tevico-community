@@ -15,7 +15,7 @@ class vpc_endpoint_services_allowed_principals_trust_boundaries(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
         ec2_client = connection.client('ec2')
-        sts_client = connection.client('sts')  # Using STS to get the current account ID
+        sts_client = connection.client('sts')  
         all_compliant = True  
 
         try:
