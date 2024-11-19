@@ -103,22 +103,31 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function createDynamicTable({ reportsData }) {
-    const headersArray = [{ label: 'check', key: 'check_metadata.check_title' }, { label: 'severity', key: 'check_metadata.severity' }, { label: 'service', key: 'check_metadata.service_name' }, { label: 'section', key: 'section' },]
+    const headersArray = [
+        { label: 'check', key: 'check_metadata.check_title' },
+        { label: 'severity', key: 'check_metadata.severity' },
+        { label: 'service', key: 'check_metadata.service_name' },
+        { label: 'section', key: 'section' },
+        { label: 'action', key: 'action' }
+    ];
 
     const table = document.createElement('table');
     table.className = 'table table-vcenter';
 
     const thead = document.createElement('thead');
-    // thead.className = 'sticky-top';
     const headerRow = document.createElement('tr');
 
     headersArray.forEach(header => {
         const th = document.createElement('th');
-        const button = document.createElement('button');
-        button.className = 'table-sort';
-        button.setAttribute('data-sort', `sort-${header.key}`);
-        button.textContent = header.label;
-        th.appendChild(button);
+        if (header.key !== 'action') {
+            const button = document.createElement('button');
+            button.className = 'table-sort';
+            button.setAttribute('data-sort', `sort-${header.key}`);
+            button.textContent = header.label;
+            th.appendChild(button);
+        } else {
+            th.textContent = header.label;
+        }
         headerRow.appendChild(th);
     });
     thead.appendChild(headerRow);
@@ -130,8 +139,17 @@ function createDynamicTable({ reportsData }) {
         const row = document.createElement('tr');
         headersArray.forEach(header => {
             const td = document.createElement('td');
-            td.className = `sort-${header.key}`;
-            td.textContent = header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '';
+
+            if (header.key === 'action') {
+                const link = document.createElement('a');
+                link.href = `check-details.html?id=${item.name}`;
+                link.className = 'btn btn-primary btn-sm';
+                link.textContent = 'View Details';
+                td.appendChild(link);
+            } else {
+                td.className = `sort-${header.key}`;
+                td.textContent = header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '';
+            }
             row.appendChild(td);
         });
         tbody.appendChild(row);
