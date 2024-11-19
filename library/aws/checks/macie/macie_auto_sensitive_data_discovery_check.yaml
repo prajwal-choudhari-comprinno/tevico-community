@@ -1,0 +1,25 @@
+Provider: aws
+CheckID: macie_auto_sensitive_data_discovery_check
+CheckTitle: Ensure automated sensitive data discovery is enabled
+CheckType: [Data Protection]
+ServiceName: macie
+SubServiceName: ""
+ResourceIdTemplate: arn:partition:access-analyzer:region:account-id:analyzer/resource-id
+Severity: high
+ResourceType: AwsMacie
+Description: Checks if automated sensitive data discovery is enabled for Amazon Macie.
+Risk: Without automated sensitive data discovery, your account may fail to detect sensitive data in real time, exposing you to potential compliance and security risks.
+RelatedUrl: https://docs.aws.amazon.com/macie/latest/user/discovery.html
+Remediation:
+  Code:
+    CLI: ""
+    NativeIaC: ""
+    Other: ""
+    Terraform: ""
+  Recommendation:
+    Text: Enable automated sensitive data discovery for Amazon Macie to enhance your sensitive data monitoring capabilities.
+    Url: https://docs.aws.amazon.com/macie/latest/user/discovery.html
+Categories: [Data Protection]
+DependsOn: []
+RelatedTo: []
+Notes: This check ensures that the automated sensitive data discovery feature is active for Amazon Macie.
