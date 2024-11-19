@@ -9,8 +9,17 @@ function updatePaginationInfo() {
 
     const paginationInfo = document.querySelector('.pagination-info');
     if (paginationInfo) {
-        paginationInfo.textContent = `${startIndex}-${endIndex} of ${totalItems}`;
+        if (totalItems === 0) {
+            paginationInfo.textContent = 'No entries found';
+        } else if (startIndex > endIndex) {
+            paginationInfo.textContent = 'No entries found';
+        } else if (startIndex === endIndex) {
+            paginationInfo.textContent = `Showing ${startIndex} of ${totalItems}`;
+        } else {
+            paginationInfo.textContent = `Showing ${startIndex}-${endIndex} of ${totalItems}`;
+        }
     }
+
 }
 
 function updatePaginationButtons() {
@@ -136,7 +145,7 @@ function createDynamicTable({ reportsData }) {
     initializeDropdowns(reportsData)
 }
 
-function createDropdownItem(text, dropdownId) {
+function createDropdownItem(text, dropdownId, filterType) {
     const item = document.createElement('a');
     item.className = 'dropdown-item';
     item.href = '#';
@@ -145,19 +154,40 @@ function createDropdownItem(text, dropdownId) {
     item.addEventListener('click', (e) => {
         e.preventDefault();
         const dropdownButton = document.querySelector(`#${dropdownId}`).closest('.dropdown').querySelector('.dropdown-toggle');
+
         if (dropdownButton) {
             if (dropdownButton.textContent === text) {
                 dropdownButton.textContent = getDefaultTextForDropdown(dropdownId);
+                activeFilters[filterType] = null;
             } else {
                 dropdownButton.textContent = text;
+                activeFilters[filterType] = text;
             }
         }
+        applyFilters();
     });
 
     return item;
 }
 
-function populateDropdown(data, dropdownId, valueAccessor) {
+function applyFilters() {
+    list.filter();
+
+    list.filter(item => {
+        const sectionMatch = !activeFilters.section ||
+            item.values()['sort-section'] === activeFilters.section;
+
+        const serviceMatch = !activeFilters.service ||
+            item.values()['sort-check_metadata.service_name'] === activeFilters.service;
+
+        const severityMatch = !activeFilters.severity ||
+            item.values()['sort-check_metadata.severity'] === activeFilters.severity;
+
+        return sectionMatch && serviceMatch && severityMatch;
+    });
+}
+
+function populateDropdown(data, dropdownId, valueAccessor, filterType) {
     const uniqueValues = data.reduce((acc, item) => {
         const value = valueAccessor(item);
         if (value && !acc.includes(value)) {
@@ -170,7 +200,7 @@ function populateDropdown(data, dropdownId, valueAccessor) {
     dropdownMenu.innerHTML = '';
 
     uniqueValues.forEach(value => {
-        dropdownMenu.appendChild(createDropdownItem(value, dropdownId));
+        dropdownMenu.appendChild(createDropdownItem(value, dropdownId, filterType));
     });
 
     return uniqueValues;
@@ -189,20 +219,29 @@ function initializeDropdowns(reportsData) {
     const dropdownConfigs = [
         {
             id: 'sectionDropdown',
-            accessor: item => item.section
+            accessor: item => item.section,
+            filterType: 'section'
         },
         {
             id: 'serviceDropdown',
-            accessor: item => item.check_metadata?.service_name
+            accessor: item => item.check_metadata?.service_name,
+            filterType: 'service'
         },
         {
             id: 'severityDropdown',
-            accessor: item => item.check_metadata?.severity
+            accessor: item => item.check_metadata?.severity,
+            filterType: 'severity'
         }
     ];
 
+    activeFilters = {
+        section: null,
+        service: null,
+        severity: null
+    };
+
     dropdownConfigs.forEach(config => {
-        populateDropdown(reportsData, config.id, config.accessor);
+        populateDropdown(reportsData, config.id, config.accessor, config.filterType);
 
         const dropdownButton = document.querySelector(`#${config.id}`).closest('.dropdown').querySelector('.dropdown-toggle');
         if (dropdownButton) {
