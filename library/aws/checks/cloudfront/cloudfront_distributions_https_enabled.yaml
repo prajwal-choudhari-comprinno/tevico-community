@@ -1,0 +1,25 @@
+Provider: aws
+CheckID: cloudfront_distributions_https_enabled
+CheckTitle: Ensure CloudFront distributions enforce HTTPS.
+CheckType: [Data Protection]
+ServiceName: cloudfront
+SubServiceName: ""
+ResourceIdTemplate: arn:partition:cloudfront:region:account-id:distribution/resource-id
+Severity: medium
+ResourceType: AwsCloudFrontDistribution
+Description: Verifies that all CloudFront distributions enforce HTTPS for secure communication.
+Risk: Allowing HTTP traffic to CloudFront distributions may lead to insecure data transmission, exposing sensitive information to attackers.
+RelatedUrl: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https.html
+Remediation: 
+  Code:
+    CLI: ""
+    NativeIaC: ""
+    Other: ""
+    Terraform: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution
+  Recommendation:
+    Text: Configure your CloudFront distributions to enforce HTTPS for secure communications.
+    Url: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https.html
+Categories: [Data Protection]
+DependsOn: []
+RelatedTo: []
+Notes: Data Protection

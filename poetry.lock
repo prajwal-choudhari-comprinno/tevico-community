@@ -302,6 +302,25 @@ test = ["certifi", "cryptography-vectors (==43.0.1)", "pretend", "pytest (>=6.2.
 test-randomorder = ["pytest-randomly"]
 
 [[package]]
+name = "detect-secrets"
+version = "1.5.0"
+description = "Tool for detecting secrets in the codebase"
+optional = false
+python-versions = "*"
+files = [
+    {file = "detect_secrets-1.5.0-py3-none-any.whl", hash = "sha256:e24e7b9b5a35048c313e983f76c4bd09dad89f045ff059e354f9943bf45aa060"},
+    {file = "detect_secrets-1.5.0.tar.gz", hash = "sha256:6bb46dcc553c10df51475641bb30fd69d25645cc12339e46c824c1e0c388898a"},
+]
+
+[package.dependencies]
+pyyaml = "*"
+requests = "*"
+
+[package.extras]
+gibberish = ["gibberish-detector"]
+word-list = ["pyahocorasick"]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.2.2"
 description = "Backport of PEP 654 (exception groups)"
@@ -891,4 +910,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9.16"
-content-hash = "02b82d6a568d35fbccf36391f781627faeb6d482d8a21dce33b2c781ea149dc4"
+content-hash = "56d2b9d22fce7dcf23b0b9b60f7fedcb9e367cd51cfd47ebf1b314ff04f43203"

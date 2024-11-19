@@ -1,0 +1,25 @@
+Provider: aws
+CheckID: cloudfront_access_logging_enabled
+CheckTitle: Ensure CloudFront distributions have access logging enabled.
+CheckType: [Detective Control]
+ServiceName: cloudfront
+SubServiceName: ""
+ResourceIdTemplate: arn:partition:cloudfront:region:account-id:distribution/resource-id
+Severity: medium
+ResourceType: AwsCloudFrontDistribution
+Description: Ensures CloudFront distributions have access logging enabled to allow monitoring and analysis of access requests.
+Risk: Without access logging, it is difficult to detect unauthorized access or analyze traffic patterns for security and troubleshooting purposes.
+RelatedUrl: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/AccessLogs.html
+Remediation: 
+  Code:
+    CLI: ""
+    NativeIaC: ""
+    Other: ""
+    Terraform: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution
+  Recommendation:
+    Text: Enable access logging for CloudFront distributions to record and monitor requests.
+    Url: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/AccessLogs.html
+Categories: [Detective Control]
+DependsOn: []
+RelatedTo: []
+Notes: Detective Control

@@ -1,0 +1,25 @@
+Provider: aws
+CheckID: cloudfront_distributions_using_deprecated_ssl_protocols
+CheckTitle: Ensure CloudFront distributions are not using deprecated SSL/TLS protocols.
+CheckType: [Data Protection]
+ServiceName: cloudfront
+SubServiceName: ""
+ResourceIdTemplate: arn:partition:cloudfront::account-id:distribution/resource-id
+Severity: high
+ResourceType: AwsCloudFrontDistribution
+Description: Checks if any CloudFront distributions are using deprecated SSL/TLS protocols such as SSLv3, TLSv1, or TLSv1.1.
+Risk: Deprecated SSL/TLS protocols like SSLv3, TLSv1, and TLSv1.1 are insecure and may expose data to interception or modification.
+RelatedUrl: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/security-policy.html
+Remediation:
+  Code:
+    CLI: ""
+    NativeIaC: ""
+    Other: ""
+    Terraform: ""
+  Recommendation:
+    Text: Update CloudFront distributions to use the latest security policy that enforces modern TLS protocols.
+    Url: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/security-policy.html
+Categories: [Data Protection]
+DependsOn: []
+RelatedTo: []
+Notes: Data Protection
