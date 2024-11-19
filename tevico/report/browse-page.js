@@ -100,7 +100,7 @@ function createDynamicTable({ reportsData }) {
     table.className = 'table table-vcenter';
 
     const thead = document.createElement('thead');
-    thead.className = 'sticky-top';
+    // thead.className = 'sticky-top';
     const headerRow = document.createElement('tr');
 
     headersArray.forEach(header => {
@@ -133,4 +133,80 @@ function createDynamicTable({ reportsData }) {
     container.innerHTML = '';
     container.appendChild(table);
     initializeListJS();
+    initializeDropdowns(reportsData)
+}
+
+function createDropdownItem(text, dropdownId) {
+    const item = document.createElement('a');
+    item.className = 'dropdown-item';
+    item.href = '#';
+    item.textContent = text;
+
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const dropdownButton = document.querySelector(`#${dropdownId}`).closest('.dropdown').querySelector('.dropdown-toggle');
+        if (dropdownButton) {
+            if (dropdownButton.textContent === text) {
+                dropdownButton.textContent = getDefaultTextForDropdown(dropdownId);
+            } else {
+                dropdownButton.textContent = text;
+            }
+        }
+    });
+
+    return item;
+}
+
+function populateDropdown(data, dropdownId, valueAccessor) {
+    const uniqueValues = data.reduce((acc, item) => {
+        const value = valueAccessor(item);
+        if (value && !acc.includes(value)) {
+            acc.push(value);
+        }
+        return acc;
+    }, []).sort((a, b) => a.localeCompare(b));
+
+    const dropdownMenu = document.getElementById(dropdownId);
+    dropdownMenu.innerHTML = '';
+
+    uniqueValues.forEach(value => {
+        dropdownMenu.appendChild(createDropdownItem(value, dropdownId));
+    });
+
+    return uniqueValues;
+}
+
+function getDefaultTextForDropdown(dropdownId) {
+    const defaults = {
+        'sectionDropdown': 'Select Section',
+        'serviceDropdown': 'Select Service',
+        'severityDropdown': 'Select Severity'
+    };
+    return defaults[dropdownId] || 'Select Option';
+}
+
+function initializeDropdowns(reportsData) {
+    const dropdownConfigs = [
+        {
+            id: 'sectionDropdown',
+            accessor: item => item.section
+        },
+        {
+            id: 'serviceDropdown',
+            accessor: item => item.check_metadata?.service_name
+        },
+        {
+            id: 'severityDropdown',
+            accessor: item => item.check_metadata?.severity
+        }
+    ];
+
+    dropdownConfigs.forEach(config => {
+        populateDropdown(reportsData, config.id, config.accessor);
+
+        const dropdownButton = document.querySelector(`#${config.id}`).closest('.dropdown').querySelector('.dropdown-toggle');
+        if (dropdownButton) {
+            dropdownButton.textContent = getDefaultTextForDropdown(config.id);
+        }
+    });
 }
