@@ -61,6 +61,8 @@ class Provider(ABC):
     
     def handle_check_execution(self, check: Check, section: str, framework: str) -> CheckReport:
         res = check.get_report(framework=framework, section=section, connection=self.connection)
+        
+        res.execution_time = round(res.execution_time, 2)
 
         if res is not None and res.passed:
             print(f'\t\t* Check Passed ✅: {res.name} ({res.execution_time} seconds)')
