@@ -63,9 +63,9 @@ class Provider(ABC):
         res = check.get_report(framework=framework, section=section, connection=self.connection)
 
         if res is not None and res.passed:
-            print(f'\t\t* Check Passed ✅: {res.name}')
+            print(f'\t\t* Check Passed ✅: {res.name} ({res.execution_time} seconds)')
         else:
-            print(f'\t\t* Check Failed ❌: {res.name}')
+            print(f'\t\t* Check Failed ❌: {res.name} ({res.execution_time} seconds)')
         
         return res
     
