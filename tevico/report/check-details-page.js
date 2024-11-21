@@ -1,24 +1,30 @@
 document.addEventListener('DOMContentLoaded', function () {
     const id = getQueryParam('id');
     if (id) {
-        fetch('./data/check_reports.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const report = data.find(item => item.name === id);
-                if (report) {
-                    displayCheckDetails(report);
-                } else {
-                    console.error('Report not found for ID:', id);
-                }
-            })
-            .catch(error => {
-                console.error('Error loading check details:', error);
-            });
+        const report = check_reports.find(item => item.name === id);
+        if (report) {
+            displayCheckDetails(report);
+        } else {
+            console.error('Report not found for ID:', id);
+        }
+        // fetch('./data/check_reports.json')
+        //     .then(response => {
+        //         if (!response.ok) {
+        //             throw new Error('Network response was not ok');
+        //         }
+        //         return response.json();
+        //     })
+        //     .then(data => {
+        //         const report = data.find(item => item.name === id);
+        //         if (report) {
+        //             displayCheckDetails(report);
+        //         } else {
+        //             console.error('Report not found for ID:', id);
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.error('Error loading check details:', error);
+        //     });
     } else {
         console.error('No ID parameter provided in URL');
         window.location.href = 'index.html';
