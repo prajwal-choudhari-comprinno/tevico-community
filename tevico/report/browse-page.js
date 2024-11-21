@@ -46,7 +46,7 @@ function initializeListJS() {
         sortClass: 'table-sort',
         listClass: 'table-tbody',
         searchClass: 'table-search',
-        valueNames: ['sort-check_metadata.check_title', 'sort-check_metadata.severity', 'sort-check_metadata.service_name', 'sort-section'],
+        valueNames: ['sort-check_metadata.check_title', 'sort-check_metadata.severity', 'sort-check_metadata.service_name', 'sort-section', 'sort-status'],
         page: 15,
         pagination: true
     };
@@ -108,6 +108,7 @@ function createDynamicTable({ reportsData }) {
         { label: 'severity', key: 'check_metadata.severity' },
         { label: 'service', key: 'check_metadata.service_name' },
         { label: 'section', key: 'section' },
+        { label: 'status', key: 'status' },
         { label: 'action', key: 'action' }
     ];
 
@@ -140,15 +141,21 @@ function createDynamicTable({ reportsData }) {
         headersArray.forEach(header => {
             const td = document.createElement('td');
 
-            if (header.key === 'action') {
-                const link = document.createElement('a');
-                link.href = `check-details.html?id=${item.name}`;
-                link.className = 'btn btn-primary btn-sm';
-                link.textContent = 'View Details';
-                td.appendChild(link);
-            } else {
-                td.className = `sort-${header.key}`;
-                td.textContent = header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '';
+            switch (header.key) {
+                case 'action':
+                    const link = document.createElement('a');
+                    link.href = `check-details.html?id=${item.name}`;
+                    link.className = 'btn btn-primary btn-sm';
+                    link.textContent = 'View Details';
+                    td.appendChild(link);
+                    break;
+                case 'status':
+                    td.className = `sort-${header.key}`;
+                    td.textContent = item.passed ? 'Passed' : 'Failed';
+                    break;
+                default:
+                    td.className = `sort-${header.key}`;
+                    td.textContent = header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '';
             }
             row.appendChild(td);
         });
