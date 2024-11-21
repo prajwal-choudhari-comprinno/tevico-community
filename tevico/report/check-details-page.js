@@ -46,7 +46,7 @@ function getQueryParam(paramName) {
 
 function displayCheckDetails(report) {
     const pageTitle = document.getElementById('page_title');
-    pageTitle.textContent = report.name;
+    pageTitle.textContent = report.check_metadata?.check_id;
     const framework = document.getElementById('framework_text');
     framework.textContent = report.framework;
     const checkTitle = document.getElementById('check_title_text');

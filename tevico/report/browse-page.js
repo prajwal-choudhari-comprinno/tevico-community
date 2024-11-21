@@ -90,10 +90,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function createDynamicTable({ reportsData }) {
     const headersArray = [
+        { label: '#', key: '' },
         { label: 'check', key: 'check_metadata.check_title' },
         { label: 'severity', key: 'check_metadata.severity' },
         { label: 'service', key: 'check_metadata.service_name' },
         { label: 'section', key: 'section' },
+        { label: 'passed', key: 'passed' },
         { label: 'action', key: 'action' }
     ];
 
@@ -105,7 +107,7 @@ function createDynamicTable({ reportsData }) {
 
     headersArray.forEach(header => {
         const th = document.createElement('th');
-        if (header.key !== 'action') {
+        if (header.key !== 'action' && header.key !== '') {
             const button = document.createElement('button');
             button.className = 'table-sort';
             button.setAttribute('data-sort', `sort-${header.key}`);
@@ -121,7 +123,7 @@ function createDynamicTable({ reportsData }) {
 
     const tbody = document.createElement('tbody');
     tbody.className = 'table-tbody';
-    reportsData.forEach(item => {
+    reportsData.forEach((item, i) => {
         const row = document.createElement('tr');
         headersArray.forEach(header => {
             const td = document.createElement('td');
@@ -131,10 +133,14 @@ function createDynamicTable({ reportsData }) {
                 link.href = `check-details.html?id=${item.name}`;
                 link.className = 'btn btn-primary btn-sm';
                 link.textContent = 'View Details';
+                link.target = '_blank';
                 td.appendChild(link);
-            } else {
+            } else if (header.label === '#') {
+                td.textContent = i + 1;
+            }
+            else {
                 td.className = `sort-${header.key}`;
-                td.textContent = header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '';
+                td.textContent = String(header.key.split('.').reduce((obj, key) => obj && obj[key], item)) || '';
             }
             row.appendChild(td);
         });
