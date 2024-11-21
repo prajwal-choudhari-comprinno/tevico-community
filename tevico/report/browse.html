@@ -323,24 +323,26 @@
       <!-- Page body -->
       <div class="page-body">
         <div class="container-xl">
-          <div id="table-default" class="table-responsive">
+          <div id="table-default">
             <div class="card">
               <div class="card-body border-bottom py-3">
                 <div class="d-flex gap-3">
                   <div class="dropdown">
                     <a href="#" class="btn dropdown-toggle" data-bs-toggle="dropdown">Select Section</a>
-                    <div class="dropdown-menu" id="sectionDropdown"></div>
+                    <div class="dropdown-menu" id="sectionDropdown" style="max-height: 15rem; overflow: auto;"></div>
                   </div>
 
                   <div class="dropdown">
                     <a href="#" class="btn dropdown-toggle" data-bs-toggle="dropdown">Select Service</a>
-                    <div class="dropdown-menu" id="serviceDropdown"></div>
+                    <div class="dropdown-menu" id="serviceDropdown" style="max-height: 15rem; overflow: auto;"></div>
                   </div>
 
                   <div class="dropdown">
                     <a href="#" class="btn dropdown-toggle" data-bs-toggle="dropdown">Select Severity</a>
-                    <div class="dropdown-menu" id="severityDropdown"></div>
+                    <div class="dropdown-menu" id="severityDropdown" style="max-height: 15rem; overflow: auto;"></div>
                   </div>
+
+                  <button class="btn btn-secondary" onclick="clearAllFilters()">Clear All Filters</button>
 
                   <div class="ms-auto text-secondary">
                     Search:
