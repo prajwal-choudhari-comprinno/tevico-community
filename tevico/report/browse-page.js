@@ -107,7 +107,7 @@ function createDynamicTable({ reportsData }) {
 
     headersArray.forEach(header => {
         const th = document.createElement('th');
-        if (header.key !== 'action' && header.key !== '') {
+        if (header.key !== 'action' && header.key !== '' && header.key !=='#') {
             const button = document.createElement('button');
             button.className = 'table-sort';
             button.setAttribute('data-sort', `sort-${header.key}`);
