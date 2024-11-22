@@ -198,11 +198,26 @@ function applyFilters() {
         const severityMatch = !activeFilters.severity ||
             item.values()['sort-check_metadata.severity'] === activeFilters.severity;
 
-        return sectionMatch && serviceMatch && severityMatch;
+        const statusMatch = !activeFilters.status ||
+            (activeFilters.status === 'Passed' ? item.values()['sort-status'] === 'Passed' :
+                activeFilters.status === 'Failed' ? item.values()['sort-status'] === 'Failed' : true);
+
+        return sectionMatch && serviceMatch && severityMatch && statusMatch;
     });
 }
 
 populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
+    const dropdownMenu = document.getElementById(dropdownId);
+    dropdownMenu.innerHTML = '';
+
+    if (dropdownId === 'statusDropdown') {
+        const statusValues = ['Passed', 'Failed'];
+        statusValues.forEach(value => {
+            dropdownMenu.appendChild(createDropdownItem(value, dropdownId, filterType));
+        });
+        return statusValues;
+    }
+
     const uniqueValues = data.reduce((acc, item) => {
         const value = valueAccessor(item);
         if (value && !acc.includes(value)) {
@@ -210,9 +225,6 @@ populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
         }
         return acc;
     }, []).sort((a, b) => a.localeCompare(b));
-
-    const dropdownMenu = document.getElementById(dropdownId);
-    dropdownMenu.innerHTML = '';
 
     uniqueValues.forEach(value => {
         dropdownMenu.appendChild(createDropdownItem(value, dropdownId, filterType));
@@ -225,7 +237,8 @@ getDefaultTextForDropdown = (dropdownId) => {
     const defaults = {
         'sectionDropdown': 'Select Section',
         'serviceDropdown': 'Select Service',
-        'severityDropdown': 'Select Severity'
+        'severityDropdown': 'Select Severity',
+        'statusDropdown': 'Select Status'
     };
     return defaults[dropdownId] || 'Select Option';
 }
@@ -246,13 +259,19 @@ function initializeDropdowns(reportsData) {
             id: 'severityDropdown',
             accessor: item => item.check_metadata?.severity,
             filterType: 'severity'
+        },
+        {
+            id: 'statusDropdown',
+            accessor: item => item.passed ? 'Passed' : 'Failed',
+            filterType: 'status'
         }
     ];
 
     activeFilters = {
         section: null,
         service: null,
-        severity: null
+        severity: null,
+        status: null
     };
 
     dropdownConfigs.forEach(config => {
@@ -270,7 +289,7 @@ function clearAllFilters() {
         activeFilters[key] = null;
     });
 
-    const dropdownIds = ['sectionDropdown', 'serviceDropdown', 'severityDropdown'];
+    const dropdownIds = ['sectionDropdown', 'serviceDropdown', 'severityDropdown', 'statusDropdown'];
     dropdownIds.forEach(id => {
         const dropdownButton = document.querySelector(`#${id}`).closest('.dropdown').querySelector('.dropdown-toggle');
         if (dropdownButton) {
