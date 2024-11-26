@@ -24,9 +24,6 @@ class rds_instance_multi_az(Check):
                 else:
                     report.resource_ids_status[instance_id] = True
                     
-     
-
-            
         except Exception as e:
             report.passed = False
             return report
