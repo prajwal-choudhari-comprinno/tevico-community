@@ -136,6 +136,11 @@ function createDynamicTable({ reportsData }) {
                     link.textContent = 'View Details';
                     td.appendChild(link);
                     break;
+                case 'check_metadata.severity':
+                    td.className = `sort-${header.key}`;
+                    td.textContent = header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '';
+                    td.classList.add('text-capitalize');
+                    break;
                 case 'status':
                     td.className = `sort-${header.key}`;
                     td.textContent = item.passed ? 'Passed' : 'Failed';
