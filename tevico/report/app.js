@@ -1,26 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
     updateUI(check_reports, check_analytics);
-    // const fetchReports = fetch('./data/check_reports.json').then(response => {
-    //     if (!response.ok) {
-    //         throw new Error('Network response was not ok for check_reports.json');
-    //     }
-    //     return response.json();
-    // });
-
-    // const fetchAnalytics = fetch('./data/check_analytics.json').then(response => {
-    //     if (!response.ok) {
-    //         throw new Error('Network response was not ok for check_analytics.json');
-    //     }
-    //     return response.json();
-    // });
-
-    // Promise.all([fetchReports, fetchAnalytics])
-    //     .then(([reportsData, analyticsData]) => {
-    //         updateUI(reportsData, analyticsData);
-    //     })
-    //     .catch(error => {
-    //         console.error('There was a problem with the fetch operation:', error);
-    //     });
 });
 
 function updateUI(reportsData, analyticsData) {
@@ -40,7 +19,7 @@ function updateUI(reportsData, analyticsData) {
             total_checks: check_status.total,
             passed_checks: check_status.passed,
             failed_checks: check_status.failed,
-            severity_score: `${(reportsData.reduce((acc, check) => {
+            severity_score: `${(((reportsData.reduce((acc, check) => {
                 const scores = {
                     critical: 4,
                     high: 3,
@@ -48,7 +27,7 @@ function updateUI(reportsData, analyticsData) {
                     low: 1,
                 };
                 return acc + scores[check.check_metadata.severity] || 0;
-            }, 0) / reportsData.length).toFixed(2)}%`
+            }, 0) / reportsData.length) / 4) * 100).toFixed(2)}%`
         };
 
         const subtitle = {
