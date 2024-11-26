@@ -12,7 +12,7 @@ class rds_instance_multi_az(Check):
         try:
             client = connection.client('rds')
             response = client.describe_db_instances()
-            report.passed = True  # Initialize as True
+            report.passed = True 
             
             for instance in response['DBInstances']:
                 instance_id = instance['DBInstanceIdentifier']
