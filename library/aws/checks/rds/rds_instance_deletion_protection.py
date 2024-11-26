@@ -15,7 +15,6 @@ class rds_instance_deletion_protection(Check):
             instance_name = instance['DBInstanceIdentifier']
             
             if instance['DeletionProtection']:
-                report.passed = True
                 report.resource_ids_status[instance_name] = True
             else:
                 report.passed = False
