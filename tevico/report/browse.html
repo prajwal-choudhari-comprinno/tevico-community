@@ -284,7 +284,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="./form-elements.html">
+              <a class="nav-link" href="./well-architected-review.html">
                 <span
                   class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
@@ -295,7 +295,7 @@
                   </svg>
                 </span>
                 <span class="nav-link-title">
-                  Frameworks
+                  Well-Architected Review
                 </span>
               </a>
             </li>
@@ -342,6 +342,11 @@
                     <div class="dropdown-menu" id="severityDropdown" style="max-height: 15rem; overflow: auto;"></div>
                   </div>
 
+                  <div class="dropdown">
+                    <a href="#" class="btn dropdown-toggle" data-bs-toggle="dropdown">Select Status</a>
+                    <div class="dropdown-menu" id="statusDropdown" style="max-height: 15rem; overflow: auto;"></div>
+                  </div>
+
                   <button class="btn btn-secondary" onclick="clearAllFilters()">Clear All Filters</button>
 
                   <div class="ms-auto text-secondary">
@@ -359,7 +364,6 @@
                 <ul class="pagination m-0 ms-auto">
                   <li class="page-item">
                     <a class="page-link prev" href="#" tabindex="-1">
-                      <!-- Download SVG icon from http://tabler-icons.io/i/chevron-left -->
                       <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
                         stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -372,7 +376,6 @@
                   <li class="page-item">
                     <a class="page-link next" href="#">
                       next
-                      <!-- Download SVG icon from http://tabler-icons.io/i/chevron-right -->
                       <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
                         stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -388,57 +391,9 @@
           </div>
         </div>
       </div>
-      <footer class="footer footer-transparent d-print-none">
-        <div class="container-xl">
-          <div class="row text-center align-items-center flex-row-reverse">
-            <div class="col-lg-auto ms-lg-auto">
-              <ul class="list-inline list-inline-dots mb-0">
-                <li class="list-inline-item"><a href="https://tabler.io/docs" target="_blank" class="link-secondary"
-                    rel="noopener">Tevico SaaS</a></li>
-                <li class="list-inline-item"><a href="https://github.com/tabler/tabler" target="_blank"
-                    class="link-secondary" rel="noopener">Source code</a></li>
-                <li class="list-inline-item">
-                  <a href="https://github.com/sponsors/codecalm" target="_blank" class="link-secondary" rel="noopener">
-                    <!-- Download SVG icon from http://tabler-icons.io/i/heart -->
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon text-pink icon-filled icon-inline" width="24"
-                      height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572" />
-                    </svg>
-                    Made with Tabler
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div class="col-12 col-lg-auto mt-3 mt-lg-0">
-              <ul class="list-inline list-inline-dots mb-0">
-                <li class="list-inline-item">
-                  Copyright &copy; 2024
-                  <a href="#" class="link-secondary">Tevico</a>.
-                  All rights reserved.
-                </li>
-                <li class="list-inline-item">
-                  <a href="#" class="link-secondary" rel="noopener">
-                    v1.0.0
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   </div>
-  <!-- Libs JS -->
-  <!-- <script src="./lib/libs/apexcharts/dist/apexcharts.min.js?1692870487" defer></script> -->
-  <script src="./lib/libs/apexcharts/dist/apexcharts.min.js" defer></script>
-  <!-- <script src="./lib/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487" defer></script> -->
-  <!-- <script src="./lib/libs/jsvectormap/dist/maps/world.js?1692870487" defer></script> -->
-  <!-- <script src="./lib/libs/jsvectormap/dist/maps/world-merc.js?1692870487" defer></script> -->
-  <!-- Tabler Core -->
   <script src="./lib/js/tabler.min.js?1692870487" defer></script>
-  <!-- <script src="./lib/js/demo.min.js?1692870487" defer></script> -->
 
   <script src="./lib/libs/list.js/dist/list.min.js" defer></script>
 
