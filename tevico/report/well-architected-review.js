@@ -1,26 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // renderDOM({ warDetails, reportsData: check_reports })
-    const fetchReports = fetch('./data/check_reports.json').then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok for check_reports.json');
-        }
-        return response.json();
-    });
-
-    const fetchWarDetails = fetch('./data/war.json').then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok for war.json');
-        }
-        return response.json();
-    });
-
-    Promise.all([fetchReports, fetchWarDetails])
-        .then(([reportsData, warDetails]) => {
-            renderDOM({ reportsData, warDetails });
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
+    renderDOM({ warDetails: war_report, reportsData: check_reports })
 });
 
 const renderDOM = ({ warDetails, reportsData }) => {
@@ -78,7 +57,7 @@ const renderDOM = ({ warDetails, reportsData }) => {
             );
             if (checkData) {
                 tbody.appendChild(createTableRow(checkData, index));
-                index +=1;
+                index += 1;
             }
         });
 
@@ -99,13 +78,15 @@ const renderDOM = ({ warDetails, reportsData }) => {
 
         tabContent.innerHTML = `<p>${section.description}</p>`;
 
-        section.sections.forEach((subSection, index) => {
-            const sectionContent = createSectionContent(subSection);
-            if (index + 1 < section.sections.length) {
-                sectionContent.classList.add('mb-3');
-            }
-            tabContent.appendChild(sectionContent);
-        });
+        if (section.sections) {
+            section.sections.forEach((subSection, index) => {
+                const sectionContent = createSectionContent(subSection);
+                if (index + 1 < section.sections.length) {
+                    sectionContent.classList.add('mb-3');
+                }
+                tabContent.appendChild(sectionContent);
+            });
+        }
 
         tabsContent.appendChild(tabContent);
     });
