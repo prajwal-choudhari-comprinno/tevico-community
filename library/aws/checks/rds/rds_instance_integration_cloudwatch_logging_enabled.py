@@ -22,15 +22,13 @@ class rds_instance_integration_cloudwatch_logging_enabled(Check):
 
             for instance in instances:
                 instance_name = instance['DBInstanceIdentifier']
-                logging_enabled = instance.get('CloudwatchLogsExportConfiguration', {}).get('LogTypes', [])
-
+                logging_enabled = instance.get('EnabledCloudwatchLogsExports', [])
                 if logging_enabled:
                     report.resource_ids_status[instance_name] = True
                 else:
                     report.resource_ids_status[instance_name] = False
                     report.passed = False  
                      
-            
         except Exception as e:
             report.passed = False
             return report
