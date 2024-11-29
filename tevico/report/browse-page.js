@@ -57,11 +57,13 @@ function initializeListJS() {
         searchClass: 'table-search',
         valueNames: ['sort-check_metadata.check_title', 'sort-check_metadata.severity', 'sort-check_metadata.service_name', 'sort-section', 'sort-status'],
         page: 15,
-        pagination: true
+        pagination: true,
+        sort: ['sort-check_metadata.check_title', { order: 'asc' }]
     };
 
     list = new List('table-default', options);
 
+    list.sort('sort-check_metadata.check_title', { order: 'asc' });
     list.on('searchComplete', updateRowNumbers);
     list.on('filterComplete', updateRowNumbers);
     list.on('sortComplete', updateRowNumbers);
