@@ -1,5 +1,7 @@
 let currentPage = 1;
 let list;
+let currentSortColumn = 'sort-check_metadata.check_title';
+let currentSortOrder = 'asc';
 
 function updatePaginationInfo() {
     const totalItems = list.matchingItems.length;
@@ -57,16 +59,34 @@ function initializeListJS() {
         searchClass: 'table-search',
         valueNames: ['sort-check_metadata.check_title', 'sort-check_metadata.severity', 'sort-check_metadata.service_name', 'sort-section', 'sort-status'],
         page: 15,
-        pagination: true,
-        sort: ['sort-check_metadata.check_title', { order: 'asc' }]
+        pagination: true
     };
 
     list = new List('table-default', options);
+    list.sort(currentSortColumn, { order: currentSortOrder });
+    list.on('sortComplete', function () {
+        const sortElements = document.querySelectorAll('.table-sort');
+        sortElements.forEach(element => {
+            if (element.classList.contains('asc')) {
+                currentSortColumn = element.getAttribute('data-sort');
+                currentSortOrder = 'asc';
+            } else if (element.classList.contains('desc')) {
+                currentSortColumn = element.getAttribute('data-sort');
+                currentSortOrder = 'desc';
+            }
+        });
+    });
 
-    list.sort('sort-check_metadata.check_title', { order: 'asc' });
-    list.on('searchComplete', updateRowNumbers);
-    list.on('filterComplete', updateRowNumbers);
-    list.on('sortComplete', updateRowNumbers);
+    list.on('searchComplete', function () {
+        list.sort(currentSortColumn, { order: currentSortOrder });
+        updateRowNumbers();
+    });
+
+    list.on('filterComplete', function () {
+        list.sort(currentSortColumn, { order: currentSortOrder });
+        updateRowNumbers();
+    });
+
     list.on('updated', () => {
         updatePaginationInfo();
         updatePaginationButtons();
@@ -75,7 +95,10 @@ function initializeListJS() {
 
     document.querySelectorAll('.dropdown-item').forEach(item => {
         item.addEventListener('click', () => {
-            setTimeout(updateRowNumbers, 0);
+            setTimeout(() => {
+                list.sort(currentSortColumn, { order: currentSortOrder });
+                updateRowNumbers();
+            }, 0);
         });
     });
 
