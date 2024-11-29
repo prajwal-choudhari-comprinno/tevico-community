@@ -370,10 +370,18 @@ function clearAllFilters() {
 
     const dropdownIds = ['sectionDropdown', 'serviceDropdown', 'severityDropdown', 'statusDropdown'];
     dropdownIds.forEach(id => {
-        const dropdownButton = document.querySelector(`#${id}`).closest('.dropdown').querySelector('.dropdown-toggle');
+        const dropdown = document.querySelector(`#${id}`).closest('.dropdown');
+        const dropdownButton = dropdown.querySelector('.dropdown-toggle');
+        const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
+
         if (dropdownButton) {
             dropdownButton.textContent = getDefaultTextForDropdown(id);
+            dropdownButton.classList.remove('active');
         }
+        dropdownItems.forEach(item => {
+            item.classList.remove('active');
+        });
     });
+
     list.filter();
 }
