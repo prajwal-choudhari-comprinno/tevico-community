@@ -215,35 +215,54 @@ function createDynamicTable({ reportsData }) {
     initializeDropdowns(reportsData);
 }
 
+const capitalizeText = (text) => text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+
 createDropdownItem = (text, dropdownId, filterType) => {
+    const transformedText = filterType === 'severity' ? capitalizeText(text) : text;
+
     const item = document.createElement('a');
     item.className = 'dropdown-item';
     item.href = '#';
-    item.textContent = text;
+    item.textContent = transformedText;
 
     item.addEventListener('click', (e) => {
         e.preventDefault();
-        const dropdownButton = document.querySelector(`#${dropdownId}`).closest('.dropdown').querySelector('.dropdown-toggle');
+        const dropdown = document.querySelector(`#${dropdownId}`).closest('.dropdown');
+        const dropdownButton = dropdown.querySelector('.dropdown-toggle');
+        const allDropdownItems = dropdown.querySelectorAll('.dropdown-item');
 
         if (dropdownButton) {
-            if (dropdownButton.textContent === text) {
+            allDropdownItems.forEach(dropItem => {
+                dropItem.classList.remove('active');
+            });
+
+            if (dropdownButton.textContent === transformedText) {
                 dropdownButton.textContent = getDefaultTextForDropdown(dropdownId);
+                dropdownButton.classList.remove('active');
                 activeFilters[filterType] = null;
             } else {
-                dropdownButton.textContent = text;
-                activeFilters[filterType] = text;
+                dropdownButton.textContent = transformedText;
+                dropdownButton.classList.add('active');
+                item.classList.add('active');
+                activeFilters[filterType] = transformedText;
             }
+
             applyFilters();
-            updateRowNumbers();
+            setTimeout(() => {
+                list.sort(currentSortColumn, { order: currentSortOrder });
+                updateRowNumbers();
+            }, 0);
         }
     });
+
+    if (activeFilters[filterType] === transformedText) {
+        item.classList.add('active');
+    }
 
     return item;
 }
 
 function applyFilters() {
-    list.filter();
-
     list.filter(item => {
         const sectionMatch = !activeFilters.section ||
             item.values()['sort-section'] === activeFilters.section;
@@ -252,14 +271,18 @@ function applyFilters() {
             item.values()['sort-check_metadata.service_name'] === activeFilters.service;
 
         const severityMatch = !activeFilters.severity ||
-            item.values()['sort-check_metadata.severity'] === activeFilters.severity;
+            item.values()['sort-check_metadata.severity'] === activeFilters.severity.toLowerCase();
 
         const statusMatch = !activeFilters.status ||
             (activeFilters.status === 'Passed' ? item.values()['sort-status'] === 'Passed' :
-                activeFilters.status === 'Failed' ? item.values()['sort-status'] === 'Failed' : true);
+                item.values()['sort-status'] === 'Failed');
 
         return sectionMatch && serviceMatch && severityMatch && statusMatch;
     });
+    setTimeout(() => {
+        list.sort(currentSortColumn, { order: currentSortOrder });
+        updateRowNumbers();
+    }, 0);
 }
 
 populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
