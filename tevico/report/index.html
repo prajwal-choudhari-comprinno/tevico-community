@@ -23,11 +23,6 @@
       font-feature-settings: "cv03", "cv04", "cv11";
     }
   </style>
-  <style>
-    /* .card {
-      height: 400px;
-    } */
-  </style>
 </head>
 
 <body>
@@ -40,8 +35,9 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <h1 class="navbar-brand navbar-brand-autodark">
-          <a href=".">
-            <img src="./lib/img/tevico/logo.png" width="110" height="32" alt="Tabler" class="navbar-brand-image">
+          <a href="." style="position: relative;">
+            <img src="./lib/img/tevico/logo.png" alt="Tabler" style="max-height: 75px;">
+            <p class="mb-0 fw-normal" style="position: absolute; bottom: 2px;">Tevico</p>
           </a>
         </h1>
         <div class="navbar-nav flex-row d-lg-none">
@@ -246,12 +242,12 @@
               <a class="nav-link" href="./browse.html">
                 <span
                   class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/home -->
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                    stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-search">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
-                    <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-                    <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+                    <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                    <path d="M21 21l-6 -6" />
                   </svg>
                 </span>
                 <span class="nav-link-title">
@@ -425,7 +421,8 @@
                       <h3 class="card-title">Critical Checks</h3>
                       <a href="browse.html" class="btn btn-primary btn-sm">View All</a>
                     </div>
-                    <div class="table-responsive" id="failedChecksTableContainer" style="min-height: 257px; max-height: 257px; overflow: scroll;">
+                    <div class="table-responsive" id="failedChecksTableContainer"
+                      style="min-height: 257px; max-height: 257px; overflow: scroll;">
                     </div>
                   </div>
                 </div>
@@ -481,7 +478,8 @@
                       <h3 class="card-title">Critical Checks</h3>
                       <a href="browse.html" class="btn btn-primary btn-sm">View All</a>
                     </div>
-                    <div class="table-responsive" id="passedChecksTableContainer" style="min-height: 257px; max-height: 257px; overflow: scroll;">
+                    <div class="table-responsive" id="passedChecksTableContainer"
+                      style="min-height: 257px; max-height: 257px; overflow: scroll;">
                     </div>
                   </div>
                 </div>

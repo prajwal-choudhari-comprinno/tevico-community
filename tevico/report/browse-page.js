@@ -19,7 +19,6 @@ function updatePaginationInfo() {
             paginationInfo.textContent = `Showing ${startIndex}-${endIndex} of ${totalItems}`;
         }
     }
-
 }
 
 function updatePaginationButtons() {
@@ -41,6 +40,16 @@ function updatePaginationButtons() {
     });
 }
 
+function updateRowNumbers() {
+    const visibleRows = document.querySelectorAll('.table-tbody tr:not(.hidden):not([style*="display: none"])');
+    visibleRows.forEach((row, index) => {
+        const indexCell = row.querySelector('.row-index');
+        if (indexCell) {
+            indexCell.textContent = index + 1;
+        }
+    });
+}
+
 function initializeListJS() {
     const options = {
         sortClass: 'table-sort',
@@ -53,17 +62,31 @@ function initializeListJS() {
 
     list = new List('table-default', options);
 
+    list.on('searchComplete', updateRowNumbers);
+    list.on('filterComplete', updateRowNumbers);
+    list.on('sortComplete', updateRowNumbers);
     list.on('updated', () => {
         updatePaginationInfo();
         updatePaginationButtons();
+        updateRowNumbers();
+    });
+
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+            setTimeout(updateRowNumbers, 0);
+        });
     });
 
     const paginationContainer = document.querySelector('.pagination');
     if (paginationContainer) {
         paginationContainer.addEventListener('click', handlePaginationClick);
     }
+
     updatePaginationInfo();
     updatePaginationButtons();
+    updateRowNumbers();
+
+    return list;
 }
 
 function handlePaginationClick(e) {
@@ -107,7 +130,7 @@ function createDynamicTable({ reportsData }) {
 
     headersArray.forEach(header => {
         const th = document.createElement('th');
-        if (header.key !== 'action' && header.key !== '' && header.key !=='#') {
+        if (header.key !== 'action' && header.key !== '' && header.key !== '#') {
             const button = document.createElement('button');
             button.className = 'table-sort';
             button.setAttribute('data-sort', `sort-${header.key}`);
@@ -146,6 +169,7 @@ function createDynamicTable({ reportsData }) {
                     td.textContent = item.passed ? 'Passed' : 'Failed';
                     break;
                 case '#':
+                    td.className = 'row-index';
                     td.textContent = i + 1;
                     break;
                 default:
@@ -161,8 +185,9 @@ function createDynamicTable({ reportsData }) {
     const container = document.getElementById("tableContainer");
     container.innerHTML = '';
     container.appendChild(table);
+
     initializeListJS();
-    initializeDropdowns(reportsData)
+    initializeDropdowns(reportsData);
 }
 
 createDropdownItem = (text, dropdownId, filterType) => {
@@ -183,8 +208,9 @@ createDropdownItem = (text, dropdownId, filterType) => {
                 dropdownButton.textContent = text;
                 activeFilters[filterType] = text;
             }
+            applyFilters();
+            updateRowNumbers();
         }
-        applyFilters();
     });
 
     return item;
