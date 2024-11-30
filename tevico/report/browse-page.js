@@ -57,7 +57,7 @@ function initializeListJS() {
         sortClass: 'table-sort',
         listClass: 'table-tbody',
         searchClass: 'table-search',
-        valueNames: ['sort-check_metadata.check_title', 'sort-check_metadata.severity', 'sort-check_metadata.service_name', 'sort-section', 'sort-status'],
+        valueNames: ['sort-check_metadata.check_title', 'sort-check_metadata.severity', 'sort-check_metadata.service_name', 'sort-section', { name: 'sort-status', attr: 'data-status' }],
         page: 15,
         pagination: true
     };
@@ -191,7 +191,10 @@ function createDynamicTable({ reportsData }) {
                     break;
                 case 'status':
                     td.className = `sort-${header.key}`;
-                    td.textContent = item.passed ? 'Passed' : 'Failed';
+                    const statusValue = item.passed ? 'Passed' : 'Failed';
+                    const badgeClass = item.passed ? 'bg-softer-success' : 'bg-softer-danger';
+                    td.setAttribute('data-status', statusValue);
+                    td.innerHTML = `<span class="badge ${badgeClass}">${statusValue}</span>`;
                     break;
                 case '#':
                     td.className = 'row-index';
@@ -274,8 +277,7 @@ function applyFilters() {
             item.values()['sort-check_metadata.severity'] === activeFilters.severity.toLowerCase();
 
         const statusMatch = !activeFilters.status ||
-            (activeFilters.status === 'Passed' ? item.values()['sort-status'] === 'Passed' :
-                item.values()['sort-status'] === 'Failed');
+            item.values()['sort-status'] === activeFilters.status;
 
         return sectionMatch && serviceMatch && severityMatch && statusMatch;
     });
