@@ -1,6 +1,9 @@
+import { setActiveNavLink, getQueryParam } from './utils/utils.js';
+
 document.addEventListener('DOMContentLoaded', function () {
     const id = getQueryParam('id');
     if (id) {
+        setActiveNavLink();
         const report = check_reports.find(item => item.name === id);
         if (report) {
             displayCheckDetails(report);
@@ -12,19 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.href = 'index.html';
     }
 });
-
-getQueryParam = (paramName) => {
-    try {
-        const param = new URLSearchParams(window.location.search).get(paramName);
-        if (param === null) {
-            throw new Error(`Query parameter '${paramName}' not found`);
-        }
-        return param;
-    } catch (error) {
-        console.error('Error getting query parameter:', error.message);
-        return null;
-    }
-}
 
 function displayCheckDetails(report) {
     const updateElement = (id, value) => {
