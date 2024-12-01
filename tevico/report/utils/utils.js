@@ -25,3 +25,16 @@ export function setActiveNavLink() {
         }
     });
 }
+
+export const getQueryParam = (paramName) => {
+    try {
+        const param = new URLSearchParams(window.location.search).get(paramName);
+        if (param === null) {
+            throw new Error(`Query parameter '${paramName}' not found`);
+        }
+        return param;
+    } catch (error) {
+        console.error('Error getting query parameter:', error.message);
+        return null;
+    }
+}
