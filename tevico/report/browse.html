@@ -358,7 +358,9 @@
                     <div class="dropdown-menu" id="statusDropdown" style="max-height: 15rem; overflow: auto;"></div>
                   </div>
 
-                  <button class="btn btn-secondary" onclick="clearAllFilters()">Clear All Filters</button>
+                  <button class="btn btn-secondary" id="clearFiltersButton">
+                    Clear All Filters
+                  </button>
 
                   <div class="ms-auto text-secondary">
                     Search:
@@ -409,7 +411,7 @@
   <script src="./lib/libs/list.js/dist/list.min.js" defer></script>
 
   <script src="./data/check_report.js"></script>
-  <script src="./browse-page.js"></script>
+  <script type="module" src="./browse-page.js"></script>
 </body>
 
 </html>
