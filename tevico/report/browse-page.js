@@ -1,7 +1,15 @@
+import { setActiveNavLink } from './utils/utils.js'
+
 let currentPage = 1;
 let list;
 let currentSortColumn = 'sort-check_metadata.check_title';
 let currentSortOrder = 'asc';
+const activeFilters = {
+    section: null,
+    service: null,
+    severity: null,
+    status: null
+};
 
 function updatePaginationInfo() {
     const totalItems = list.matchingItems.length;
@@ -134,6 +142,11 @@ function handlePaginationClick(e) {
 
 document.addEventListener('DOMContentLoaded', function () {
     createDynamicTable({ reportsData: check_reports });
+    setActiveNavLink();
+    const clearButton = document.querySelector('#clearFiltersButton');
+    if (clearButton) {
+        clearButton.addEventListener('click', clearAllFilters);
+    }
 });
 
 function createDynamicTable({ reportsData }) {
@@ -220,7 +233,7 @@ function createDynamicTable({ reportsData }) {
 
 const capitalizeText = (text) => text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 
-createDropdownItem = (text, dropdownId, filterType) => {
+const createDropdownItem = (text, dropdownId, filterType) => {
     const transformedText = filterType === 'severity' ? capitalizeText(text) : text;
 
     const item = document.createElement('a');
@@ -287,7 +300,7 @@ function applyFilters() {
     }, 0);
 }
 
-populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
+const populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
     const dropdownMenu = document.getElementById(dropdownId);
     dropdownMenu.innerHTML = '';
 
@@ -314,7 +327,7 @@ populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
     return uniqueValues;
 }
 
-getDefaultTextForDropdown = (dropdownId) => {
+const getDefaultTextForDropdown = (dropdownId) => {
     const defaults = {
         'sectionDropdown': 'Select Section',
         'serviceDropdown': 'Select Service',
@@ -347,13 +360,6 @@ function initializeDropdowns(reportsData) {
             filterType: 'status'
         }
     ];
-
-    activeFilters = {
-        section: null,
-        service: null,
-        severity: null,
-        status: null
-    };
 
     dropdownConfigs.forEach(config => {
         populateDropdown(reportsData, config.id, config.accessor, config.filterType);
