@@ -33,9 +33,9 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <h1 class="navbar-brand navbar-brand-autodark mx-auto">
-                    <a href=".">
-                        <img src="./lib/img/tevico/logo.png" width="110" height="32" alt="Tabler"
-                            class="navbar-brand-image">
+                    <a href="." style="position: relative;">
+                        <img src="./lib/img/tevico/logo.png" alt="Tabler" style="max-height: 75px;">
+                        <p class="mb-0 fw-normal" style="position: absolute; bottom: 2px;">Tevico</p>
                     </a>
                 </h1>
                 <div class="collapse navbar-collapse" id="sidebar-menu">
@@ -60,13 +60,13 @@
                         <li class="nav-item">
                             <a class="nav-link" href="./browse.html">
                                 <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                        stroke-linecap="round" stroke-linejoin="round">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="icon icon-tabler icons-tabler-outline icon-tabler-search">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
-                                        <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-                                        <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+                                        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                                        <path d="M21 21l-6 -6" />
                                     </svg>
                                 </span>
                                 <span class="nav-link-title">
@@ -97,12 +97,30 @@
         <div class="page-wrapper">
             <div class="page-header d-print-none">
                 <div class="container-xl">
-                    <div class="row g-2 align-items-center">
-                        <div class="col">
+                    <div class="row">
+                        <div class="col-auto">
+                            <a href="./browse.html" class="link-dark">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-left">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M5 12l14 0" />
+                                    <path d="M5 12l6 6" />
+                                    <path d="M5 12l6 -6" />
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="col-auto">
                             <div class="page-pretitle">
                                 Check Details
                             </div>
-                            <h2 class="page-title" id="page_title"></h2>
+                            <h2 class="page-title mb-1" id="page_title"></h2>
+                            <ol class="breadcrumb" aria-label="breadcrumbs">
+                                <li class="breadcrumb-item"><a href="./browse.html">Browse Checks</a></li>
+                                <li class="breadcrumb-item active" aria-current="page"><a href="#">Check Details</a>
+                                </li>
+                            </ol>
                         </div>
                     </div>
                 </div>
@@ -160,7 +178,7 @@
 
     <script src="./lib/libs/list.js/dist/list.min.js" defer></script>
     <script src="./data/check_report.js"></script>
-    <script src="./check-details-page.js"></script>
+    <script type="module" src="./check-details-page.js"></script>
 </body>
 
 </html>
