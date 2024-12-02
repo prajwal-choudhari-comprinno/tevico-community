@@ -1,4 +1,4 @@
-import { setActiveNavLink } from './utils/utils.js'
+import { getQueryParam, setActiveNavLink } from './utils/utils.js';
 
 let currentPage = 1;
 let list;
@@ -278,6 +278,43 @@ const createDropdownItem = (text, dropdownId, filterType) => {
     return item;
 }
 
+function applyDefaultFilters() {
+    const severity = getQueryParam('severity');
+    const status = getQueryParam('status');
+
+    if (severity) {
+        const severityDropdown = document.getElementById('severityDropdown');
+        const severityItem = Array.from(severityDropdown.querySelectorAll('.dropdown-item'))
+            .find(item => item.textContent.toLowerCase() === severity.toLowerCase());
+        const dropdownToggle = severityDropdown.closest('.dropdown').querySelector('.dropdown-toggle');
+
+        if (severityItem) {
+            activeFilters.severity = severityItem.textContent;
+            dropdownToggle.textContent = severityItem.textContent;
+            dropdownToggle.classList.add('active');
+            severityItem.classList.add('active');
+        }
+    }
+
+    if (status) {
+        const statusDropdown = document.getElementById('statusDropdown');
+        const statusItem = Array.from(statusDropdown.querySelectorAll('.dropdown-item'))
+            .find(item => item.textContent.toLowerCase() === status.toLowerCase());
+        const dropdownToggle = statusDropdown.closest('.dropdown').querySelector('.dropdown-toggle');
+
+        if (statusItem) {
+            activeFilters.status = statusItem.textContent;
+            dropdownToggle.textContent = statusItem.textContent;
+            dropdownToggle.classList.add('active');
+            statusItem.classList.add('active');
+        }
+    }
+
+    if (severity || status) {
+        applyFilters();
+    }
+}
+
 function applyFilters() {
     list.filter(item => {
         const sectionMatch = !activeFilters.section ||
@@ -369,6 +406,8 @@ function initializeDropdowns(reportsData) {
             dropdownButton.textContent = getDefaultTextForDropdown(config.id);
         }
     });
+
+    applyDefaultFilters();
 }
 
 function clearAllFilters() {
