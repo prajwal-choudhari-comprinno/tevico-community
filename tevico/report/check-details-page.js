@@ -1,4 +1,3 @@
-import { setActiveNavLink, getQueryParam } from './utils/utils.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     const id = getQueryParam('id');
