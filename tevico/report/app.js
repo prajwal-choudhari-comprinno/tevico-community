@@ -1,5 +1,3 @@
-import { setActiveNavLink } from './utils/utils.js';
-
 document.addEventListener('DOMContentLoaded', function () {
     updateUI(check_reports, check_analytics);
     setActiveNavLink();

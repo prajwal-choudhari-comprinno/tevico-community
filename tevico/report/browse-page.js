@@ -1,4 +1,3 @@
-import { getQueryParam, setActiveNavLink } from './utils/utils.js';
 
 let currentPage = 1;
 let list;
