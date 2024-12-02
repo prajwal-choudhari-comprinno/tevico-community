@@ -52,10 +52,13 @@ function updatePaginationButtons() {
 
 function updateRowNumbers() {
     const visibleRows = document.querySelectorAll('.table-tbody tr:not(.hidden):not([style*="display: none"])');
+    const itemsPerPage = list.page;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+
     visibleRows.forEach((row, index) => {
         const indexCell = row.querySelector('.row-index');
         if (indexCell) {
-            indexCell.textContent = index + 1;
+            indexCell.textContent = startIndex + index + 1;
         }
     });
 }
@@ -129,15 +132,23 @@ function handlePaginationClick(e) {
     e.preventDefault();
 
     if (target.parentElement.classList.contains('prev')) {
-        if (currentPage > 1) currentPage--;
+        if (currentPage > 1) {
+            currentPage--;
+            list.show((currentPage - 1) * list.page + 1, list.page);
+        }
     } else if (target.parentElement.classList.contains('next')) {
-        if (currentPage < Math.ceil(list.matchingItems.length / list.page)) currentPage++;
+        if (currentPage < Math.ceil(list.matchingItems.length / list.page)) {
+            currentPage++;
+            list.show((currentPage - 1) * list.page + 1, list.page);
+        }
     } else {
         currentPage = parseInt(target.textContent, 10);
+        list.show((currentPage - 1) * list.page + 1, list.page);
     }
 
     updatePaginationInfo();
     updatePaginationButtons();
+    updateRowNumbers();
 }
 
 document.addEventListener('DOMContentLoaded', function () {
