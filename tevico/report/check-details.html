@@ -97,12 +97,30 @@
         <div class="page-wrapper">
             <div class="page-header d-print-none">
                 <div class="container-xl">
-                    <div class="row g-2 align-items-center">
-                        <div class="col">
+                    <div class="row">
+                        <div class="col-auto">
+                            <a href="./browse.html" class="link-dark">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-left">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M5 12l14 0" />
+                                    <path d="M5 12l6 6" />
+                                    <path d="M5 12l6 -6" />
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="col-auto">
                             <div class="page-pretitle">
                                 Check Details
                             </div>
-                            <h2 class="page-title" id="page_title"></h2>
+                            <h2 class="page-title mb-1" id="page_title"></h2>
+                            <ol class="breadcrumb" aria-label="breadcrumbs">
+                                <li class="breadcrumb-item"><a href="./browse.html">Browse Checks</a></li>
+                                <li class="breadcrumb-item active" aria-current="page"><a href="#">Check Details</a>
+                                </li>
+                            </ol>
                         </div>
                     </div>
                 </div>
@@ -160,7 +178,7 @@
 
     <script src="./lib/libs/list.js/dist/list.min.js" defer></script>
     <script src="./data/check_report.js"></script>
-    <script src="./check-details-page.js"></script>
+    <script type="module" src="./check-details-page.js"></script>
 </body>
 
 </html>

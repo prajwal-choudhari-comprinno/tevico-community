@@ -1,5 +1,15 @@
+import { getQueryParam, setActiveNavLink } from './utils/utils.js';
+
 let currentPage = 1;
 let list;
+let currentSortColumn = 'sort-check_metadata.check_title';
+let currentSortOrder = 'asc';
+const activeFilters = {
+    section: null,
+    service: null,
+    severity: null,
+    status: null
+};
 
 function updatePaginationInfo() {
     const totalItems = list.matchingItems.length;
@@ -42,10 +52,13 @@ function updatePaginationButtons() {
 
 function updateRowNumbers() {
     const visibleRows = document.querySelectorAll('.table-tbody tr:not(.hidden):not([style*="display: none"])');
+    const itemsPerPage = list.page;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+
     visibleRows.forEach((row, index) => {
         const indexCell = row.querySelector('.row-index');
         if (indexCell) {
-            indexCell.textContent = index + 1;
+            indexCell.textContent = startIndex + index + 1;
         }
     });
 }
@@ -55,16 +68,36 @@ function initializeListJS() {
         sortClass: 'table-sort',
         listClass: 'table-tbody',
         searchClass: 'table-search',
-        valueNames: ['sort-check_metadata.check_title', 'sort-check_metadata.severity', 'sort-check_metadata.service_name', 'sort-section', 'sort-status'],
+        valueNames: ['sort-check_metadata.check_title', 'sort-check_metadata.severity', 'sort-check_metadata.service_name', 'sort-section', { name: 'sort-status', attr: 'data-status' }],
         page: 15,
         pagination: true
     };
 
     list = new List('table-default', options);
+    list.sort(currentSortColumn, { order: currentSortOrder });
+    list.on('sortComplete', function () {
+        const sortElements = document.querySelectorAll('.table-sort');
+        sortElements.forEach(element => {
+            if (element.classList.contains('asc')) {
+                currentSortColumn = element.getAttribute('data-sort');
+                currentSortOrder = 'asc';
+            } else if (element.classList.contains('desc')) {
+                currentSortColumn = element.getAttribute('data-sort');
+                currentSortOrder = 'desc';
+            }
+        });
+    });
 
-    list.on('searchComplete', updateRowNumbers);
-    list.on('filterComplete', updateRowNumbers);
-    list.on('sortComplete', updateRowNumbers);
+    list.on('searchComplete', function () {
+        list.sort(currentSortColumn, { order: currentSortOrder });
+        updateRowNumbers();
+    });
+
+    list.on('filterComplete', function () {
+        list.sort(currentSortColumn, { order: currentSortOrder });
+        updateRowNumbers();
+    });
+
     list.on('updated', () => {
         updatePaginationInfo();
         updatePaginationButtons();
@@ -73,7 +106,10 @@ function initializeListJS() {
 
     document.querySelectorAll('.dropdown-item').forEach(item => {
         item.addEventListener('click', () => {
-            setTimeout(updateRowNumbers, 0);
+            setTimeout(() => {
+                list.sort(currentSortColumn, { order: currentSortOrder });
+                updateRowNumbers();
+            }, 0);
         });
     });
 
@@ -96,19 +132,32 @@ function handlePaginationClick(e) {
     e.preventDefault();
 
     if (target.parentElement.classList.contains('prev')) {
-        if (currentPage > 1) currentPage--;
+        if (currentPage > 1) {
+            currentPage--;
+            list.show((currentPage - 1) * list.page + 1, list.page);
+        }
     } else if (target.parentElement.classList.contains('next')) {
-        if (currentPage < Math.ceil(list.matchingItems.length / list.page)) currentPage++;
+        if (currentPage < Math.ceil(list.matchingItems.length / list.page)) {
+            currentPage++;
+            list.show((currentPage - 1) * list.page + 1, list.page);
+        }
     } else {
         currentPage = parseInt(target.textContent, 10);
+        list.show((currentPage - 1) * list.page + 1, list.page);
     }
 
     updatePaginationInfo();
     updatePaginationButtons();
+    updateRowNumbers();
 }
 
 document.addEventListener('DOMContentLoaded', function () {
     createDynamicTable({ reportsData: check_reports });
+    setActiveNavLink();
+    const clearButton = document.querySelector('#clearFiltersButton');
+    if (clearButton) {
+        clearButton.addEventListener('click', clearAllFilters);
+    }
 });
 
 function createDynamicTable({ reportsData }) {
@@ -166,11 +215,20 @@ function createDynamicTable({ reportsData }) {
                     break;
                 case 'status':
                     td.className = `sort-${header.key}`;
-                    td.textContent = item.passed ? 'Passed' : 'Failed';
+                    const statusValue = item.passed ? 'Passed' : 'Failed';
+                    const badgeClass = item.passed ? 'bg-softer-success' : 'bg-softer-danger';
+                    td.setAttribute('data-status', statusValue);
+                    td.innerHTML = `<span class="badge ${badgeClass}">${statusValue}</span>`;
                     break;
                 case '#':
                     td.className = 'row-index';
                     td.textContent = i + 1;
+                    break;
+                case 'check_metadata.check_title':
+                    td.className = `sort-${header.key} text-truncate`;
+                    td.style.maxWidth = '250px'
+                    td.setAttribute('title', header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '');
+                    td.textContent = header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '';
                     break;
                 default:
                     td.className = `sort-${header.key}`;
@@ -190,35 +248,91 @@ function createDynamicTable({ reportsData }) {
     initializeDropdowns(reportsData);
 }
 
-createDropdownItem = (text, dropdownId, filterType) => {
+const capitalizeText = (text) => text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+
+const createDropdownItem = (text, dropdownId, filterType) => {
+    const transformedText = filterType === 'severity' ? capitalizeText(text) : text;
+
     const item = document.createElement('a');
     item.className = 'dropdown-item';
     item.href = '#';
-    item.textContent = text;
+    item.textContent = transformedText;
 
     item.addEventListener('click', (e) => {
         e.preventDefault();
-        const dropdownButton = document.querySelector(`#${dropdownId}`).closest('.dropdown').querySelector('.dropdown-toggle');
+        const dropdown = document.querySelector(`#${dropdownId}`).closest('.dropdown');
+        const dropdownButton = dropdown.querySelector('.dropdown-toggle');
+        const allDropdownItems = dropdown.querySelectorAll('.dropdown-item');
 
         if (dropdownButton) {
-            if (dropdownButton.textContent === text) {
+            allDropdownItems.forEach(dropItem => {
+                dropItem.classList.remove('active');
+            });
+
+            if (dropdownButton.textContent === transformedText) {
                 dropdownButton.textContent = getDefaultTextForDropdown(dropdownId);
+                dropdownButton.classList.remove('active');
                 activeFilters[filterType] = null;
             } else {
-                dropdownButton.textContent = text;
-                activeFilters[filterType] = text;
+                dropdownButton.textContent = transformedText;
+                dropdownButton.classList.add('active');
+                item.classList.add('active');
+                activeFilters[filterType] = transformedText;
             }
+
             applyFilters();
-            updateRowNumbers();
+            setTimeout(() => {
+                list.sort(currentSortColumn, { order: currentSortOrder });
+                updateRowNumbers();
+            }, 0);
         }
     });
+
+    if (activeFilters[filterType] === transformedText) {
+        item.classList.add('active');
+    }
 
     return item;
 }
 
-function applyFilters() {
-    list.filter();
+function applyDefaultFilters() {
+    const severity = getQueryParam('severity');
+    const status = getQueryParam('status');
 
+    if (severity) {
+        const severityDropdown = document.getElementById('severityDropdown');
+        const severityItem = Array.from(severityDropdown.querySelectorAll('.dropdown-item'))
+            .find(item => item.textContent.toLowerCase() === severity.toLowerCase());
+        const dropdownToggle = severityDropdown.closest('.dropdown').querySelector('.dropdown-toggle');
+
+        if (severityItem) {
+            activeFilters.severity = severityItem.textContent;
+            dropdownToggle.textContent = severityItem.textContent;
+            dropdownToggle.classList.add('active');
+            severityItem.classList.add('active');
+        }
+    }
+
+    if (status) {
+        const statusDropdown = document.getElementById('statusDropdown');
+        const statusItem = Array.from(statusDropdown.querySelectorAll('.dropdown-item'))
+            .find(item => item.textContent.toLowerCase() === status.toLowerCase());
+        const dropdownToggle = statusDropdown.closest('.dropdown').querySelector('.dropdown-toggle');
+
+        if (statusItem) {
+            activeFilters.status = statusItem.textContent;
+            dropdownToggle.textContent = statusItem.textContent;
+            dropdownToggle.classList.add('active');
+            statusItem.classList.add('active');
+        }
+    }
+
+    if (severity || status) {
+        applyFilters();
+    }
+}
+
+function applyFilters() {
     list.filter(item => {
         const sectionMatch = !activeFilters.section ||
             item.values()['sort-section'] === activeFilters.section;
@@ -227,17 +341,20 @@ function applyFilters() {
             item.values()['sort-check_metadata.service_name'] === activeFilters.service;
 
         const severityMatch = !activeFilters.severity ||
-            item.values()['sort-check_metadata.severity'] === activeFilters.severity;
+            item.values()['sort-check_metadata.severity'] === activeFilters.severity.toLowerCase();
 
         const statusMatch = !activeFilters.status ||
-            (activeFilters.status === 'Passed' ? item.values()['sort-status'] === 'Passed' :
-                activeFilters.status === 'Failed' ? item.values()['sort-status'] === 'Failed' : true);
+            item.values()['sort-status'] === activeFilters.status;
 
         return sectionMatch && serviceMatch && severityMatch && statusMatch;
     });
+    setTimeout(() => {
+        list.sort(currentSortColumn, { order: currentSortOrder });
+        updateRowNumbers();
+    }, 0);
 }
 
-populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
+const populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
     const dropdownMenu = document.getElementById(dropdownId);
     dropdownMenu.innerHTML = '';
 
@@ -264,7 +381,7 @@ populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
     return uniqueValues;
 }
 
-getDefaultTextForDropdown = (dropdownId) => {
+const getDefaultTextForDropdown = (dropdownId) => {
     const defaults = {
         'sectionDropdown': 'Select Section',
         'serviceDropdown': 'Select Service',
@@ -298,13 +415,6 @@ function initializeDropdowns(reportsData) {
         }
     ];
 
-    activeFilters = {
-        section: null,
-        service: null,
-        severity: null,
-        status: null
-    };
-
     dropdownConfigs.forEach(config => {
         populateDropdown(reportsData, config.id, config.accessor, config.filterType);
 
@@ -313,6 +423,8 @@ function initializeDropdowns(reportsData) {
             dropdownButton.textContent = getDefaultTextForDropdown(config.id);
         }
     });
+
+    applyDefaultFilters();
 }
 
 function clearAllFilters() {
@@ -322,10 +434,18 @@ function clearAllFilters() {
 
     const dropdownIds = ['sectionDropdown', 'serviceDropdown', 'severityDropdown', 'statusDropdown'];
     dropdownIds.forEach(id => {
-        const dropdownButton = document.querySelector(`#${id}`).closest('.dropdown').querySelector('.dropdown-toggle');
+        const dropdown = document.querySelector(`#${id}`).closest('.dropdown');
+        const dropdownButton = dropdown.querySelector('.dropdown-toggle');
+        const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
+
         if (dropdownButton) {
             dropdownButton.textContent = getDefaultTextForDropdown(id);
+            dropdownButton.classList.remove('active');
         }
+        dropdownItems.forEach(item => {
+            item.classList.remove('active');
+        });
     });
+
     list.filter();
 }
