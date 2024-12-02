@@ -213,6 +213,12 @@ function createDynamicTable({ reportsData }) {
                     td.className = 'row-index';
                     td.textContent = i + 1;
                     break;
+                case 'check_metadata.check_title':
+                    td.className = `sort-${header.key} text-truncate`;
+                    td.style.maxWidth = '250px'
+                    td.setAttribute('title', header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '');
+                    td.textContent = header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '';
+                    break;
                 default:
                     td.className = `sort-${header.key}`;
                     td.textContent = header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '';
