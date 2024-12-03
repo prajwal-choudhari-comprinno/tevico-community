@@ -39,6 +39,7 @@ const renderDOM = ({ warDetails, reportsData }) => {
             <td>
                 ${checkData.passed ? '<span class="badge bg-softer-success">Passed</span>' : '<span class="badge bg-softer-danger">Failed</span>'}
             </td>
+            <td><a href="check-details.html?id=${checkData.name}&from=war" class="btn btn-primary btn-sm">View Details</a></td>
         `;
         return row;
     };
