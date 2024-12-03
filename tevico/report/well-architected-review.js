@@ -36,7 +36,9 @@ const renderDOM = ({ warDetails, reportsData }) => {
             <td>${checkData.check_metadata.severity}</td>
             <td>${checkData.check_metadata.service_name}</td>
             <td>${checkData.section}</td>
-            <td>${checkData.passed ? 'Passed' : 'Failed'}</td>
+            <td>
+                ${checkData.passed ? '<span class="badge bg-softer-success">Passed</span>' : '<span class="badge bg-softer-danger">Failed</span>'}
+            </td>
         `;
         return row;
     };
