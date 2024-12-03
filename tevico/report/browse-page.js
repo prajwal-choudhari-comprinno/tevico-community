@@ -203,7 +203,7 @@ function createDynamicTable({ reportsData }) {
             switch (header.key) {
                 case 'action':
                     const link = document.createElement('a');
-                    link.href = `check-details.html?id=${item.name}`;
+                    link.href = `check-details.html?id=${item.name}&from=browse`;
                     link.className = 'btn btn-primary btn-sm';
                     link.textContent = 'View Details';
                     td.appendChild(link);
