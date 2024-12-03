@@ -33,7 +33,7 @@ const renderDOM = ({ warDetails, reportsData }) => {
         row.innerHTML = `
             <td>${index + 1}</td>
             <td>${checkData.check_metadata.check_title}</td>
-            <td>${checkData.check_metadata.severity}</td>
+            <td class="text-capitalize">${checkData.check_metadata.severity}</td>
             <td>${checkData.check_metadata.service_name}</td>
             <td>${checkData.section}</td>
             <td>
