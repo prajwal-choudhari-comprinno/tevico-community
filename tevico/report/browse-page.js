@@ -15,7 +15,7 @@ function updatePaginationInfo() {
     const totalItems = list.matchingItems.length;
     const pageSize = list.page;
     const startIndex = (currentPage - 1) * pageSize + 1;
-    const endIndex = Math.min(startIndex + pageSize - 1, totalItems);
+    const endIndex = Math.min(startIndex + (Number(pageSize) - 1), totalItems);
 
     const paginationInfo = document.querySelector('.pagination-info');
     if (paginationInfo) {
@@ -349,6 +349,7 @@ function applyFilters() {
         return sectionMatch && serviceMatch && severityMatch && statusMatch;
     });
     setTimeout(() => {
+        currentPage = 1;
         list.sort(currentSortColumn, { order: currentSortOrder });
         updateRowNumbers();
     }, 0);
