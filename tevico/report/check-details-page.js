@@ -1,11 +1,33 @@
 
 document.addEventListener('DOMContentLoaded', function () {
+    const source = getQueryParam('from');
     const id = getQueryParam('id');
+
+    const backArrow = document.getElementById('backButton');
+    const firstBreadcrumb = document.querySelector('.breadcrumb-item:first-child');
+
+    const navigationMap = {
+        'browse': {
+            href: './browse.html',
+            text: 'Browse Checks'
+        },
+        'war': {
+            href: './well-architected-review.html',
+            text: 'Well-Architected Review'
+        }
+    };
+
     if (id) {
         setActiveNavLink();
         const report = check_reports.find(item => item.name === id);
         if (report) {
             displayCheckDetails(report);
+            if (source && navigationMap[source]) {
+                const { href, text } = navigationMap[source];
+                const sectionParam = source === 'war' && report.section ? `?section=${report.section}` : '';
+                backArrow.href = `${href}${sectionParam}`;
+                firstBreadcrumb.innerHTML = `<a href="${href}${sectionParam}">${text}</a>`;
+            }
         } else {
             console.error('Report not found for ID:', id);
         }

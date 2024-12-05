@@ -1,4 +1,4 @@
-export function setActiveNavLink() {
+function setActiveNavLink() {
     const currentPath = window.location.pathname.split('/').pop() || './';
     const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
 
@@ -26,7 +26,7 @@ export function setActiveNavLink() {
     });
 }
 
-export const getQueryParam = (paramName) => {
+const getQueryParam = (paramName) => {
     try {
         const param = new URLSearchParams(window.location.search).get(paramName);
         if (param === null) {

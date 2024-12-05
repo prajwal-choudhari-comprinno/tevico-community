@@ -31,10 +31,13 @@ const renderDOM = ({ warDetails, reportsData }) => {
         row.innerHTML = `
             <td>${index + 1}</td>
             <td>${checkData.check_metadata.check_title}</td>
-            <td>${checkData.check_metadata.severity}</td>
+            <td class="text-capitalize">${checkData.check_metadata.severity}</td>
             <td>${checkData.check_metadata.service_name}</td>
             <td>${checkData.section}</td>
-            <td>${checkData.passed ? 'Passed' : 'Failed'}</td>
+            <td>
+                ${checkData.passed ? '<span class="badge bg-softer-success">Passed</span>' : '<span class="badge bg-softer-danger">Failed</span>'}
+            </td>
+            <td><a href="check-details.html?id=${checkData.name}&from=war" class="btn btn-primary btn-sm">View Details</a></td>
         `;
         return row;
     };

@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <title>Tevico Community | Well-Architected Review</title>
     <!-- CSS files -->
     <link href="./lib/css/tabler.min.css?1692870487" rel="stylesheet" />
@@ -21,6 +22,16 @@
         body {
             font-feature-settings: "cv03", "cv04", "cv11";
         }
+
+        .bg-softer-success {
+            background-color: #4CCB9833 !important;
+            color: #4CCB98;
+        }
+
+        .bg-softer-danger {
+            background-color: #ED495D33 !important;
+            color: #ED495D;
+        }
     </style>
 </head>
 
@@ -36,7 +47,9 @@
                 <h1 class="navbar-brand navbar-brand-autodark mx-auto">
                     <a href="." style="position: relative;">
                         <img src="./lib/img/tevico/logo.png" alt="Tabler" style="max-height: 75px;">
-                        <p class="mb-0 fw-normal" style="position: absolute; bottom: 2px;">Tevico</p>
+                        <p class="mb-0 fw-normal bg-dark" style="position: absolute; bottom: 2px; left: -50px">
+                            Tevico Community
+                        </p>
                     </a>
                 </h1>
                 <div class="collapse navbar-collapse" id="sidebar-menu">
@@ -140,6 +153,7 @@
                             <th class="sticky-top bg-info text-light">service</th>
                             <th class="sticky-top bg-info text-light">section</th>
                             <th class="sticky-top bg-info text-light">status</th>
+                            <th class="sticky-top bg-info text-light">action</th>
                         </tr>
                     </thead>
                     <tbody class="table-tbody">

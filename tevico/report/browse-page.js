@@ -14,7 +14,7 @@ function updatePaginationInfo() {
     const totalItems = list.matchingItems.length;
     const pageSize = list.page;
     const startIndex = (currentPage - 1) * pageSize + 1;
-    const endIndex = Math.min(startIndex + pageSize - 1, totalItems);
+    const endIndex = Math.min(startIndex + (Number(pageSize) - 1), totalItems);
 
     const paginationInfo = document.querySelector('.pagination-info');
     if (paginationInfo) {
@@ -202,7 +202,7 @@ function createDynamicTable({ reportsData }) {
             switch (header.key) {
                 case 'action':
                     const link = document.createElement('a');
-                    link.href = `check-details.html?id=${item.name}`;
+                    link.href = `check-details.html?id=${item.name}&from=browse`;
                     link.className = 'btn btn-primary btn-sm';
                     link.textContent = 'View Details';
                     td.appendChild(link);
@@ -348,6 +348,7 @@ function applyFilters() {
         return sectionMatch && serviceMatch && severityMatch && statusMatch;
     });
     setTimeout(() => {
+        currentPage = 1;
         list.sort(currentSortColumn, { order: currentSortOrder });
         updateRowNumbers();
     }, 0);
