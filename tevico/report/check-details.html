@@ -22,6 +22,16 @@
         body {
             font-feature-settings: "cv03", "cv04", "cv11";
         }
+
+        .bg-softer-success {
+            background-color: #4CCB9833 !important;
+            color: #4CCB98;
+        }
+
+        .bg-softer-danger {
+            background-color: #ED495D33 !important;
+            color: #ED495D;
+        }
     </style>
 </head>
 
@@ -131,7 +141,7 @@
             </div>
             <div class="page-body">
                 <div class="container-xl">
-                    <div class="card">
+                    <div class="card mb-4">
                         <div class="card-body">
                             <div class="datagrid">
                                 <div class="datagrid-item">
@@ -170,6 +180,12 @@
                                     <div class="datagrid-title">Severity Text</div>
                                     <div class="datagrid-content text-capitalize" id="severity_text"></div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body px-0">
+                            <div id="tableContainer">
                             </div>
                         </div>
                     </div>
