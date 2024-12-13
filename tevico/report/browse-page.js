@@ -10,6 +10,31 @@ const activeFilters = {
     status: null
 };
 
+function saveTableState() {
+    const state = {
+        currentPage,
+        currentSortColumn,
+        currentSortOrder
+    };
+    sessionStorage.setItem('tableState', JSON.stringify(state));
+}
+
+function loadTableState() {
+    const state = sessionStorage.getItem('tableState');
+    if (state) {
+        const { currentPage: savedPage, currentSortColumn: savedColumn, currentSortOrder: savedOrder } = JSON.parse(state);
+        currentPage = savedPage;
+        currentSortColumn = savedColumn;
+        currentSortOrder = savedOrder;
+        return true;
+    }
+    return false;
+}
+
+function clearTableState() {
+    sessionStorage.removeItem('tableState');
+}
+
 function updatePaginationInfo() {
     const totalItems = list.matchingItems.length;
     const pageSize = list.page;
@@ -44,8 +69,17 @@ function updatePaginationButtons() {
     if (prevBtn) prevBtn.classList.toggle('disabled', isFirstPage);
     if (nextBtn) nextBtn.classList.toggle('disabled', isLastPage);
 
-    document.querySelectorAll('.pagination li:not(.prev):not(.next)').forEach((item, index) => {
-        item.classList.toggle('active', index + 1 === currentPage);
+    const paginationItems = Array.from(document.querySelectorAll('.pagination li:not(.prev):not(.next)'));
+
+    paginationItems.forEach(item => {
+        item.classList.remove('active');
+    });
+
+    paginationItems.forEach(item => {
+        const pageNum = parseInt(item.textContent, 10);
+        if (pageNum === currentPage) {
+            item.classList.add('active');
+        }
     });
 }
 
@@ -73,19 +107,66 @@ function initializeListJS() {
     };
 
     list = new List('table-default', options);
-    list.sort(currentSortColumn, { order: currentSortOrder });
+
+    const defaultSortColumn = 'sort-check_metadata.check_title'; // or whatever column you want as default
+    const defaultSortOrder = 'asc';
+
+    const referrer = document.referrer;
+    if (referrer.includes('check-details.html')) {
+        const hasState = loadTableState();
+        if (hasState) {
+            list.sort(currentSortColumn, { order: currentSortOrder });
+            list.show((currentPage - 1) * list.page + 1, list.page);
+        } else {
+            currentSortColumn = defaultSortColumn;
+            currentSortOrder = defaultSortOrder;
+            list.sort(currentSortColumn, { order: currentSortOrder });
+        }
+    } else {
+        clearTableState();
+        currentSortColumn = defaultSortColumn;
+        currentSortOrder = defaultSortOrder;
+        list.sort(currentSortColumn, { order: currentSortOrder });
+    }
+
     list.on('sortComplete', function () {
         const sortElements = document.querySelectorAll('.table-sort');
+        let sortChanged = false;
+
         sortElements.forEach(element => {
             if (element.classList.contains('asc')) {
-                currentSortColumn = element.getAttribute('data-sort');
-                currentSortOrder = 'asc';
+                const newSortColumn = element.getAttribute('data-sort');
+                if (currentSortColumn !== newSortColumn || currentSortOrder !== 'asc') {
+                    currentSortColumn = newSortColumn;
+                    currentSortOrder = 'asc';
+                    sortChanged = true;
+                }
             } else if (element.classList.contains('desc')) {
-                currentSortColumn = element.getAttribute('data-sort');
-                currentSortOrder = 'desc';
+                const newSortColumn = element.getAttribute('data-sort');
+                if (currentSortColumn !== newSortColumn || currentSortOrder !== 'desc') {
+                    currentSortColumn = newSortColumn;
+                    currentSortOrder = 'desc';
+                    sortChanged = true;
+                }
             }
         });
+
+        if (sortChanged) {
+            saveTableState();
+        }
     });
+
+    function updateSortUI() {
+        document.querySelectorAll('.table-sort').forEach(element => {
+            const sortColumn = element.getAttribute('data-sort');
+            element.classList.remove('asc', 'desc');
+            if (sortColumn === currentSortColumn) {
+                element.classList.add(currentSortOrder);
+            }
+        });
+    }
+
+    updateSortUI();
 
     list.on('searchComplete', function () {
         list.sort(currentSortColumn, { order: currentSortOrder });
@@ -130,21 +211,27 @@ function handlePaginationClick(e) {
 
     e.preventDefault();
 
+    const totalPages = Math.ceil(list.matchingItems.length / list.page);
+
     if (target.parentElement.classList.contains('prev')) {
         if (currentPage > 1) {
             currentPage--;
             list.show((currentPage - 1) * list.page + 1, list.page);
         }
     } else if (target.parentElement.classList.contains('next')) {
-        if (currentPage < Math.ceil(list.matchingItems.length / list.page)) {
+        if (currentPage < totalPages) {
             currentPage++;
             list.show((currentPage - 1) * list.page + 1, list.page);
         }
     } else {
-        currentPage = parseInt(target.textContent, 10);
-        list.show((currentPage - 1) * list.page + 1, list.page);
+        const newPage = parseInt(target.textContent, 10);
+        if (!isNaN(newPage) && newPage > 0 && newPage <= totalPages) {
+            currentPage = newPage;
+            list.show((currentPage - 1) * list.page + 1, list.page);
+        }
     }
 
+    saveTableState();
     updatePaginationInfo();
     updatePaginationButtons();
     updateRowNumbers();
@@ -157,6 +244,13 @@ document.addEventListener('DOMContentLoaded', function () {
     if (clearButton) {
         clearButton.addEventListener('click', clearAllFilters);
     }
+
+    window.addEventListener('beforeunload', function (e) {
+        const currentPath = window.location.pathname;
+        if (!e.target.activeElement?.href?.includes('check-details.html')) {
+            clearTableState();
+        }
+    });
 });
 
 function createDynamicTable({ reportsData }) {
@@ -225,7 +319,7 @@ function createDynamicTable({ reportsData }) {
                     break;
                 case 'check_metadata.check_title':
                     td.className = `sort-${header.key} text-truncate`;
-                    td.style.maxWidth = '250px'
+                    td.style.maxWidth = '250px';
                     td.setAttribute('title', header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '');
                     td.textContent = header.key.split('.').reduce((obj, key) => obj && obj[key], item) || '';
                     break;
@@ -428,24 +522,39 @@ function initializeDropdowns(reportsData) {
 }
 
 function clearAllFilters() {
-    Object.keys(activeFilters).forEach(key => {
-        activeFilters[key] = null;
-    });
-
     const dropdownIds = ['sectionDropdown', 'serviceDropdown', 'severityDropdown', 'statusDropdown'];
-    dropdownIds.forEach(id => {
-        const dropdown = document.querySelector(`#${id}`).closest('.dropdown');
-        const dropdownButton = dropdown.querySelector('.dropdown-toggle');
-        const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
 
-        if (dropdownButton) {
-            dropdownButton.textContent = getDefaultTextForDropdown(id);
-            dropdownButton.classList.remove('active');
-        }
-        dropdownItems.forEach(item => {
-            item.classList.remove('active');
+    const hadActiveFilters = Object.values(activeFilters).some(Boolean);
+
+    if (hadActiveFilters) {
+
+        Object.keys(activeFilters).forEach(key => {
+            activeFilters[key] = null;
         });
-    });
 
-    list.filter();
+        dropdownIds.forEach(id => {
+            const dropdown = document.querySelector(`#${id}`).closest('.dropdown');
+            const dropdownButton = dropdown.querySelector('.dropdown-toggle');
+            const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
+
+            if (dropdownButton) {
+                dropdownButton.textContent = getDefaultTextForDropdown(id);
+                dropdownButton.classList.remove('active');
+            }
+            dropdownItems.forEach(item => {
+                item.classList.remove('active');
+            });
+        });
+        console.log("Executed");
+        currentPage = 1;
+        list.filter();
+
+        const url = new URL(window.location.href);
+        const newUrl = `${url.pathname}${url.hash}`;
+        window.history.pushState({}, '', newUrl);
+
+        updatePaginationInfo();
+        updatePaginationButtons();
+        updateRowNumbers();
+    }
 }
