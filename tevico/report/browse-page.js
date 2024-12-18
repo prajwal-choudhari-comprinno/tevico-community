@@ -16,11 +16,11 @@ function saveTableState() {
         currentSortColumn,
         currentSortOrder
     };
-    sessionStorage.setItem('tableState', JSON.stringify(state));
+    localStorage.setItem('tableState', JSON.stringify(state));
 }
 
 function loadTableState() {
-    const state = sessionStorage.getItem('tableState');
+    const state = localStorage.getItem('tableState');
     if (state) {
         const { currentPage: savedPage, currentSortColumn: savedColumn, currentSortOrder: savedOrder } = JSON.parse(state);
         currentPage = savedPage;
@@ -32,7 +32,7 @@ function loadTableState() {
 }
 
 function clearTableState() {
-    sessionStorage.removeItem('tableState');
+    localStorage.removeItem('tableState');
 }
 
 function updatePaginationInfo() {
@@ -259,9 +259,14 @@ document.addEventListener('DOMContentLoaded', function () {
         clearButton.addEventListener('click', clearAllFilters);
     }
 
-    window.addEventListener('beforeunload', function (e) {
-        if (!e.target.activeElement?.href?.includes('check-details.html')) {
+    window.addEventListener('unload', function (e) {
+        const targetElement = e.target.activeElement;
+        const isNavigatingToCheckDetails = targetElement?.href?.includes('check-details.html');
+
+        if (!isNavigatingToCheckDetails) {
             clearTableState();
+            sessionStorage.clear();
+            localStorage.clear();
         }
     });
 });
@@ -458,7 +463,7 @@ function applyFilters(scenario = "default") {
     saveFiltersToLocalStorage();
 
     setTimeout(() => {
-        const savedState = sessionStorage.getItem('tableState') || {};
+        const savedState = localStorage.getItem('tableState') || {};
         let savedPage = 1;
         if (Object.keys(savedState).length) {
             const { currentPage: page = 1 } = JSON.parse(savedState) || {};
