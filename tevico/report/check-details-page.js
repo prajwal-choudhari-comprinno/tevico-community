@@ -35,6 +35,16 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('No ID parameter provided in URL');
         window.location.href = 'index.html';
     }
+
+    window.addEventListener('unload', function (e) {
+        const targetElement = e.target.activeElement;
+        const isNavigatingToCheckDetails = targetElement?.href?.includes('browse.html');
+
+        if (!isNavigatingToCheckDetails) {
+            sessionStorage.clear();
+            localStorage.clear();
+        }
+    });
 });
 
 function displayCheckDetails(report) {

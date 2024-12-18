@@ -259,9 +259,14 @@ document.addEventListener('DOMContentLoaded', function () {
         clearButton.addEventListener('click', clearAllFilters);
     }
 
-    window.addEventListener('beforeunload', function (e) {
-        if (!e.target.activeElement?.href?.includes('check-details.html')) {
+    window.addEventListener('unload', function (e) {
+        const targetElement = e.target.activeElement;
+        const isNavigatingToCheckDetails = targetElement?.href?.includes('check-details.html');
+
+        if (!isNavigatingToCheckDetails) {
             clearTableState();
+            sessionStorage.clear();
+            localStorage.clear();
         }
     });
 });
