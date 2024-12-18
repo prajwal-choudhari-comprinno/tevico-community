@@ -132,8 +132,8 @@ class ChartManager {
 
   async initialize() {
     try {
-      // const data = await this.#fetchData();
-      const data = check_analytics;
+      const data = await this.#fetchData();
+      // const data = check_analytics;
       await this.#renderCharts(data);
     } catch (error) {
       console.error('Chart initialization failed:', error);
@@ -141,13 +141,13 @@ class ChartManager {
     }
   }
 
-  // async #fetchData() {
-  //   const response = await fetch('./data/check_analytics.json');
-  //   if (!response.ok) {
-  //     throw new Error('Failed to fetch chart data');
-  //   }
-  //   return response.json();
-  // }
+  async #fetchData() {
+    const response = await fetch('./data/check_analytics.json');
+    if (!response.ok) {
+      throw new Error('Failed to fetch chart data');
+    }
+    return response.json();
+  }
 
   async #renderCharts(data) {
     const renderTasks = [
