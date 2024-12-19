@@ -35,16 +35,6 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('No ID parameter provided in URL');
         window.location.href = 'index.html';
     }
-
-    window.addEventListener('unload', function (e) {
-        const targetElement = e.target.activeElement;
-        const isNavigatingToCheckDetails = targetElement?.href?.includes('browse.html');
-
-        if (!isNavigatingToCheckDetails) {
-            sessionStorage.clear();
-            localStorage.clear();
-        }
-    });
 });
 
 function displayCheckDetails(report) {
@@ -83,7 +73,7 @@ function updateMetadataElements({ meta, report, status }) {
         { elementId: 'risk_text', value: meta.risk },
         { elementId: 'service_name_text', value: meta.service_name },
         { elementId: 'severity_text', value: meta.severity },
-        { elementId: 'status_text', value: status }
+        // { elementId: 'status_text', value: status }
     ];
 
     updates.forEach(({ elementId, value }) => updateElement(elementId, value));
