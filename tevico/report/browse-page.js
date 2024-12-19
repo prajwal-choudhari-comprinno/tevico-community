@@ -252,8 +252,22 @@ function handlePaginationClick(e) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldClear = urlParams.get('clear') === 'true';
+
+    if (shouldClear) {
+        clearTableState();
+        sessionStorage.clear();
+        localStorage.clear();
+
+        urlParams.delete('clear');
+        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+    }
+
     createDynamicTable({ reportsData: check_reports });
     setActiveNavLink();
+
     const clearButton = document.querySelector('#clearFiltersButton');
     if (clearButton) {
         clearButton.addEventListener('click', clearAllFilters);
