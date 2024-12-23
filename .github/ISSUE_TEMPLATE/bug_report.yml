@@ -1,5 +1,5 @@
 name: 🐞 Bug Report
-description: Create a report to help us improve `tevico-community`
+description: Create a report to help us improve Tevico Community
 labels: ["bug", "status/needs-triage"]
 
 body:
@@ -41,7 +41,7 @@ body:
   - type: dropdown
     id: installation-method
     attributes:
-      label: How did you install `tevico-community`?
+      label: How did you install Tevico Community?
       options:
         - Cloning the repository from GitHub (`git clone`)
         - From pip package (`pip install tevico`)
@@ -54,7 +54,7 @@ body:
     id: environment
     attributes:
       label: Environment Resource
-      description: Where are you running `tevico-community`?
+      description: Where are you running Tevico Community?
       placeholder: |-
         1. EC2 instance
         2. Docker container (local or remote)
@@ -84,8 +84,8 @@ body:
   - type: input
     id: tevico-version
     attributes:
-      label: `tevico-community` Version
-      description: Provide the version of `tevico-community` you are using.
+      label: Tevico Community Version
+      description: Provide the version of Tevico Community you are using.
       placeholder: |-
         tevico --version
     validations:
@@ -95,7 +95,7 @@ body:
     id: pip-version
     attributes:
       label: Pip Version
-      description: Provide the version of pip used to install `tevico-community`.
+      description: Provide the version of pip used to install Tevico Community.
       placeholder: |-
         pip --version
     validations:
