@@ -38,9 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function displayCheckDetails(report) {
-    const { check_metadata: meta = {}, resource_ids_status, passed } = report;
-
-    const status = passed ? 'Passed' : 'Failed';
+    const { check_metadata: meta = {}, resource_ids_status, passed: status } = report;
 
     updateMetadataElements({ meta, report, status });
 
