@@ -1,161 +1,195 @@
 """
 AUTHOR: RONIT CHAUHAN
 DATE: 2024-10-17
-"""
-"""
-AUTHOR: RONIT CHAUHAN
-DATE: 2024-10-17
 
-Description: This code checks if an AWS account is part of an AWS Organization.
-Think of it like checking if a branch office is properly connected to its headquarters.
+Description: This program checks if your AWS account is part of an AWS Organization.
+Think of it like checking if a branch office (AWS account) is properly connected to its headquarters (AWS Organization).
 """
 
-import boto3
-import logging
-from botocore.exceptions import BotoCoreError, ClientError
-from tevico.engine.entities.report.check_model import CheckReport
-from tevico.engine.entities.check.check import Check
-from datetime import datetime
+import boto3  # AWS SDK for Python - helps us talk to AWS services
+import logging  # For keeping track of what the program is doing
+from botocore.exceptions import BotoCoreError, ClientError  # For handling AWS-specific errors
+from tevico.engine.entities.report.check_model import CheckReport  # For creating our check report
+from tevico.engine.entities.check.check import Check  # Base class for our check
+from datetime import datetime  # For adding timestamps to our reports
 
-# Set up logging to track what's happening
+# Set up logging - We only want to see errors, not debug messages
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 class organizations_account_part_of_organizations(Check):
     """
-    This check verifies if the AWS account is part of an AWS Organization.
-    Like checking if a branch office is properly registered with headquarters.
+    This class is like a detective that investigates whether your AWS account
+    is properly connected to an AWS Organization.
     """
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         """
-        Main function to check organization membership.
-        Returns a detailed report of the findings.
+        Main function that does the actual checking.
+        Think of this as the detective's investigation process.
+
+        Args:
+            connection: Our secure line to AWS (like a special phone line)
+        Returns:
+            CheckReport: The detective's findings (pass/fail with details)
         """
-        # Start timing the check execution
-        start_time = datetime.now()
-        
-        # Create a report object
+        # Start our investigation report
         report = CheckReport(name=__name__)
         
         try:
-            # Step 1: Connect to AWS Organizations service
-            logger.info("Connecting to AWS Organizations service")
+            # Step 1: Try to connect to AWS Organizations
+            # Like trying to call the headquarters
             try:
                 org_client = connection.client('organizations')
-                logger.info("Successfully connected to AWS Organizations")
             except (BotoCoreError, ClientError) as e:
-                error_msg = f"Cannot connect to AWS Organizations: {str(e)}"
-                logger.error(error_msg)
-                raise ConnectionError(error_msg)
+                raise ConnectionError(f"Couldn't connect to AWS Organizations: {str(e)}")
 
-            # Step 2: Try to get organization details
             try:
-                # Attempt to describe the organization
-                org_details = org_client.describe_organization()
-                organization = org_details.get('Organization', {})
-                
-                # Extract important organization information
-                org_id = organization.get('Id', 'Unknown')
-                org_arn = organization.get('Arn', 'Unknown')
-                org_status = organization.get('Status', 'Unknown')
-                
-                logger.info(f"Found organization: {org_id} with status: {org_status}")
+                # Step 2: Try to get organization details
+                # Like asking headquarters for information
+                # We'll try up to 3 times if we get temporary failures
+                max_retries = 3
+                retry_count = 0
+                while retry_count < max_retries:
+                    try:
+                        response = org_client.describe_organization()
+                        break
+                    except ClientError as e:
+                        if e.response['Error']['Code'] == 'ThrottlingException':
+                            retry_count += 1
+                            if retry_count == max_retries:
+                                raise
+                            continue
+                        raise
 
-                # Step 3: Check organization status and prepare report
-                if org_status == "ACTIVE":
-                    report.passed = True
-                    report.resource_ids_status = {org_id: True}
-                    report.report_metadata = {
-                        "status": "PASS",
-                        "message": f"Account is part of active AWS Organization: {org_id}",
-                        "details": {
-                            "organization_id": org_id,
-                            "organization_arn": org_arn,
-                            "status": org_status,
-                            "master_account": organization.get('MasterAccountId', 'Unknown'),
-                            "feature_set": organization.get('FeatureSet', 'Unknown'),
-                            "check_time": datetime.now().isoformat()
+                # Step 3: Check if we got valid organization information
+                if 'Organization' in response:
+                    # Extract important details about the organization
+                    org = response['Organization']
+                    org_id = org.get('Id')  # Organization's ID number
+                    org_arn = org.get('Arn')  # Organization's unique identifier
+                    master_account_id = org.get('MasterAccountId')  # Main account ID
+                    feature_set = org.get('FeatureSet')  # What features are enabled
+
+                    # If we found an organization ID, everything is good
+                    if org_id:
+                        # Mark the check as passed
+                        report.passed = True
+                        report.resource_ids_status = {
+                            org_id: True,
+                            'organization_status': True
                         }
-                    }
-                    logger.info("Check passed - Account is part of active organization")
-                else:
-                    report.passed = False
-                    report.resource_ids_status = {org_id: False}
-                    report.report_metadata = {
-                        "status": "FAIL",
-                        "message": f"Organization exists but status is: {org_status}",
-                        "details": {
-                            "organization_id": org_id,
-                            "organization_arn": org_arn,
-                            "status": org_status,
-                            "check_time": datetime.now().isoformat()
-                        },
-                        "recommendation": "Verify organization status and configuration"
-                    }
-                    logger.warning(f"Check failed - Organization status is {org_status}")
+                        # Add detailed information to our report
+                        report.report_metadata = {
+                            "status": "PASS",
+                            "message": f"AWS Organization {org_id} contains this AWS account",
+                            "details": {
+                                "organization_id": org_id,
+                                "organization_arn": org_arn,
+                                "master_account_id": master_account_id,
+                                "feature_set": feature_set,
+                                "region": connection.region_name,
+                                "timestamp": datetime.now().isoformat()
+                            }
+                        }
+                    else:
+                        # No organization ID found - something's wrong
+                        raise ValueError("Couldn't find the organization ID")
 
-            except org_client.exceptions.AWSOrganizationsNotInUseException:
-                # Handle case when Organizations is not being used
+            # Handle the case where Organizations isn't being used
+            except org_client.exceptions.AWSOrganizationsNotInUseException as e:
                 report.passed = False
-                report.resource_ids_status = {"no_organization": False}
+                report.resource_ids_status = {
+                    'organization_status': False
+                }
                 report.report_metadata = {
                     "status": "FAIL",
-                    "message": "AWS Organizations is not in use for this account",
-                    "recommendation": "Consider using AWS Organizations for better account management",
-                    "check_time": datetime.now().isoformat()
+                    "message": "This AWS Account isn't using AWS Organizations",
+                    "details": {
+                        "error": str(e),
+                        "error_type": "OrganizationsNotInUse",
+                        "recommendation": "Consider enabling AWS Organizations for better account management",
+                        "timestamp": datetime.now().isoformat()
+                    }
                 }
-                logger.warning("AWS Organizations is not in use")
 
+        # Handle permission errors (like not having the right security clearance)
         except org_client.exceptions.AccessDeniedException as e:
-            # Handle permission issues
-            error_msg = "Access denied while checking organization details"
-            logger.error(f"{error_msg}: {str(e)}")
             report.passed = False
             report.report_metadata = {
                 "status": "ERROR",
-                "error": error_msg,
-                "exception": str(e),
-                "recommendation": "Check IAM permissions for Organizations access",
-                "check_time": datetime.now().isoformat()
+                "message": "Not allowed to check organization status",
+                "details": {
+                    "error": str(e),
+                    "error_type": "AccessDenied",
+                    "required_permission": "organizations:DescribeOrganization",
+                    "recommendation": "Check if you have permission to view organization details",
+                    "timestamp": datetime.now().isoformat()
+                }
             }
 
+        # Handle AWS-specific errors
         except (BotoCoreError, ClientError) as e:
-            # Handle AWS-specific errors
-            error_msg = "Error while checking organization details"
-            logger.error(f"{error_msg}: {str(e)}")
-            report.passed = False
-            report.report_metadata = {
-                "status": "ERROR",
-                "error": error_msg,
-                "exception": str(e),
-                "recommendation": "Check AWS service availability",
-                "check_time": datetime.now().isoformat()
-            }
-
-        except Exception as e:
-            # Handle unexpected errors
-            error_msg = "Unexpected error during organization check"
-            logger.error(f"{error_msg}: {str(e)}")
-            report.passed = False
-            report.report_metadata = {
-                "status": "ERROR",
-                "error": error_msg,
-                "exception": str(e),
-                "recommendation": "Check system logs for details",
-                "check_time": datetime.now().isoformat()
-            }
-
-        finally:
-            # Calculate and log execution time
-            execution_time = (datetime.now() - start_time).total_seconds()
-            logger.info(f"Check completed in {execution_time} seconds")
+            error_code = getattr(e, 'response', {}).get('Error', {}).get('Code', 'Unknown')
+            error_message = getattr(e, 'response', {}).get('Error', {}).get('Message', str(e))
             
-            # Add execution time to metadata if it exists
-            if hasattr(report, 'report_metadata') and isinstance(report.report_metadata, dict):
-                report.report_metadata["execution_time"] = execution_time
+            report.passed = False
+            report.report_metadata = {
+                "status": "ERROR",
+                "message": "Problem accessing AWS Organizations",
+                "details": {
+                    "error": error_message,
+                    "error_code": error_code,
+                    "error_type": "AWSAPIError",
+                    "region": connection.region_name,
+                    "recommendation": self._get_error_recommendation(error_code),
+                    "timestamp": datetime.now().isoformat()
+                }
+            }
+
+        # Handle data validation errors
+        except ValueError as e:
+            report.passed = False
+            report.report_metadata = {
+                "status": "ERROR",
+                "message": "Invalid organization information received",
+                "details": {
+                    "error": str(e),
+                    "error_type": "ValidationError",
+                    "recommendation": "Verify organization setup",
+                    "timestamp": datetime.now().isoformat()
+                }
+            }
+
+        # Handle any unexpected errors
+        except Exception as e:
+            report.passed = False
+            report.report_metadata = {
+                "status": "ERROR",
+                "message": "Unexpected problem during check",
+                "details": {
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                    "recommendation": "Contact technical support",
+                    "timestamp": datetime.now().isoformat()
+                }
+            }
 
         return report
 
+    def _get_error_recommendation(self, error_code: str) -> str:
+        """
+        Provides helpful suggestions based on the type of error we encountered.
+        Like a troubleshooting guide for common problems.
+        """
+        recommendations = {
+            "ThrottlingException": "Too many requests - try again more slowly",
+            "InvalidInputException": "Check if organization settings are correct",
+            "ServiceException": "AWS service issue - try again later",
+            "TooManyRequestsException": "Slow down the request rate",
+            "UnrecognizedClientException": "Check AWS credentials"
+        }
+        return recommendations.get(error_code, "Check AWS documentation for help")
 
     # Pass Condition: If the organization is ENABLED, it adds a "PASS" status confirming that the AWS Organization contains the AWS account.
     # Fail Condition: If the status is not "ENABLED", it adds a "FAIL" status that the AWS Organization is not in use.
