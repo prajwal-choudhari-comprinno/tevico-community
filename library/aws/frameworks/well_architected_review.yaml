@@ -133,6 +133,17 @@ sections:
           - macie_status_check
           - securityhub_enabled
 
+      - name: Infrastructure Protection
+        description: |
+          The Infrastructure Protection section includes the ability to protect workloads, systems, and networks by implementing security best practices.
+
+          This section checks for the presence of a Well Architected Review in the AWS account.
+
+        checks:
+          - ecr_repository_scan_images_on_push_enabled
+          - ecr_repository_scan_vulnerabilities_in_latest_image
+      
+
   - name: Performance Efficiency
     description: |
       The Performance Efficiency pillar includes the ability to use computing resources efficiently to meet system
