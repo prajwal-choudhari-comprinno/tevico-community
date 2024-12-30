@@ -1,6 +1,6 @@
 """
 AUTHOR: RONIT CHAUHAN
-DATE: [Current Date]
+DATE: 2024-12-30
 
 Description: This script checks for vulnerabilities in the latest images of ECR repositories.
 It's like a security inspection system that:
