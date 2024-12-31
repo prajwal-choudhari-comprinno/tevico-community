@@ -3,134 +3,185 @@ AUTHOR: RONIT CHAUHAN
 DATE: 2024-10-11
 
 Description: This code checks for AWS users who have too much power (administrative privileges) 
-through their inline policies. It's like checking if any employees have unlimited access 
-to all company resources when they should only have access to what they need for their job.
+through their inline policies.
 """
 
 import boto3
 import logging
+import json
 from botocore.exceptions import BotoCoreError, ClientError
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
-# Set up logging to track what's happening in our code
 logger = logging.getLogger(__name__)
 
 class iam_inline_policy_admin_privileges_found(Check):
     """
     This check looks for AWS users who might have too much power through their inline policies.
-    Think of it like auditing employee access cards to make sure no one has unauthorized access to restricted areas.
     """
+
+    def normalize_policy_statement(self, statement):
+        """
+        Normalize policy statement to ensure consistent dictionary format
+        """
+        try:
+            if isinstance(statement, str):
+                try:
+                    statement = json.loads(statement)
+                except json.JSONDecodeError:
+                    logger.warning(f"Invalid JSON in policy statement: {statement}")
+                    return None
+
+            if not isinstance(statement, dict):
+                logger.warning(f"Statement is not a dictionary: {statement}")
+                return None
+
+            effect = statement.get('Effect', '')
+            if not isinstance(effect, str):
+                return None
+
+            actions = statement.get('Action', [])
+            if isinstance(actions, str):
+                actions = [actions]
+            elif not isinstance(actions, list):
+                actions = []
+
+            resources = statement.get('Resource', [])
+            if isinstance(resources, str):
+                resources = [resources]
+            elif not isinstance(resources, list):
+                resources = []
+
+            return {
+                'Effect': effect,
+                'Action': actions,
+                'Resource': resources
+            }
+
+        except Exception as e:
+            logger.error(f"Error normalizing statement: {e}")
+            return None
+
+    def has_admin_privileges(self, statement):
+        """
+        Check if normalized statement grants admin privileges
+        """
+        normalized = self.normalize_policy_statement(statement)
+        if not normalized:
+            return False
+
+        effect = normalized['Effect'].lower()
+        actions = normalized['Action']
+        resources = normalized['Resource']
+
+        if effect != 'allow':
+            return False
+
+        has_wildcard_action = '*' in actions or any('*' in action for action in actions)
+        has_wildcard_resource = '*' in resources or any('*' in resource for resource in resources)
+
+        return has_wildcard_action and has_wildcard_resource
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         """
         Main function that checks for users with administrative privileges.
-        
-        Args:
-            connection: Our secure connection to AWS
-            
-        Returns:
-            report: A detailed report showing which users (if any) have too much access
         """
-        # Start a new report - like opening a fresh security audit form
         report = CheckReport(name=__name__)
         
-        # Step 1: Connect to AWS IAM (Identity and Access Management) service
         try:
             iam_client = connection.client('iam')
-            logger.info("Successfully connected to AWS IAM service")
-        except (BotoCoreError, ClientError) as e:
-            # If we can't connect to AWS, log the error and return
-            error_message = f"Cannot connect to AWS IAM service: {str(e)}"
-            logger.error(error_message)
-            report.passed = False
-            report.report_metadata = {"error": error_message}
-            return report
-
-        # Step 2: Get list of all AWS users
-        try:
             users = iam_client.list_users()['Users']
             logger.info(f"Found {len(users)} IAM users to check")
         except (BotoCoreError, ClientError) as e:
-            error_message = f"Cannot get list of AWS users: {str(e)}"
+            error_message = f"AWS IAM service error: {str(e)}"
             logger.error(error_message)
             report.passed = False
             report.report_metadata = {"error": error_message}
             return report
 
-        # Lists to keep track of what we find
-        findings = []  # Will store our security findings
-        resource_ids_status = {}  # Will store status for each user
+        findings = []
+        resource_ids_status = {}
 
-        # Step 3: Check each user's policies
         for user in users:
             user_name = user['UserName']
             logger.info(f"Checking policies for user: {user_name}")
 
             try:
-                # Get list of user's inline policies
                 inline_policies = iam_client.list_user_policies(UserName=user_name)['PolicyNames']
-                logger.info(f"Found {len(inline_policies)} inline policies for user {user_name}")
             except (BotoCoreError, ClientError) as e:
-                # If we can't get user's policies, mark as potential security risk
                 error_message = f"Cannot check policies for user {user_name}: {str(e)}"
                 logger.error(error_message)
-                resource_ids_status[user_name] = False
+                resource_ids_status[f"{user_name}:no_policies_found"] = False
                 findings.append(error_message)
                 continue
 
-            # Flag to track if user has admin privileges
-            has_admin_privileges = False
+            if not inline_policies:
+                # Mark users with no inline policies as failed
+                resource_ids_status[f"{user_name}:no_inline_policies"] = False
+                finding = f"User {user_name} has no inline policies"
+                logger.info(finding)
+                findings.append(finding)
+                continue
 
-            # Step 4: Check each policy for administrative privileges
             for policy_name in inline_policies:
                 try:
-                    # Get the detailed policy rules
-                    policy_document = iam_client.get_user_policy(
+                    policy_response = iam_client.get_user_policy(
                         UserName=user_name, 
                         PolicyName=policy_name
-                    )['PolicyDocument']
+                    )
+                    
+                    policy_document = policy_response['PolicyDocument']
+
+                    if isinstance(policy_document, str):
+                        try:
+                            policy_document = json.loads(policy_document)
+                        except json.JSONDecodeError:
+                            logger.error(f"Invalid JSON in policy document for {policy_name}")
+                            resource_ids_status[f"{user_name}:{policy_name}"] = False
+                            continue
+
+                    statements = policy_document.get('Statement', [])
+                    if not isinstance(statements, list):
+                        statements = [statements]
+
+                    has_admin_privileges = False
+                    for statement in statements:
+                        if self.has_admin_privileges(statement):
+                            has_admin_privileges = True
+                            finding = f"SECURITY ALERT: User {user_name} has full admin access through policy {policy_name}"
+                            logger.warning(finding)
+                            findings.append(finding)
+                            break
+
+                    # Create resource ID with both user name and policy name
+                    resource_id = f"{user_name}:{policy_name}"
+                    resource_ids_status[resource_id] = not has_admin_privileges
+
                 except (BotoCoreError, ClientError) as e:
-                    error_message = f"Cannot read policy {policy_name} for user {user_name}: {str(e)}"
+                    error_message = f"Error reading policy {policy_name} for user {user_name}: {str(e)}"
                     logger.error(error_message)
                     findings.append(error_message)
-                    continue
+                    resource_ids_status[f"{user_name}:{policy_name}"] = False
 
-                # Step 5: Check if policy gives too much access
-                if 'Statement' in policy_document:
-                    for statement in policy_document['Statement']:
-                        # Look for "Allow" permissions that might grant full access
-                        if statement.get('Effect') == 'Allow':
-                            actions = statement.get('Action', [])
-                            resources = statement.get('Resource', [])
-
-                            # Check if policy grants full access (using "*")
-                            if (actions == "*" and resources == "*") or \
-                               (isinstance(actions, list) and "*" in actions and 
-                                isinstance(resources, list) and "*" in resources):
-                                has_admin_privileges = True
-                                finding = f"SECURITY ALERT: User {user_name} has full admin access through policy {policy_name}"
-                                logger.warning(finding)
-                                findings.append(finding)
-                                break
-
-            # Update user's security status
-            resource_ids_status[user_name] = not has_admin_privileges
-
-        # Step 6: Prepare final report
-        if findings:
-            # Some security issues were found
-            report.passed = all(status for status in resource_ids_status.values())
-            report.resource_ids_status = resource_ids_status
-            report.report_metadata = {"findings": findings}
-            logger.info(f"Check completed with {len(findings)} findings")
-        else:
-            # No security issues found
-            report.passed = True
-            report.resource_ids_status = {user['UserName']: True for user in users}
-            logger.info("Check completed successfully - no security issues found")
-
+        # Prepare final report
+        report.passed = all(status for status in resource_ids_status.values())
+        report.resource_ids_status = resource_ids_status
+        
+        report.report_metadata = {
+            "findings": findings,
+            "details": {
+                resource_id: {
+                    "status": "passed" if status else "failed",
+                    "user": resource_id.split(":")[0],
+                    "policy": resource_id.split(":")[1]
+                }
+                for resource_id, status in resource_ids_status.items()
+            }
+        }
+        
+        logger.info(f"Check completed with {len(findings)} findings")
         return report
+
 
 # What this check does:
 # 1. Passes (returns True) if:
