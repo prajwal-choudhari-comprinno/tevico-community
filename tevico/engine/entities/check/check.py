@@ -22,6 +22,12 @@ class Check(ABC):
         check_report.check_metadata = self.metadata
         check_report.framework = framework
         check_report.section = section
+        
+        # Set the check status based on resource_ids_status
+        if check_report.has_failed_resources():
+            check_report.passed = False
+        else:
+            check_report.passed = True
         return check_report
     
     @abstractmethod
