@@ -7,7 +7,7 @@ from tevico.engine.configs.config import ConfigUtils
 from tevico.engine.entities.provider.provider import Provider, CheckReport
 
 class MyProvider(Provider):
-    """Custom provider class for AWS."""
+    """Provider class for AWS."""
 
     @property
     def name(self) -> str:
