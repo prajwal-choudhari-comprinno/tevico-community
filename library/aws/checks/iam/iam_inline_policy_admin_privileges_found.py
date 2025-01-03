@@ -33,7 +33,11 @@ class iam_inline_policy_admin_privileges_found(Check):
         Handles different input formats (string, dict, list) and normalizes them.
 
         Args:
-            statement: Raw policy statement
+            statement: Raw pol# Generate test logs
+            logger "Test message 1 from EC2 $(date)"
+            logger "Test message 2 from EC2 $(date)"
+            logger "Error message from EC2 $(date)" -p user.err
+            icy statement
 
         Returns:
             List of normalized policy statements or None if invalid

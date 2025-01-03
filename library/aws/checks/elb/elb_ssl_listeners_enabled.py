@@ -1,163 +1,99 @@
 """
 AUTHOR: RONIT CHAUHAN
-DATE: 2024-12-24
-
-Description: This script checks if Classic Load Balancers are using secure connections (HTTPS/SSL/TLS).
-Think of it like a security inspector checking if all doors have proper locks installed.
-If a load balancer isn't using secure protocols, it's like having an unlocked door - unsafe!
+EMAIL: ronit.chauhan@comprinno.net
+DATE: 2024-1-4
+"""
+"""
+Check: Ensures that all Classic Load Balancers (ELBs) use secure protocols (HTTPS/SSL) for their listeners
+Compliance Status: 
+    PASS: All listeners use secure protocols (HTTPS/SSL)
+    FAIL: One or more listeners use insecure protocols or no listeners found
 """
 
 import boto3
+from typing import Dict, List
+from botocore.exceptions import ClientError
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
-import logging
-from botocore.exceptions import (
-    ClientError,          # Handles AWS-specific errors
-    EndpointConnectionError,  # Handles network connection issues
-    NoCredentialsError,   # Handles missing AWS credentials
-    ParamValidationError  # Handles invalid parameter errors
-)
-
-# Setup logging to track what's happening in the code
-logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger(__name__)
 
 class elb_ssl_listeners_enabled(Check):
-    """
-    Security check for Classic Load Balancers to ensure they use secure protocols.
-    Like checking if all entrance doors have proper security locks installed.
-    """
-
-    def check_ssl_policy(self, client, lb_name: str, port: int) -> tuple:
+    def _evaluate_listener(self, listener: Dict) -> tuple:
         """
-        Checks if a specific port on a load balancer uses secure protocols.
+        Evaluates if a single listener uses secure protocol
         
-        Think of this like checking a specific door's lock:
-        - If it has a secure lock (HTTPS/SSL) = Good ✅
-        - If it has no lock (HTTP) = Bad ❌
-
         Args:
-            client: Our connection to AWS (like a security badge)
-            lb_name: Name of the load balancer (building) we're checking
-            port: The specific port (door) we're checking
-
-        Returns:
-            Two pieces of information:
-            1. Is it secure? (True/False)
-            2. What's the status message?
-        """
-        try:
-            # Get the security policy details
-            policies = client.describe_load_balancer_policies(
-                LoadBalancerName=lb_name
-            )['PolicyDescriptions']
+            listener: Single listener configuration
             
-            # Check if the security policy is adequate (like checking if the lock is strong enough)
-            for policy in policies:
-                if policy.get('PolicyTypeName') == 'SSLNegotiationPolicyType':
-                    logger.info(f"✅ Checking security policy for {lb_name} on port {port}")
-                    return True
-            return False
-
-        except ClientError as e:
-            # Handle AWS-specific errors
-            logger.error(f"🚫 Error checking SSL policy for '{lb_name}': {e.response['Error']['Message']}")
-            return False
-        except Exception as e:
-            # Handle unexpected errors
-            logger.error(f"❌ Unexpected error checking SSL policy for '{lb_name}': {str(e)}")
-            return False
+        Returns:
+            tuple: (is_secure, status_message)
+        """
+        protocol = listener['Protocol']
+        port = listener['LoadBalancerPort']
+        
+        if protocol in ('HTTPS', 'SSL'):
+            return True, f"Listener {protocol}:{port} uses secure protocol {protocol}"
+        return False, f"Listener {protocol}:{port} uses insecure protocol {protocol}"
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         """
-        Main method that checks all load balancers for secure protocols.
+        Executes the ELB SSL listeners security check
         
-        Think of this like doing a complete security audit of a building:
-        1. Check all entrances (listeners)
-        2. Verify each door has proper locks (secure protocols)
-        3. Create a report of what we found
-        
+        Args:
+            connection: boto3 Session object
+            
         Returns:
-            A report card showing which load balancers are secure
+            CheckReport: Results of the security check
         """
-        # Initialize our report card
-        report = CheckReport(name=__name__)
-        report.passed = True  # Start optimistic - assume everything is secure
-        report.resource_ids_status = {}  # Will store results for each load balancer
-        found_load_balancers = False
-
         try:
-            # Connect to AWS ELB service
-            elb_client = connection.client('elb')
+            report = CheckReport(name=__name__)
+            report.passed = True
+            
+            client = connection.client('elb')
+            paginator = client.get_paginator('describe_load_balancers')
+            
+            load_balancers_found = False
             
             try:
-                # Get list of all load balancers (like getting a list of all buildings to inspect)
-                classic_lbs = elb_client.describe_load_balancers()['LoadBalancerDescriptions']
-                
-                if classic_lbs:
-                    found_load_balancers = True
+                for page in paginator.paginate():
+                    load_balancers = page.get('LoadBalancerDescriptions', [])
                     
-                    # Check each load balancer
-                    for lb in classic_lbs:
-                        lb_name = lb['LoadBalancerName']
-                        has_secure_listener = False
-
-                        # Check each listener (door) on the load balancer
-                        for listener in lb['ListenerDescriptions']:
-                            port = listener['Listener']['LoadBalancerPort']
-                            protocol = listener['Listener']['Protocol'].upper()
-
-                            # Check if using secure protocols (HTTPS/SSL)
-                            if protocol in ['HTTPS', 'SSL']:
-                                is_secure = self.check_ssl_policy(elb_client, lb_name, port)
-                                has_secure_listener = has_secure_listener or is_secure
-
-                        # Record the results
-                        resource_key = f"CLB:{lb_name}"
-                        report.resource_ids_status[resource_key] = has_secure_listener
-
-                        if not has_secure_listener:
-                            report.passed = False
-                            logger.info(f"⚠️ Load balancer '{lb_name}' is not using secure protocols!")
-
-                # Handle case where no load balancers were found
-                if not found_load_balancers:
+                    if load_balancers:
+                        load_balancers_found = True
+                        
+                        for lb in load_balancers:
+                            lb_name = lb['LoadBalancerName']
+                            listeners = lb.get('ListenerDescriptions', [])
+                            
+                            if not listeners:
+                                resource_key = f"ELB {lb_name}: No listeners found"
+                                report.resource_ids_status[resource_key] = False
+                                report.passed = False
+                                continue
+                            
+                            # Evaluate each listener separately
+                            for listener_desc in listeners:
+                                listener = listener_desc['Listener']
+                                is_secure, status_message = self._evaluate_listener(listener)
+                                
+                                # Update resource status with message for each listener
+                                resource_key = f"ELB {lb_name}: {status_message}"
+                                report.resource_ids_status[resource_key] = is_secure
+                                
+                                # If any listener is insecure, mark overall check as failed
+                                if not is_secure:
+                                    report.passed = False
+                
+                # If no load balancers were found, mark check as failed
+                if not load_balancers_found:
                     report.passed = False
-                    report.resource_ids_status["No Load Balancers Found"] = False
-                    logger.warning("ℹ️ No Classic Load Balancers found to check")
-
+                    report.resource_ids_status["No ELB Found"] = False
+                    
             except ClientError as e:
-                # Handle AWS API errors
-                error_code = e.response['Error']['Code']
-                if error_code == 'AccessDenied':
-                    logger.error("🔒 Access denied - check your permissions")
-                else:
-                    logger.error(f"⚠️ Error listing load balancers: {e.response['Error']['Message']}")
                 report.passed = False
                 report.resource_ids_status["Error"] = False
-
-            except ParamValidationError as e:
-                # Handle invalid parameter errors
-                logger.error(f"📝 Invalid parameter error: {str(e)}")
-                report.passed = False
-                report.resource_ids_status["Parameter Error"] = False
-
-        except NoCredentialsError:
-            # Handle missing AWS credentials
-            logger.error("🔑 AWS credentials missing - check your AWS configuration")
-            report.passed = False
-            report.resource_ids_status["No AWS Credentials"] = False
-        
-        except EndpointConnectionError:
-            # Handle AWS connection issues
-            logger.error("🌐 Cannot connect to AWS - check your internet connection")
-            report.passed = False
-            report.resource_ids_status["Connection Error"] = False
-        
+                
         except Exception as e:
-            # Handle any unexpected errors
-            logger.error(f"💥 Critical error in check execution: {str(e)}")
             report.passed = False
             report.resource_ids_status["Error"] = False
-
+            
         return report
