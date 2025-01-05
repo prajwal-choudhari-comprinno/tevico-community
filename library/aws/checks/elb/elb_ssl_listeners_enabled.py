@@ -31,8 +31,8 @@ class elb_ssl_listeners_enabled(Check):
         port = listener['LoadBalancerPort']
         
         if protocol in ('HTTPS', 'SSL'):
-            return True, f"Listener {protocol}:{port} uses secure protocol {protocol}"
-        return False, f"Listener {protocol}:{port} uses insecure protocol {protocol}"
+            return True, f"ELB Listener {protocol}:{port} uses secure protocol {protocol}"
+        return False, f"ELB Listener {protocol}:{port} uses insecure protocol {protocol}"
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         """
@@ -65,7 +65,7 @@ class elb_ssl_listeners_enabled(Check):
                             listeners = lb.get('ListenerDescriptions', [])
                             
                             if not listeners:
-                                resource_key = f"ELB {lb_name}: No listeners found"
+                                resource_key = f"{lb_name}: No listeners found"
                                 report.resource_ids_status[resource_key] = False
                                 report.passed = False
                                 continue
@@ -76,7 +76,7 @@ class elb_ssl_listeners_enabled(Check):
                                 is_secure, status_message = self._evaluate_listener(listener)
                                 
                                 # Update resource status with message for each listener
-                                resource_key = f"ELB {lb_name}: {status_message}"
+                                resource_key = f"{lb_name}: {status_message}"
                                 report.resource_ids_status[resource_key] = is_secure
                                 
                                 # If any listener is insecure, mark overall check as failed
