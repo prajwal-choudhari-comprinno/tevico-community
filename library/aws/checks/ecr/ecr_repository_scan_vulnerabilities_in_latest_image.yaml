@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: ecr_repository_scan_vulnerabilities_in_latest_image
-CheckTitle: Check for Vulnerabilities in Latest ECR Image Scans
+CheckTitle: Check for vulnerabilities in latest ECR image scans
 CheckType: [Infrastructure Protection, Security Best Practices, Vulnerability Management]
 ServiceName: ecr
 SubServiceName: ""

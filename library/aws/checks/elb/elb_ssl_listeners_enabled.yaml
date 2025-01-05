@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: elb_ssl_listeners_enabled
-CheckTitle: Ensure Classic Load Balancer Listeners Use Secure Protocols (SSL/HTTPS)
+CheckTitle: Ensure classic load balancer listeners use secure protocols (SSL/HTTPS)
 CheckType: [Data Protection, Security]
 ServiceName: elb
 SubServiceName: "classic"

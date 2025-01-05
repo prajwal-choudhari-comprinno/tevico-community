@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: elb_waf_acl_attached
-CheckTitle: Ensure WAF ACL is Attached to Application Load Balancers (ALB)
+CheckTitle: Ensure WAF ACL is attached to application load balancers (ALB)
 CheckType: [Infrastructure Protection]
 ServiceName: elbv2
 SubServiceName: ""

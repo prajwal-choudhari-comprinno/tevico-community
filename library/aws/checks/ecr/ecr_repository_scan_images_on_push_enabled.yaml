@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: ecr_repository_scan_images_on_push_enabled
-CheckTitle: Ensure ECR Repositories Have Automatic Image Scanning Enabled
+CheckTitle: Ensure ECR repositories have automatic image scanning enabled
 CheckType: [Infrastructure Protection, Security Best Practices]
 ServiceName: ecr
 SubServiceName: ""
