@@ -1,3 +1,9 @@
+"""
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-1-7
+"""
+
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 from tevico.engine.entities.report.check_model import CheckReport
