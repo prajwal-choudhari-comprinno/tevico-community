@@ -6,7 +6,7 @@ Provider: aws
 
 CheckID: iam_attached_policy_admin_privileges_found
 
-CheckTitle: "Detect  IAM Users with Administrative Access Privileges"
+CheckTitle: "Detect IAM Users with AWS-managed administrator access privileges"
 
 CheckType: 
   - Software and Configuration Checks

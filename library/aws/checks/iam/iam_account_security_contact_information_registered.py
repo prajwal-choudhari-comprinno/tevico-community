@@ -1,99 +1,83 @@
 """
-AUTHOR: RONIT CHAUHAN 
-DATE: 2024-10-17
+AUTHOR: RONIT CHAUHAN
+EMAIL: ronit.chauhan@comprinno.net
+DATE: 2025-1-4
 """
-
+"""
+Check: IAM Account Security Contact Information
+Description: Verifies if AWS account has registered security contact information
+"""
 import boto3
-import logging
-from botocore.exceptions import (
-    BotoCoreError,
-    ClientError,
-    ParamValidationError
-)
-
+from botocore.exceptions import ClientError
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
-# Set up logging for tracking code execution
-logger = logging.getLogger(__name__)
-
 class iam_account_security_contact_information_registered(Check):
-    """
-    This check verifies if AWS account has security contact information registered.
-    It's a critical security requirement to have proper contact details set up.
-    """
+    def __init__(self, metadata=None):
+        """Initialize check configuration"""
+        super().__init__(metadata)
+
+    def validate_security_contact(self, account_client) -> tuple:
+        """
+        Validate AWS account security contact information
+        Args:
+            account_client: AWS Account client
+        Returns:
+            tuple: (is_compliant: bool, message: str)
+        """
+        try:
+            response = account_client.get_alternate_contact(AlternateContactType='SECURITY')
+            contact = response.get('AlternateContact', {})
+            
+            # Check for required fields
+            email = contact.get('EmailAddress', '').strip()
+            phone = contact.get('PhoneNumber', '').strip()
+            name = contact.get('Name', '').strip()
+            title = contact.get('Title', '').strip()
+            
+            if all([email, phone, name, title]):
+                return True, "Security contact properly configured"
+            
+            missing = []
+            if not email:
+                missing.append("email")
+            if not phone:
+                missing.append("phone")
+            if not name:
+                missing.append("name")
+            if not title:
+                missing.append("title")
+                
+            return False, f"Incomplete security contact: missing {', '.join(missing)}"
+            
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'ResourceNotFoundException':
+                return False, "Security contact not configured"
+            raise
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         """
-        Executes the security contact information check.
-        
+        Execute the security contact information check
         Args:
-            connection: AWS session for making API calls
-            
+            connection: AWS session
         Returns:
-            CheckReport: Results of the security contact check
+            CheckReport: Check results
         """
-        # Initialize our report
         report = CheckReport(name=__name__)
+        report.passed = True
 
         try:
-            # Step 1: Create AWS Account client
-            try:
-                account_client = connection.client('account')
-            except (BotoCoreError, ClientError) as e:
-                logger.error(f"Failed to create AWS Account client: {str(e)}")
-                report.passed = False
-                report.resource_ids_status['SECURITY_CONTACT'] = False
-                return report
+            account = connection.client('account')
+            is_compliant, message = self.validate_security_contact(account)
+            
+            report.passed = is_compliant
+            report.resource_ids_status[message] = is_compliant
 
-            # Step 2: Check if security contact is registered
-            try:
-                # Get security contact information from AWS
-                security_contact = account_client.get_alternate_contact(
-                    AlternateContactType='SECURITY'
-                )
-                
-                # Step 3: Validate the contact information
-                if 'AlternateContact' in security_contact and security_contact['AlternateContact']:
-                    # Contact exists and has information
-                    logger.info("Security contact information found")
-                    report.passed = True
-                    report.resource_ids_status['SECURITY_CONTACT'] = True
-                else:
-                    # Contact exists but information is incomplete
-                    logger.warning("Security contact information is incomplete")
-                    report.passed = False
-                    report.resource_ids_status['SECURITY_CONTACT'] = False
-
-            except account_client.exceptions.ResourceNotFoundException:
-                # No security contact is registered
-                logger.warning("No security contact found")
-                report.passed = False
-                report.resource_ids_status['SECURITY_CONTACT'] = False
-
-            except ParamValidationError as e:
-                # Invalid parameters in the request
-                logger.error(f"Parameter validation error: {str(e)}")
-                report.passed = False
-                report.resource_ids_status['SECURITY_CONTACT'] = False
-
-            except ClientError as e:
-                # AWS API error
-                logger.error(f"AWS API error: {str(e)}")
-                report.passed = False
-                report.resource_ids_status['SECURITY_CONTACT'] = False
-
-        except Exception as e:
-            # Catch any unexpected errors
-            logger.error(f"Unexpected error: {str(e)}", exc_info=True)
+        except ClientError as e:
             report.passed = False
-            report.resource_ids_status['SECURITY_CONTACT'] = False
+            report.resource_ids_status[f"AWS Error: {e.response['Error']['Code']}"] = False
+        except Exception as e:
+            report.passed = False
+            report.resource_ids_status[f"Unexpected Error: {str(e)}"] = False
 
         return report
-
-# What this check does:
-# 1. Passes (True) if security contact is registered and has complete information
-# 2. Fails (False) if:
-#    - No security contact is registered
-#    - Contact information is incomplete
-#    - Any errors occur during the check

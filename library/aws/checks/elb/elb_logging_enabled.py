@@ -3,98 +3,101 @@ AUTHOR: RONIT CHAUHAN
 EMAIL: ronit.chauhan@comprinno.net
 DATE: 2024-1-4
 """
+
 """
-Check: Ensures that Classic Load Balancers (ELBs) have access logging enabled
-Compliance Status: 
-    PASS: ELB has access logging enabled and configured to an S3 bucket
-    FAIL: ELB has access logging disabled or no ELBs found
+Check: ELB Logging Enabled
+Description: Verifies if Elastic Load Balancers have logging enabled
 """
 import boto3
-from typing import Dict
 from botocore.exceptions import ClientError
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
 class elb_logging_enabled(Check):
-    def _check_access_logging(self, client, lb_name: str) -> tuple:
+    def __init__(self, metadata=None):
+        """Initialize check configuration"""
+        super().__init__(metadata)
+
+    def check_lb_logging(self, client, lb_type: str, lb_arn: str, lb_name: str) -> tuple:
         """
-        Checks if access logging is enabled for a specific ELB
-        
+        Check logging configuration for a specific load balancer
         Args:
-            client: boto3 ELB client
-            lb_name: Name of the load balancer
-            
+            client: ELB client
+            lb_type: Load balancer type (application/network/classic)
+            lb_arn: Load balancer ARN
+            lb_name: Load balancer name
         Returns:
-            tuple: (is_enabled, status_message)
+            tuple: (is_compliant: bool, message: str)
         """
         try:
-            attributes = client.describe_load_balancer_attributes(
-                LoadBalancerName=lb_name
-            )['LoadBalancerAttributes']
+            if lb_type == 'classic':
+                attrs = client.describe_load_balancer_attributes(LoadBalancerName=lb_name)
+                is_enabled = attrs.get('LoadBalancerAttributes', {}).get('AccessLog', {}).get('Enabled', False)
+            else:
+                attrs = client.describe_load_balancer_attributes(LoadBalancerArn=lb_arn)
+                is_enabled = any(
+                    attr['Key'] == 'access_logs.s3.enabled' and attr['Value'].lower() == 'true'
+                    for attr in attrs.get('Attributes', [])
+                )
             
-            access_log = attributes.get('AccessLog', {})
-            is_enabled = access_log.get('Enabled', False)
+            return is_enabled, f"{lb_type.capitalize()} LB {lb_name}: {'Logging enabled' if is_enabled else 'Logging disabled'}"
             
-            if is_enabled:
-                return True, "ELB has access_logs enabled"
-            return False, "ELB access_logs is not configured"
-            
-        except ClientError:
-            return False, "Failed to retrieve ELB attributes"
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'LoadBalancerNotFound':
+                return False, f"{lb_type.capitalize()} LB {lb_name}: Not found"
+            raise
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         """
-        Executes the ELB access logging check
-        
+        Execute the ELB logging check
         Args:
-            connection: boto3 Session object
-            
+            connection: AWS session
         Returns:
-            CheckReport: Results of the security check
+            CheckReport: Check results
         """
+        report = CheckReport(name=__name__)
+        report.passed = True
+
         try:
-            report = CheckReport(name=__name__)
-            report.passed = True
+            # Check classic load balancers
+            elb = connection.client('elb')
+            elbv2 = connection.client('elbv2')
             
-            client = connection.client('elb')
-            paginator = client.get_paginator('describe_load_balancers')
-            
-            load_balancers_found = False
-            
+            # Check classic ELBs
             try:
-                for page in paginator.paginate():
-                    load_balancers = page.get('LoadBalancerDescriptions', [])
-                    
-                    if load_balancers:
-                        load_balancers_found = True
-                        
-                        for lb in load_balancers:
-                            lb_name = lb['LoadBalancerName']
-                            
-                            # Check access logging status
-                            is_enabled, status_message = self._check_access_logging(
-                                client, lb_name
-                            )
-                            
-                            # Update resource status with message
-                            resource_key = f"{lb_name}: {status_message}"
-                            report.resource_ids_status[resource_key] = is_enabled
-                            
-                            # If any ELB fails, mark overall check as failed
-                            if not is_enabled:
-                                report.passed = False
-                    
-                # If no load balancers were found, mark check as failed
-                if not load_balancers_found:
-                    report.passed = False
-                    report.resource_ids_status["No ELB Found"] = False
-                    
-            except ClientError as e:
+                classic_lbs = elb.describe_load_balancers().get('LoadBalancerDescriptions', [])
+                for lb in classic_lbs:
+                    is_compliant, message = self.check_lb_logging(
+                        elb, 'classic', '', lb['LoadBalancerName']
+                    )
+                    report.resource_ids_status[message] = is_compliant
+                    if not is_compliant:
+                        report.passed = False
+            except ClientError:
+                pass
+
+            # Check ALB/NLB
+            try:
+                v2_lbs = elbv2.describe_load_balancers().get('LoadBalancers', [])
+                for lb in v2_lbs:
+                    is_compliant, message = self.check_lb_logging(
+                        elbv2, lb['Type'], lb['LoadBalancerArn'], lb['LoadBalancerName']
+                    )
+                    report.resource_ids_status[message] = is_compliant
+                    if not is_compliant:
+                        report.passed = False
+            except ClientError:
+                pass
+
+            if not report.resource_ids_status:
                 report.passed = False
-                report.resource_ids_status["Error: Failed to list ELBs"] = False
-                
+                report.resource_ids_status["No load balancers found"] = False
+
+        except ClientError as e:
+            report.passed = False
+            report.resource_ids_status[f"AWS Error: {e.response['Error']['Code']}"] = False
         except Exception as e:
             report.passed = False
-            report.resource_ids_status["Error: Unexpected error occurred"] = False
-            
+            report.resource_ids_status[f"Unexpected Error: {str(e)}"] = False
+
         return report

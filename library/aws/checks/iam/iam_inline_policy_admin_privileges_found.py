@@ -2,223 +2,103 @@
 AUTHOR: RONIT CHAUHAN
 EMAIL: ronit.chauhan@comprinno.net
 DATE: 2024-11-07
-
-Description: This security check identifies AWS users who have:
-1. Full administrative access (*:*) through their inline policies
-2. Service-specific wildcards (like ec2:*) are allowed and won't trigger failures
+"""
+"""
+Check: IAM Inline Policy Admin Privileges
+Description: Detects inline policies with administrative privileges
 """
 import boto3
-import json
-from botocore.exceptions import BotoCoreError, ClientError
+from botocore.exceptions import ClientError
 from tevico.engine.entities.report.check_model import CheckReport
 from tevico.engine.entities.check.check import Check
 
 class iam_inline_policy_admin_privileges_found(Check):
     def __init__(self, metadata=None):
-        """
-        Initialize check with configuration parameters.
-        Sets up admin action patterns and severity levels.
-        """
+        """Initialize check configuration"""
         super().__init__(metadata)
-        self.admin_actions = ['*:*', 'iam:*', 'organizations:*']
-        self._initialize_check_parameters()
 
-    def _initialize_check_parameters(self):
-        """
-        Initialize internal check parameters and configurations.
-        Separate initialization for better maintainability.
-        """
-        self.error_messages = {
-            'policy_not_found': 'Policy document not found',
-            'invalid_statement': 'Invalid statement format',
-            'api_error': 'AWS API error occurred',
-            'parse_error': 'Error parsing policy document'
-        }
-
-    def _normalize_policy_elements(self, actions, resources):
-        """
-        Normalize policy elements to lists for consistent processing.
-        
-        Args:
-            actions: Policy actions (string or list)
-            resources: Policy resources (string or list)
-            
-        Returns:
-            tuple: (normalized_actions, normalized_resources)
-        """
+    def has_admin_privileges(self, policy_doc: dict) -> bool:
+        """Check if policy document contains admin privileges"""
         try:
-            norm_actions = [actions] if isinstance(actions, str) else actions or []
-            norm_resources = [resources] if isinstance(resources, str) else resources or []
-            return norm_actions, norm_resources
-        except Exception:
-            return [], []
-
-    def _validate_statement_format(self, statement):
-        """
-        Validate the format of a policy statement.
-        
-        Args:
-            statement: Policy statement to validate
-            
-        Returns:
-            bool: True if valid, False otherwise
-        """
-        return (isinstance(statement, dict) and 
-                'Effect' in statement and 
-                ('Action' in statement or 'Resource' in statement))
-
-    def check_policy_for_admin_access(self, policy_document: dict) -> tuple:
-        """
-        Analyze policy document for administrative privileges.
-        
-        Args:
-            policy_document: IAM policy document to analyze
-            
-        Returns:
-            tuple: (has_admin: bool, admin_type: str)
-        """
-        try:
-            if not policy_document or 'Statement' not in policy_document:
-                return False, ""
-
-            statements = policy_document['Statement']
-            if isinstance(statements, dict):
+            statements = policy_doc.get('Statement', [])
+            if not isinstance(statements, list):
                 statements = [statements]
-
-            for statement in statements:
-                if not self._validate_statement_format(statement):
-                    continue
-
-                if statement.get('Effect') != 'Allow':
-                    continue
-
-                actions, resources = self._normalize_policy_elements(
-                    statement.get('Action', []),
-                    statement.get('Resource', [])
-                )
-
-                # Check for full admin access patterns
-                if '*' in actions and '*' in resources:
-                    return True, "FullAdminAccess"
-
-                # Check for service-specific admin access
-                if any(admin in actions for admin in self.admin_actions) and '*' in resources:
-                    return True, "ServiceAdminAccess"
-
-            return False, ""
-
-        except Exception:
-            return False, ""
-
-    def _process_user_policies(self, iam_client, user_name):
-        """
-        Process and analyze all inline policies for a user.
-        
-        Args:
-            iam_client: IAM client instance
-            user_name: Name of the user to check
             
-        Returns:
-            tuple: (failed_policies, checked_policies, error_occurred)
-        """
-        failed_policies = []
-        checked_policies = []
-        
+            return any(
+                stmt.get('Effect') == 'Allow' and
+                (stmt.get('Action') == '*' or 
+                 (isinstance(stmt.get('Action'), list) and '*' in stmt.get('Action'))) and
+                (stmt.get('Resource') == '*' or 
+                 (isinstance(stmt.get('Resource'), list) and '*' in stmt.get('Resource')))
+                for stmt in statements
+            )
+        except Exception:
+            return False
+
+    def check_user_policies(self, iam_client, username: str) -> dict:
+        """Check user's inline policies for admin privileges"""
         try:
-            policy_response = iam_client.list_user_policies(UserName=user_name)
-            inline_policies = policy_response.get('PolicyNames', [])
-
-            if not inline_policies:
-                return [], [], False
-
-            for policy_name in inline_policies:
+            policies = iam_client.list_user_policies(UserName=username).get('PolicyNames', [])
+            
+            if not policies:
+                return {"status": "no_policies"}
+            
+            admin_policies = []
+            for policy_name in policies:
                 try:
-                    policy_response = iam_client.get_user_policy(
-                        UserName=user_name,
+                    policy = iam_client.get_user_policy(
+                        UserName=username,
                         PolicyName=policy_name
                     )
-                    
-                    policy_document = policy_response.get('PolicyDocument')
-                    if not policy_document:
-                        continue
-
-                    checked_policies.append(policy_name)
-                    has_admin, admin_type = self.check_policy_for_admin_access(policy_document)
-
-                    if has_admin:
-                        failed_policies.append(f"{policy_name} ({admin_type})")
-
+                    if self.has_admin_privileges(policy.get('PolicyDocument', {})):
+                        admin_policies.append(policy_name)
                 except ClientError:
                     continue
-
-            return failed_policies, checked_policies, False
-
+            
+            return {
+                "status": "has_admin" if admin_policies else "no_admin",
+                "policies": admin_policies
+            }
+            
         except ClientError:
-            return [], [], True
+            return {"status": "error"}
 
     def execute(self, connection: boto3.Session) -> CheckReport:
-        """
-        Execute the security check across all IAM users.
-        
-        Args:
-            connection: AWS session
-            
-        Returns:
-            CheckReport: Results of the security check
-        """
+        """Execute the inline policy check"""
         report = CheckReport(name=__name__)
         report.passed = True
 
         try:
-            iam_client = connection.client('iam')
-            paginator = iam_client.get_paginator('list_users')
+            iam = connection.client('iam')
+            users = iam.list_users().get('Users', [])
 
-            for page in paginator.paginate():
-                for user in page['Users']:
-                    user_name = user['UserName']
-                    
-                    failed_policies, checked_policies, error_occurred = self._process_user_policies(
-                        iam_client, user_name
-                    )
+            # Handle case when no IAM users exist
+            if not users:
+                report.resource_ids_status["No IAM users found"] = True
+                return report
 
-                    if error_occurred:
-                        continue
+            for user in users:
+                username = user['UserName']
+                result = self.check_user_policies(iam, username)
+                
+                if result["status"] == "no_policies":
+                    status_msg = "No inline policies found"
+                    status_value = True
+                elif result["status"] == "has_admin":
+                    status_msg = f"Has AWS admin privileges in inline policies: {', '.join(result['policies'])}"
+                    status_value = False
+                    report.passed = False
+                else:
+                    status_msg = "No AWS admin privileges in inline policies"
+                    status_value = True
+                
+                report.resource_ids_status[f"{username} : {status_msg}"] = status_value
 
-                    if not checked_policies:
-                        report.resource_ids_status[f"{user_name}: No inline policies found"] = True
-                        continue
-
-                    if failed_policies:
-                        failed_policies_str = ", ".join(failed_policies)
-                        report.resource_ids_status[f"{user_name}: policies {failed_policies_str}"] = False
-                        report.passed = False
-                    else:
-                        checked_policies_str = ", ".join(checked_policies)
-                        report.resource_ids_status[
-                            f"{user_name}: policies {checked_policies_str} none of them having Administrative Privileges"
-                        ] = True
-
-        except (BotoCoreError, ClientError):
+        except ClientError as e:
             report.passed = False
-            report.resource_ids_status["AWSError"] = False
-        except Exception:
+            report.resource_ids_status[f"AWS Error: {e.response['Error']['Code']}"] = False
+        except Exception as e:
             report.passed = False
-            report.resource_ids_status["UnexpectedError"] = False
+            report.resource_ids_status[f"Unexpected Error: {str(e)}"] = False
 
         return report
-
-
-# What this security check does:
-# 1. Fails (returns False) if:
-#    - A user has full admin access (*:*)
-#    - A user has no inline policies defined
-#    - We can't verify a user's policies
-#
-# 2. Passes (returns True) if:
-#    - Users have appropriate access (including service-specific wildcards like ec2:*)
-#    - No users have full administrative privileges
-#
-# 3. Allows service-specific wildcards:
-#    - ec2:* (all EC2 permissions)
-#    - s3:* (all S3 permissions)
-#    - etc.
