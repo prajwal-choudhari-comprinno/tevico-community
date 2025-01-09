@@ -112,9 +112,9 @@ class iam_inline_policy_admin_privileges_found(Check):
         #     policy_get_func='get_role_policy',
         #     name_key='RoleName'
         # )
-                # If any failure was found, the check should fail
-                if any(status is False for status in report.resource_ids_status.values()):
-                    report.passed = False  # Ensure this is a boolean
+        # If any failure was found, the check should fail
+        if any(status is False for status in report.resource_ids_status.values()):
+            report.passed = False  # Ensure this is a boolean
 
         return report
  
