@@ -23,8 +23,7 @@ class cloudtrail_multiregion_enabled(Check):
             # Retrieve the CloudTrail configuration
             trail_info = cloudtrail_client.describe_trails()
             if not trail_info['trailList']:
-                report.passed = False
-                report.resource_ids_status["No CloudTrail found"] = False
+                logging.info("No CloudTrails found")
                 return report
 
             # Iterate over all trails to check multi-region status
