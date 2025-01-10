@@ -80,6 +80,7 @@ sections:
 
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
+          - acm_certificates_expiration_check
           - efs_encryption_at_rest_enabled
           - eks_cluster_kms_cmk_encryption_in_secrets_enabled
           - dynamodb_tables_kms_cmk_encryption_enabled
@@ -196,6 +197,7 @@ sections:
 
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
+          - acm_certificates_transparency_logs_enabled
           - apigateway_execution_logging_enabled
           - apigateway_restapi_logging_enabled
           - apigatewayv2_api_access_logging_enabled
