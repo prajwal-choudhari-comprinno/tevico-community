@@ -24,7 +24,9 @@ class cloudtrail_s3_bucket_access_logging_enabled(Check):
             # Retrieve the CloudTrail configuration
             trail_info = cloudtrail_client.describe_trails()
             if not trail_info['trailList']:
-                raise Exception("No CloudTrail found")
+                report.passed = False
+                report.resource_ids_status["No CloudTrail found"] = False
+                return report
 
             # Iterate over all trails
             for trail in trail_info['trailList']:
