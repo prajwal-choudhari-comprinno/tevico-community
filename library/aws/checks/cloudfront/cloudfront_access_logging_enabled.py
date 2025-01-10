@@ -1,3 +1,9 @@
+"""
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-10
+"""
+
 import boto3
 import logging
 
@@ -31,17 +37,28 @@ class cloudfront_access_logging_enabled(Check):
 
                 # Get the distribution configuration using get_distribution_config
                 dist_config = client.get_distribution_config(Id=distribution_id)
+                distribution_config = dist_config.get('DistributionConfig', {})
 
-                # For example, you can check if logging is enabled
-                logging_config = dist_config.get('DistributionConfig', {}).get('Logging', {})
-                logging_enabled = logging_config.get('Enabled', False)
+                # Check for legacy logging configuration
+                legacy_logging_config = distribution_config.get('Logging', {})
+                logging_enabled = legacy_logging_config.get('Enabled', False)
+
+                # Check for real-time log configuration
+                realtime_log_config_arn = distribution_config.get(
+                    'DefaultCacheBehavior', {}).get('RealtimeLogConfigArn')
 
                 # Log the result
-                status = logging_enabled
-                report.resource_ids_status[f"{distribution_id} Access Logging: {'Enabled' if status else 'Disabled'}"] = status
+                if legacy_logging_config or realtime_log_config_arn:
+                    status = logging_enabled or bool(realtime_log_config_arn)
+                    report.resource_ids_status[f"{distribution_id} Access Logging: {'Enabled' if status else 'Disabled'}"] = status
 
-                if not status:
-                    report.passed = False  # Mark as failed if any distribution does not have logging enabled
+                    if not status:
+                        report.passed = False  # Mark as failed if any distribution does not have logging enabled
+
+                else:
+                    # If no logging configuration found, consider this as disabled
+                    report.resource_ids_status[f"{distribution_id} Access Logging: Disabled"] = False
+                    report.passed = False  # If there's no logging configuration at all, mark as failed
 
         except Exception as e:
             logging.error(f"Error while fetching CloudFront distribution config: {e}")
