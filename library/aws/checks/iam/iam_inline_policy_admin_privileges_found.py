@@ -4,7 +4,7 @@ DATE: 2024-10-11
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_inline_policy_admin_privileges_found(Check):
@@ -38,7 +38,7 @@ class iam_inline_policy_admin_privileges_found(Check):
                 # Check if the inline policy grants full administrative privileges
                 if 'Statement' in policy_document:
                     for statement in policy_document['Statement']:
-                        if statement.get('Effect') == 'Allow':
+                        if isinstance(statement, dict) and statement.get('Effect') == 'Allow':
                             actions = statement.get('Action', [])
                             resources = statement.get('Resource', [])
                             
@@ -60,12 +60,12 @@ class iam_inline_policy_admin_privileges_found(Check):
 
         # Determine report status based on findings
         if findings:
-            report.passed = False  # Indicate that the check failed
+            report.status = ResourceStatus.FAILED  # Indicate that the check failed
             report.resource_ids_status = {user['UserName']: False for user in users}  # Mark users as having issues
             report.report_metadata = {"findings": findings}  # Store findings in report metadata
             # print(f"[FAIL] Administrative privileges found for {len(findings)} policies.")
         else:
-            report.passed = True  # Indicate that the check passed
+            report.status = ResourceStatus.PASSED  # Indicate that the check passed
             report.resource_ids_status = {user['UserName']: True for user in users}  # Mark all users as having no issues
             # print("[PASS] No administrative privileges found in inline policies.")
 

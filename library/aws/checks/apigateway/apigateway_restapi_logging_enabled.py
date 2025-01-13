@@ -1,6 +1,6 @@
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -14,10 +14,10 @@ class apigateway_restapi_logging_enabled(Check):
             api_name = api['name']
             logging = api['endpointConfiguration']['types']
             if 'REGIONAL' in logging:
-                report.passed = True
+                report.status = ResourceStatus.PASSED
                 report.resource_ids_status[api_name] = True
             else:
-                report.passed = False
+                report.status = ResourceStatus.FAILED
                 report.resource_ids_status[api_name] = False
         return report
 

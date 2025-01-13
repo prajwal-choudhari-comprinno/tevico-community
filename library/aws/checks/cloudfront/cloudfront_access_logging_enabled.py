@@ -5,7 +5,7 @@ DATE: 2024-11-14
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 from botocore.exceptions import ClientError
 
@@ -13,7 +13,7 @@ class cloudfront_access_logging_enabled(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         client = connection.client('cloudfront')
         report = CheckReport(name=__name__)
-        report.passed = True
+        report.status = ResourceStatus.PASSED
 
         try:
             distributions = client.list_distributions()
@@ -31,10 +31,10 @@ class cloudfront_access_logging_enabled(Check):
                             report.resource_ids_status[dist_id] = True
                         else:
                             report.resource_ids_status[dist_id] = False
-                            report.passed = False
+                            report.status = ResourceStatus.FAILED
                             
         except ClientError:
-            report.passed = False
+            report.status = ResourceStatus.FAILED
             
         return report
 

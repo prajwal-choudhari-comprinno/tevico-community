@@ -64,7 +64,7 @@ class Provider(ABC):
         
         res.execution_time = round(res.execution_time, 2)
 
-        if res is not None and res.passed:
+        if res is not None and res.status:
             print(f'\t\t* Check Passed ✅: {res.name} ({res.execution_time} seconds)')
         else:
             print(f'\t\t* Check Failed ❌: {res.name} ({res.execution_time} seconds)')

@@ -5,14 +5,14 @@ DATE: 2024-11-15
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class cloudfront_distributions_https_enabled(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         client = connection.client('cloudfront')
         report = CheckReport(name=__name__)
-        report.passed = True
+        report.status = ResourceStatus.PASSED
         distributions = client.list_distributions()
         
         if ('DistributionList' in distributions and 
@@ -25,7 +25,7 @@ class cloudfront_distributions_https_enabled(Check):
                 viewer_protocol_policy = default_cache_behavior.get('ViewerProtocolPolicy', '')
                 if viewer_protocol_policy != 'redirect-to-https' and viewer_protocol_policy != 'https-only':
                     report.resource_ids_status[distribution_id] = False
-                    report.passed = False
+                    report.status = ResourceStatus.FAILED
                 else:
                     report.resource_ids_status[distribution_id] = True
         else:

@@ -7,7 +7,7 @@ DATE: 2024-11-15
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class cloudtrail_cloudwatch_logging_enabled(Check):
@@ -18,7 +18,7 @@ class cloudtrail_cloudwatch_logging_enabled(Check):
 
         trails = response.get('trailList', [])
         if not trails:
-            report.passed = False
+            report.status = ResourceStatus.FAILED
             return report
 
         for trail in trails:
@@ -28,7 +28,7 @@ class cloudtrail_cloudwatch_logging_enabled(Check):
             if cloudwatch_logs_arn:
                 report.resource_ids_status[trail_name] = True
             else:
-                report.passed = False
+                report.status = ResourceStatus.FAILED
                 report.resource_ids_status[trail_name] = False
 
         return report

@@ -6,14 +6,14 @@ DATE: 2024-11-12
 
 import boto3
 from datetime import datetime, timedelta, timezone
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class acm_certificates_expiration_check(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         client = connection.client('acm')
         report = CheckReport(name=__name__)
-        report.passed = True
+        report.status = ResourceStatus.PASSED
         threshold_days = 7  # Expiration threshold in days
 
         # List all ACM certificates
@@ -34,7 +34,7 @@ class acm_certificates_expiration_check(Check):
                 days_until_expiration = (not_after - current_time).days
                 if days_until_expiration <= threshold_days:
                     report.resource_ids_status[cert_arn] = False
-                    report.passed = False
+                    report.status = ResourceStatus.FAILED
                 else:
                     report.resource_ids_status[cert_arn] = True
 

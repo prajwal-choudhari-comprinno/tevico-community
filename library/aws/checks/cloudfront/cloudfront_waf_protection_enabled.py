@@ -6,7 +6,7 @@ DATE: 2024-11-14
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class cloudfront_waf_protection_enabled(Check):
@@ -17,7 +17,7 @@ class cloudfront_waf_protection_enabled(Check):
 
         distributions = response.get('DistributionList', {}).get('Items', [])
         if not distributions:
-            report.passed = True
+            report.status = ResourceStatus.PASSED
             return report
 
         for distribution in distributions:
@@ -27,7 +27,7 @@ class cloudfront_waf_protection_enabled(Check):
             if web_acl_id:
                 report.resource_ids_status[distribution_id] = True
             else:
-                report.passed = False
+                report.status = ResourceStatus.FAILED
                 report.resource_ids_status[distribution_id] = False
 
         return report

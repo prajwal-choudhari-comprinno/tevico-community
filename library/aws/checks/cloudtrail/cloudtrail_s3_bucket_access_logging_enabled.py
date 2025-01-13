@@ -6,7 +6,7 @@ DATE: 2024-11-15
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -18,7 +18,7 @@ class cloudtrail_s3_bucket_access_logging_enabled(Check):
 
         buckets = response.get('Buckets', [])
         if not buckets:
-            report.passed = False
+            report.status = ResourceStatus.FAILED
             return report
 
         for bucket in buckets:
@@ -28,7 +28,7 @@ class cloudtrail_s3_bucket_access_logging_enabled(Check):
             if logging_status:
                 report.resource_ids_status[bucket_name] = True
             else:
-                report.passed = False
+                report.status = ResourceStatus.FAILED
                 report.resource_ids_status[bucket_name] = False
 
         return report
