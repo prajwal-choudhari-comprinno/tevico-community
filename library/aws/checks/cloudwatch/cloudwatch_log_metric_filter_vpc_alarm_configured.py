@@ -24,10 +24,10 @@ class cloudwatch_log_metric_filter_vpc_alarm_configured(Check):
             return report
 
         for metric_filter in filters:
-            filter_name = metric_filter['FilterName']
-            filter_pattern = metric_filter['FilterPattern']
+            filter_name = metric_filter.get('FilterName')
+            filter_pattern = metric_filter.get('FilterPattern')
 
-            if "vpc" in filter_pattern.lower():
+            if filter_pattern is not None and "vpc" in filter_pattern.lower():
 
                 alarms = cloudwatch_client.describe_alarms_for_metric(
                     MetricName=filter_name,
