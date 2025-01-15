@@ -94,3 +94,6 @@ class CheckReport(BaseModel):
     resource_ids_status: Dict[str, bool] = {}
     report_metadata: Optional[Dict[str, Any]] = None
     created_on: datetime = datetime.now()
+
+    def has_failed_resources(self):
+        return any(status == False for status in self.resource_ids_status.values())
