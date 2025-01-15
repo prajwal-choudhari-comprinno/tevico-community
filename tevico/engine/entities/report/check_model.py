@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field, field_validator, validator
+from pydantic import BaseModel, Field, field_validator
 
 from tevico.engine.core.enums import FrameworkDimension
 from enum import Enum
@@ -64,14 +64,24 @@ class AwsArn(BaseModel):
             # If the ARN is not in the correct format, raise an error
             raise ValueError(f"Invalid ARN format: {v}")
         return v
-    
-# class ResourceStatus(BaseModel):
 
 class ResourceStatus(Enum):
+    # If the check passed
     PASSED = 'passed'
+    
+    # If the check failed
     FAILED = 'failed'
+
+    # If the check cannot be executed because of lack of information
     SKIPPED = 'skipped'
+    
+    # If there are no resources to check
     NOT_APPLICABLE = 'not_applicable'
+    
+    # If the AWS API call fails for unknown reasons
+    UNKNOWN = 'unknown'
+
+
 
 class CheckReport(BaseModel):
     status: Optional[ResourceStatus] = None
