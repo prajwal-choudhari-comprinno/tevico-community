@@ -6,7 +6,7 @@ DATE: 2025-01-10
 
 import boto3
 import logging
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -16,7 +16,7 @@ class cloudtrail_multiregion_enabled(Check):
         cloudtrail_client = connection.client('cloudtrail')
 
         report = CheckReport(name=__name__)
-        report.passed = True
+        report.status = ResourceStatus.PASSED
         report.resource_ids_status = {}
 
         try:
@@ -38,14 +38,14 @@ class cloudtrail_multiregion_enabled(Check):
                     ] = True
                 else:
                     # Multi-region logging is not enabled
-                    report.passed = False
+                    report.status = ResourceStatus.FAILED
                     report.resource_ids_status[
                         f"CloudTrail {trail_name} - Multi-Region: Disabled"
                     ] = False
 
         except Exception as e:
             logging.error(f"Error while retrieving CloudTrail trails: {e}")
-            report.passed = False
+            report.status = ResourceStatus.FAILED
             report.resource_ids_status = {}
 
         return report

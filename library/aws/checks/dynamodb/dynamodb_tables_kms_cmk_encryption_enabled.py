@@ -5,7 +5,7 @@ DATE: 2024-11-07
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class dynamodb_tables_kms_cmk_encryption_enabled(Check):
@@ -15,7 +15,7 @@ class dynamodb_tables_kms_cmk_encryption_enabled(Check):
         paginator = client.get_paginator('list_tables')
         
         report = CheckReport(name=__name__)
-        report.passed = True
+        report.status = ResourceStatus.PASSED
         
         # List all DynamoDB tables
         for page in paginator.paginate():
@@ -33,6 +33,6 @@ class dynamodb_tables_kms_cmk_encryption_enabled(Check):
                 else:
                     # Otherwise, mark the check as failed for this table
                     report.resource_ids_status[table_name] = False
-                    report.passed = False
+                    report.status = ResourceStatus.FAILED
         
         return report

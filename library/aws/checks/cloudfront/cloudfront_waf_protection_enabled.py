@@ -6,7 +6,7 @@ DATE: 2025-01-10
 
 import boto3
 import logging
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class cloudfront_waf_protection_enabled(Check):
@@ -15,7 +15,7 @@ class cloudfront_waf_protection_enabled(Check):
         # Initialize CloudFront client and report
         client = connection.client('cloudfront')
         report = CheckReport(name=__name__)
-        report.passed = True
+        report.status = ResourceStatus.PASSED
         report.resource_ids_status = {}
 
         try:
@@ -40,11 +40,11 @@ class cloudfront_waf_protection_enabled(Check):
                 report.resource_ids_status[f"{distribution_id} WAF association: {'Enabled' if status else 'Disabled'}"] = status
 
                 if not status:
-                    report.passed = False  # Mark as failed if any distribution lacks WAF protection
+                    report.status = ResourceStatus.FAILED  # Mark as failed if any distribution lacks WAF protection
 
         except Exception as e:
             logging.error(f"Error while checking CloudFront WAF protection: {e}")
-            report.passed = False
+            report.status = ResourceStatus.FAILED
             report.resource_ids_status = {}
 
         return report

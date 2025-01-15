@@ -5,14 +5,14 @@ DATE: 2024-11-15
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class acl_bidirectional_traffic_restriction_check(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         client = connection.client('ec2')
         report = CheckReport(name=__name__)
-        report.passed = True
+        report.status = ResourceStatus.PASSED
         all_nacls = []
         paginator = client.get_paginator('describe_network_acls')
         
@@ -33,7 +33,7 @@ class acl_bidirectional_traffic_restriction_check(Check):
 
             if not is_bidirectional_traffic_restricted:
                 report.resource_ids_status[nacl_id] = False
-                report.passed = False
+                report.status = ResourceStatus.FAILED
             else:
                 report.resource_ids_status[nacl_id] = True
 

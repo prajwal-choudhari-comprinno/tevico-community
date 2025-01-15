@@ -7,7 +7,7 @@ DATE: 2025-01-10
 import boto3
 import logging
 
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -17,7 +17,7 @@ class cloudtrail_s3_bucket_access_logging_enabled(Check):
         cloudtrail_client = connection.client('cloudtrail')
 
         report = CheckReport(name=__name__)
-        report.passed = True
+        report.status = ResourceStatus.PASSED
         report.resource_ids_status = {}
 
         try:
@@ -55,7 +55,7 @@ class cloudtrail_s3_bucket_access_logging_enabled(Check):
                         ] = True
                     else:
                         # Access logging is disabled
-                        report.passed = False
+                        report.status = ResourceStatus.FAILED
                         report.resource_ids_status[
                             f"CloudTrail {trail_name} - S3 bucket {s3_bucket_name} Access Logging: Disabled"
                         ] = False
@@ -64,9 +64,9 @@ class cloudtrail_s3_bucket_access_logging_enabled(Check):
                     logging.error(
                         f"Error while checking access logging for S3 bucket {s3_bucket_name}: {e}"
                     )
-                    report.passed = False
+                    report.status = ResourceStatus.FAILED
 
         except Exception as e:
             logging.error(f"Error while retrieving CloudTrail trails: {e}")
-            report.passed = False
+            report.status = ResourceStatus.FAILED
         return report

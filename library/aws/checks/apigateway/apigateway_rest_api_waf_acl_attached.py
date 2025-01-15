@@ -5,13 +5,13 @@ DATE: 2024-11-13
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class apigateway_rest_api_waf_acl_attached(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
-        report.passed = True
+        report.status = ResourceStatus.PASSED
         
         try:
             # Initialize clients
@@ -55,9 +55,9 @@ class apigateway_rest_api_waf_acl_attached(Check):
                 
                 # If any API doesn't have WAF, mark the overall check as failed
                 if not api_has_waf:
-                    report.passed = False
+                    report.status = ResourceStatus.FAILED
                     
         except Exception as e:
-            report.passed = False
+            report.status = ResourceStatus.FAILED
             
         return report
