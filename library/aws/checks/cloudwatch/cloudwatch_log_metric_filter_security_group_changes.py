@@ -10,7 +10,7 @@ import re
 
 from requests import PreparedRequest, get
 
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -23,7 +23,7 @@ class cloudwatch_log_metric_filter_security_group_changes(Check):
         report = CheckReport(name=__name__)
         
         # Initialize report status as 'Passed' unless we find a missing filter
-        report.passed = True
+        report.status = ResourceStatus.PASSED
         report.resource_ids_status = {}
 
         # Define the custom pattern for multiple security group change events
@@ -68,12 +68,12 @@ class cloudwatch_log_metric_filter_security_group_changes(Check):
                 
             # If no matching filter was found in any log group, set the report as failed
             if not any_matching_filter_found:
-                report.passed = False
+                report.status = ResourceStatus.FAILED
                 report.resource_ids_status["No matching filters found for Security Group Changes in any log group"] = False
 
         except Exception as e:
             logging.error(f"Error while fetching CloudWatch logs and metric filters: {e}")
-            report.passed = False
+            report.status = ResourceStatus.FAILED
             report.resource_ids_status = {}
 
         return report
