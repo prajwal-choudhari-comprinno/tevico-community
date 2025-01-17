@@ -4,7 +4,7 @@ DATE: 2024-10-10
 """
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -24,8 +24,8 @@ class iam_password_policy_uppercase(Check):
         
         
         if uppercase_required:
-            report.status = ResourceStatus.PASSED
+            report.status = CheckStatus.PASSED
         else:
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
 
         return report

@@ -4,7 +4,7 @@ DATE: 2024-10-10
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_policy_allows_privilege_escalation(Check):
@@ -68,12 +68,12 @@ class iam_policy_allows_privilege_escalation(Check):
             # Set overall check status
             # report.status = not any(report.resource_ids_status.values())
             if not any(report.resource_ids_status.values()):
-                report.status = ResourceStatus.FAILED
+                report.status = CheckStatus.FAILED
             else:
-                report.status = ResourceStatus.PASSED
+                report.status = CheckStatus.PASSED
         
         except Exception as e:
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
         
         return report
 

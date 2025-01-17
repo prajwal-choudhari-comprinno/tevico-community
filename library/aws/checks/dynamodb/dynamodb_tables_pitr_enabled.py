@@ -1,6 +1,6 @@
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -17,9 +17,9 @@ class dynamodb_tables_pitr_enabled(Check):
             response = client.describe_continuous_backups(TableName=table)
             result = response['ContinuousBackupsDescription']['PointInTimeRecoveryDescription']['PointInTimeRecoveryStatus'] == 'ENABLED'
             if result:
-                status = ResourceStatus.PASSED
+                status = CheckStatus.PASSED
             else:
-                status = ResourceStatus.FAILED
+                status = CheckStatus.FAILED
             report.status = status
             report.resource_ids_status[table] = result
 

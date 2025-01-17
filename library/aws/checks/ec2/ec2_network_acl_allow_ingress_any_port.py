@@ -4,7 +4,7 @@ EMAIL: deepak.puri@comprinno.net
 DATE: 2024-10-09
 """
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class ec2_network_acl_allow_ingress_any_port(Check):
@@ -14,7 +14,7 @@ class ec2_network_acl_allow_ingress_any_port(Check):
         client = connection.client('ec2')
         acls = client.describe_network_acls()['NetworkAcls']
         
-        report.status = ResourceStatus.PASSED
+        report.status = CheckStatus.PASSED
 
         for acl in acls:
             acl_id = acl['NetworkAclId']
@@ -36,7 +36,7 @@ class ec2_network_acl_allow_ingress_any_port(Check):
             
             report.resource_ids_status[acl_id] = not acl_allows_ingress
             if acl_allows_ingress:
-                report.status = ResourceStatus.FAILED
+                report.status = CheckStatus.FAILED
         
         return report
 

@@ -7,7 +7,7 @@ DATE: 2024-11-15
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class cloudwatch_log_metric_filter_vpc_alarm_configured(Check):
@@ -20,7 +20,7 @@ class cloudwatch_log_metric_filter_vpc_alarm_configured(Check):
 
         filters = response.get('metricFilters', [])
         if not filters:
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
             return report
 
         for metric_filter in filters:
@@ -38,7 +38,7 @@ class cloudwatch_log_metric_filter_vpc_alarm_configured(Check):
                 if alarms['MetricAlarms']:
                     report.resource_ids_status[filter_name] = True
                 else:
-                    report.status = ResourceStatus.FAILED
+                    report.status = CheckStatus.FAILED
                     report.resource_ids_status[filter_name] = False
 
         return report
