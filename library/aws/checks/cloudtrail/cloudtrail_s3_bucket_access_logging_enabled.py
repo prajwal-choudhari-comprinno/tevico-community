@@ -61,10 +61,16 @@ class cloudtrail_s3_bucket_access_logging_enabled(Check):
                         ] = False
 
                 except Exception as e:
-                    logging.error(
-                        f"Error while checking access logging for S3 bucket {s3_bucket_name}: {e}"
-                    )
                     report.status = ResourceStatus.FAILED
+                    logging.warning(
+                        f"CloudTrail {trail_name} - Access denied while checking access logging for S3 bucket {s3_bucket_name}: {e}. "
+                        "This bucket belongs to another AWS account. Please log in to the owning account and manually verify the S3 bucket's access logging configuration and permissions."
+                    )
+                    
+                    report.resource_ids_status[
+                        f"CloudTrail {trail_name} - Access denied while checking access logging for S3 bucket {s3_bucket_name}: {e}. "
+                        "This bucket belongs to another AWS account. Please log in to the owning account and manually verify the S3 bucket's access logging configuration and permissions."
+                    ] = False
 
         except Exception as e:
             logging.error(f"Error while retrieving CloudTrail trails: {e}")
