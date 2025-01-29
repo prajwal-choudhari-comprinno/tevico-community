@@ -63,7 +63,7 @@ class cloudtrail_s3_bucket_access_logging_enabled(Check):
                     bucket_location = connection.client('s3').get_bucket_location(
                         Bucket=s3_bucket_name
                     )
-                    bucket_region = bucket_location.get('LocationConstraint') or 'us-east-1'
+                    bucket_region = bucket_location.get('LocationConstraint')
                     s3_client = connection.client('s3', region_name=bucket_region)
                     
                     logging_config = s3_client.get_bucket_logging(Bucket=s3_bucket_name)
