@@ -6,7 +6,8 @@ cd /tmp
 rm -rf tevico-community
 
 echo -ne 'Cloning the repository...\n'
-git clone -b dev https://github.com/comprinnotech/tevico-community.git > /dev/null 2> /dev/null
+BRANCH=${BRANCH:-main}  # Default to 'main' if BRANCH is not set
+git clone -b $BRANCH https://github.com/comprinnotech/tevico-community.git > /dev/null 2> /dev/null
 cd tevico-community
 
 echo -ne 'Setting up virtual environment...\n'
