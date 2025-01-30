@@ -41,7 +41,7 @@ class acm_certificates_expiration_check(Check):
                     try:
                         # Describe each certificate to get expiration details
                         cert_details = client.describe_certificate(CertificateArn=cert_arn)
-                        print(cert_details)
+                       
                         not_after = cert_details['Certificate'].get('NotAfter')
 
                         if not_after:
