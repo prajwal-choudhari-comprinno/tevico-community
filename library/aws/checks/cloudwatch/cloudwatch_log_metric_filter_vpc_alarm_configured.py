@@ -24,8 +24,8 @@ class cloudwatch_log_metric_filter_vpc_alarm_configured(Check):
             return report
 
         for metric_filter in filters:
-            filter_name = metric_filter['FilterName']
-            filter_pattern = metric_filter['FilterPattern']
+            filter_name = metric_filter['filterName']
+            filter_pattern = metric_filter['filterPattern']
 
             if "vpc" in filter_pattern.lower():
 

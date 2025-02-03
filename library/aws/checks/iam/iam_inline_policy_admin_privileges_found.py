@@ -37,8 +37,20 @@ class iam_inline_policy_admin_privileges_found(Check):
 
                 # Check if the inline policy grants full administrative privileges
                 if 'Statement' in policy_document:
+                    
+                    # Convert single statement to list for uniform processing
+                    if isinstance(policy_document['Statement'], dict):
+                        policy_document['Statement'] = [policy_document['Statement']]
+
                     for statement in policy_document['Statement']:
                         if statement.get('Effect') == 'Allow':
+                            
+                            if isinstance(statement.get('Action'), str):
+                                statement['Action'] = [statement.get('Action')]
+                                
+                            if isinstance(statement.get('Resource'), str):
+                                statement['Resource'] = [statement.get('Resource')]
+                            
                             actions = statement.get('Action', [])
                             resources = statement.get('Resource', [])
                             
