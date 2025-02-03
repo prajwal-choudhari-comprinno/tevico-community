@@ -1,0 +1,35 @@
+site_name: Tevico Community
+theme:
+  name: material
+  font:
+    text: Hanken Grotesk
+    code: Roboto Mono
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - toc.integrate
+    - content.tabs.link
+    - content.code.copy
+  
+  # At a later time, we can define the light and the dark theme for the website
+  palette:
+    scheme: default
+    primary: white
+    accent: indigo
+  
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
