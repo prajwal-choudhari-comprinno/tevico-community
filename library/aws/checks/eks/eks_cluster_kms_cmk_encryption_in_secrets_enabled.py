@@ -5,7 +5,7 @@ DATE: 2024-11-10
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class eks_cluster_kms_cmk_encryption_in_secrets_enabled(Check):
@@ -15,7 +15,7 @@ class eks_cluster_kms_cmk_encryption_in_secrets_enabled(Check):
         paginator = client.get_paginator('list_clusters')
         
         report = CheckReport(name=__name__)
-        report.status = ResourceStatus.PASSED
+        report.status = CheckStatus.PASSED
         
         # Paginate through all EKS clusters
         for page in paginator.paginate():
@@ -41,6 +41,6 @@ class eks_cluster_kms_cmk_encryption_in_secrets_enabled(Check):
                 else:
                     # Secrets encryption with KMS CMK is not enabled; fail the check for this cluster
                     report.resource_ids_status[cluster_name] = False
-                    report.status = ResourceStatus.FAILED
+                    report.status = CheckStatus.FAILED
 
         return report

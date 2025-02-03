@@ -5,9 +5,8 @@ DATE: 2025-01-13
 """
 
 import boto3
-import logging
-import re
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -19,7 +18,7 @@ class cloudwatch_log_metric_filter_root_usage(Check):
         report = CheckReport(name=__name__)
         
         # Initialize report status as 'Passed' unless no filter/alarm is found
-        report.status = ResourceStatus.PASSED
+        report.status = CheckStatus.PASSED
         report.resource_ids_status = {}
 
         # Define the custom pattern for root account usage
@@ -74,22 +73,22 @@ class cloudwatch_log_metric_filter_root_usage(Check):
                         ] = True
                     else:
                         # Filter exists but no alarm is found
-                        report.status = ResourceStatus.FAILED
+                        report.status = CheckStatus.FAILED
                         report.resource_ids_status[
                             f"{log_group_name} (Filter: {filter_name}, No Alarm Found)"
                         ] = False
                 else:
                     # No filter found for the log group
-                    report.status = ResourceStatus.FAILED
+                    report.status = CheckStatus.FAILED
 
             # If no log groups have filters and alarms, mark the report as failed
             if not any(report.resource_ids_status.values()):
-                report.status = ResourceStatus.FAILED
+                report.status = CheckStatus.FAILED
                 report.resource_ids_status["No log group with the required filter and alarm found"] = False
 
         except Exception as e:
             logging.error(f"Error while checking log metric filters and alarms: {e}")
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
             report.resource_ids_status = {}
 
         return report

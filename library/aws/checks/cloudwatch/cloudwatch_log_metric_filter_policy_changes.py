@@ -7,8 +7,7 @@ DATE: 2025-01-13
 import boto3
 import logging
 import re
-
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -21,7 +20,7 @@ class cloudwatch_log_metric_filter_policy_changes(Check):
         report = CheckReport(name=__name__)
         
         # Initialize report status as 'Passed' unless we find a missing filter
-        report.status = ResourceStatus.PASSED
+        report.status = CheckStatus.PASSED
         report.resource_ids_status = {}
 
         # Define the custom pattern for IAM policy changes (Put/Attach/Delete actions)
@@ -67,12 +66,12 @@ class cloudwatch_log_metric_filter_policy_changes(Check):
 
             # If no matching filter was found in any log group, set the report as failed
             if not any_matching_filter_found:
-                report.status = ResourceStatus.FAILED
+                report.status = CheckStatus.FAILED
                 report.resource_ids_status["No matching filters found for IAM Policy Changes in any log group"] = False
 
         except Exception as e:
             logging.error(f"Error while fetching CloudWatch logs and metric filters: {e}")
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
             report.resource_ids_status = {}
 
         return report

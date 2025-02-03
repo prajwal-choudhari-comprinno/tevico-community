@@ -3,13 +3,13 @@
 from functools import reduce
 from typing import List
 
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.report.report_model import AnalyticsReport, CheckStatusReport, GeneralReport, SeverityReport
 
 
 def __check_status_accumulator(acc: CheckStatusReport, check: CheckReport):
     acc.total += 1
-    if check.status is ResourceStatus.PASSED:
+    if check.status is CheckStatus.PASSED:
         acc.passed += 1
     else:
         acc.failed += 1

@@ -6,7 +6,7 @@ DATE: 2024-10-17
 import boto3
 from typing import List, Dict, Any
 from datetime import datetime
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_account_maintain_current_contact_details(Check):
@@ -63,9 +63,9 @@ class iam_account_maintain_current_contact_details(Check):
 
             # Set the final report status based on whether all checks passed
             if all_checks_passed:
-                report.status = ResourceStatus.PASSED
+                report.status = CheckStatus.PASSED
             else:
-                report.status = ResourceStatus.FAILED
+                report.status = CheckStatus.FAILED
             
             if report.status:
                 # print("All checks passed successfully.")
@@ -76,13 +76,13 @@ class iam_account_maintain_current_contact_details(Check):
 
         except client.exceptions.NoSuchEntityException:
             # Handle the case where contact information cannot be found
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
             report.report_metadata = {"error": "No contact information found for this account"}
             # print("Error: No contact information found for this account.")
         
         except Exception as e:
             # Handle any other exceptions
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
             report.report_metadata = {"error": str(e)}
             # print(f"An unexpected error occurred: {e}")
 

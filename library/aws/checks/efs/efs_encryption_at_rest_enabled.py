@@ -5,7 +5,8 @@ DATE: 2025-01-24
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class efs_encryption_at_rest_enabled(Check):
@@ -13,7 +14,7 @@ class efs_encryption_at_rest_enabled(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         # Initialize the report
         report = CheckReport(name=__name__)
-        report.status = ResourceStatus.PASSED
+        report.status = CheckStatus.PASSED
         report.resource_ids_status = {}
 
         # Initialize the EFS client
@@ -42,11 +43,11 @@ class efs_encryption_at_rest_enabled(Check):
                     report.resource_ids_status[f"EFS {fs_id} is encrypted at rest."] = True
                 else:
                     report.resource_ids_status[f"EFS {fs_id} is not encrypted at rest."] = False
-                    report.status = ResourceStatus.FAILED
+                    report.status = CheckStatus.FAILED
 
         except Exception as e:
             # Handle unexpected errors
             report.resource_ids_status[f"Unexpected error: {str(e)}"] = False
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
 
         return report

@@ -5,7 +5,7 @@ DATE: 2024-10-09
 """
         
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class ec2_security_group_default_restrict_traffic(Check):
@@ -16,7 +16,7 @@ class ec2_security_group_default_restrict_traffic(Check):
         security_groups = client.describe_security_groups()['SecurityGroups']
         vpcs = client.describe_vpcs()['Vpcs']
         network_interfaces = client.describe_network_interfaces()['NetworkInterfaces']
-        report.status = ResourceStatus.PASSED
+        report.status = CheckStatus.PASSED
         vpcs_in_use = {vpc['VpcId']: vpc for vpc in vpcs}
         sg_network_interfaces = {}
         for ni in network_interfaces:
@@ -41,7 +41,7 @@ class ec2_security_group_default_restrict_traffic(Check):
                         report.resource_ids_status[sg_id] = True
                     else:
                         report.resource_ids_status[sg_id] = False
-                        report.status = ResourceStatus.FAILED
+                        report.status = CheckStatus.FAILED
                 else:
                     report.resource_ids_status[sg_id] = True
 

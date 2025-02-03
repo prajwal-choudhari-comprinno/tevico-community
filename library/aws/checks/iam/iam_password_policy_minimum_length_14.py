@@ -5,12 +5,14 @@ DATE: 2025-1-31
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_password_policy_minimum_length_14(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
+        
+        report.status = CheckStatus.PASSED
         
         try:
             # Create an IAM client using the provided boto3 session
@@ -29,11 +31,11 @@ class iam_password_policy_minimum_length_14(Check):
 
         except client.exceptions.NoSuchEntityException:
             # Handle the case where no password policy is found
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
             report.resource_ids_status['password_policy'] = False
         except Exception:
             # Handle any other errors
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
 
         # Return the generated report
         return report
