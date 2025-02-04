@@ -39,7 +39,7 @@ class ec2_instance_managed_by_ssm(Check):
             report.status = CheckStatus.FAILED
             print("in this place")
             # BT commented report.resource_ids_status['No Instances'] = False  # No instances available
-            report.resource_ids_status = [ResourceStatus(resource=AwsResource(arn="", status=CheckStatus.FAILED, summary="No instances available"))]
+            report.resource_ids_status = [ResourceStatus(resource=AwsResource(arn="arn:aws:iam::865246394951:instance-profile/ssm", status=CheckStatus.FAILED, summary="No instances available"))]
             return report
 
         for instance in instances:
