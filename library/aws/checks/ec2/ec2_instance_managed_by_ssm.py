@@ -19,6 +19,7 @@ class ec2_instance_managed_by_ssm(Check):
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED  # Assume passed unless we find an unmanaged instance
         report.resource_ids_status = {}
+        resource_status = ResourceStatus(name=__name__)
 
         # Fetch all EC2 instances
         try:
@@ -39,7 +40,9 @@ class ec2_instance_managed_by_ssm(Check):
             report.status = CheckStatus.FAILED
             print("in this place")
             # BT commented report.resource_ids_status['No Instances'] = False  # No instances available
-            report.resource_ids_status = [ResourceStatus(resource=AwsResource(arn="arn:aws:iam::865246394951:instance-profile/ssm", status=CheckStatus.FAILED, summary="No instances available"))]
+            resource_status = (resource=AwsResource(arn="arn:aws:iam::865246394951:instance-profile/ssm", status=CheckStatus.FAILED, summary="No instances available"))
+            # BT modified report.resource_ids_status = [ResourceStatus(resource=AwsResource(arn="arn:aws:iam::865246394951:instance-profile/ssm", status=CheckStatus.FAILED, summary="No instances available"))]
+            report.resource_ids_status = [resource_status]
             return report
 
         for instance in instances:
