@@ -5,7 +5,7 @@ DATE: 10-10-2024
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
