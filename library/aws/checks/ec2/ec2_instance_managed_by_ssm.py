@@ -18,8 +18,7 @@ class ec2_instance_managed_by_ssm(Check):
 
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED  # Assume passed unless we find an unmanaged instance
-        report.resource_ids_status = {}
-        resource_status = ResourceStatus(name=__name__)
+        report.resource_ids_status = []
 
         # Fetch all EC2 instances
         try:
