@@ -43,7 +43,7 @@ class ec2_instance_managed_by_ssm(Check):
             # resource_status = (resource=AwsResource(arn="arn:aws:iam::865246394951:instance-profile/ssm", status=CheckStatus.FAILED, summary="No instances available"))
             report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(),
+                        resource=GeneralResource(resource=""),
                         status=CheckStatus.FAILED,
                         summary="No instances available."
                     )
