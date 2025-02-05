@@ -18,6 +18,7 @@ class iam_password_policy_uppercase(Check):
         try:
             password_policy = client.get_account_password_policy()
         except client.exceptions.NoSuchEntityException:
+            report.status = CheckStatus.FAILED
             return report
 
         uppercase_required = password_policy.get('RequireUppercaseCharacters', False)

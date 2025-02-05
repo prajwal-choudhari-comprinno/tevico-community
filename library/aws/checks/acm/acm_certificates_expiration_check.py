@@ -7,7 +7,7 @@ DATE: 2025-01-09
 
 import boto3
 from datetime import datetime, timezone
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -22,7 +22,7 @@ class acm_certificates_expiration_check(Check):
         client = connection.client('acm')
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         try:
             # Use paginator to list all ACM certificates
@@ -51,12 +51,24 @@ class acm_certificates_expiration_check(Check):
 
                             # Handle expired certificates gracefully
                             if days_until_expiration < 0:
-                                report.resource_ids_status[f"Certificate {cert_arn} has already expired ({-days_until_expiration} days ago)."] = False
+                                report.resource_ids_status.append(
+                                    ResourceStatus(
+                                        resource=AwsResource(arn=cert_arn),
+                                        status=CheckStatus.FAILED,
+                                        summary="Certificate " + cert_arn + " has already expired " + days_until_expiration + " days ago."
+                                    )
+                                )
                                 report.status = CheckStatus.FAILED
                             else:
                                 # Determine if certificate is within expiration threshold
                                 is_valid = days_until_expiration > self.EXPIRATION_THRESHOLD_DAYS
-                                report.resource_ids_status[f"Certificate {cert_arn} expires in {days_until_expiration} days."] = is_valid
+                                report.resource_ids_status.append(
+                                    ResourceStatus(
+                                        resource=AwsResource(arn=cert_arn),
+                                        status=CheckStatus.FAILED,
+                                        summary="Certificate " + cert_arn + " expires in " + days_until_expiration + " days."
+                                    )
+                                )
 
                                 # If any certificate is expiring soon, mark the check as failed
                                 if not is_valid:
@@ -64,16 +76,39 @@ class acm_certificates_expiration_check(Check):
 
                     except Exception as e:
                         # Handle errors while describing a certificate
-                        report.resource_ids_status[f"Error describing {cert_arn}"] = False
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=AwsResource(arn=cert_arn),
+                                status=CheckStatus.FAILED,
+                                summary="Error describing " + cert_arn + "."
+                            )
+                        )
                         report.status = CheckStatus.FAILED
 
             if not certificates_found:
                 # No certificates found, mark the check as passed
-                report.resource_ids_status["No ACM certificates found"] = True
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=""),
+                        status=CheckStatus.SKIPPED,
+                        summary="No ACM certificates found."
+                    )
+                )
+                report.status = CheckStatus.FAILED
+
 
         except Exception as e:
             # Handle errors while listing certificates
             report.status = CheckStatus.FAILED
-            report.resource_ids_status["ACM listing error"] = False
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.SKIPPED,
+                    summary="ACM listing error.",
+                    exception=e
+                )
+            )
+            report.status = CheckStatus.FAILED
+
 
         return report

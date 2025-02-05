@@ -6,12 +6,13 @@ DATE: 2024-10-10
 
 import boto3
 from datetime import datetime, timedelta, timezone
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_rotate_access_keys_90_days(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
+        report.status = CheckStatus.PASSED
         client = connection.client('iam')
 
         try:
@@ -37,12 +38,12 @@ class iam_rotate_access_keys_90_days(Check):
                     else:
 
                         report.resource_ids_status[username] = False
+                        report.status = CheckStatus.FAILED
 
             # Check if any users have access keys older than 90 days
-            report.status = not any(report.resource_ids_status.values())
         except Exception as e:
 
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
         
         return report
 

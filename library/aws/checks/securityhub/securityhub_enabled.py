@@ -6,13 +6,14 @@ DATE: 2024-11-11
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 
 class securityhub_enabled(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
+        report.status = CheckStatus.PASSED
         securityhub_client = connection.client('securityhub')
 
         regions = connection.client('ec2').describe_regions()['Regions']
@@ -26,8 +27,10 @@ class securityhub_enabled(Check):
                 report.resource_ids_status[region_name] = True
             except regional_securityhub_client.exceptions.ResourceNotFoundException:
                 report.resource_ids_status[region_name] = False
+                report.status = CheckStatus.FAILED
             except regional_securityhub_client.exceptions.InvalidAccessException:
                 report.resource_ids_status[region_name] = False
+                report.status = CheckStatus.FAILED
 
         return report
 

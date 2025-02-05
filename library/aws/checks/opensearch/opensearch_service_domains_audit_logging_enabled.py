@@ -14,12 +14,12 @@ class opensearch_service_domains_audit_logging_enabled(Check):
         domain_names = res['DomainNames']
         
         report = CheckReport(name=__name__)
+        report.status = CheckStatus.FAILED
         
         for dn in domain_names:
             domain_name = dn['DomainName']
             res = client.describe_domain(DomainName=domain_name)
             domain = res['DomainStatus']
-            report.status = CheckStatus.FAILED
             report.resource_ids_status[domain_name] = False
             if domain['LogPublishingOptions']['Options']['AUDIT_LOGS']['Enabled']:
                 report.status = CheckStatus.PASSED
