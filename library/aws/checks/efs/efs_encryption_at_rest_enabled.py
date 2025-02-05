@@ -70,7 +70,7 @@ class efs_encryption_at_rest_enabled(Check):
         except Exception as e:
             # Handle unexpected errors
             error_status = ResourceStatus(
-                resource=AwsResource(arn=""),
+                resource=GeneralResource(resource=""),
                 status=CheckStatus.FAILED,
                 summary=f"Unexpected error: {str(e)}"
             )
