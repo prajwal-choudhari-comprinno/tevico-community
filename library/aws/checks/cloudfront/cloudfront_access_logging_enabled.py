@@ -7,7 +7,7 @@ DATE: 2025-01-10
 import boto3
 import logging
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -17,7 +17,7 @@ class cloudfront_access_logging_enabled(Check):
         client = connection.client('cloudfront')
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         try:
             # List all distributions
@@ -34,6 +34,7 @@ class cloudfront_access_logging_enabled(Check):
             # Get and log the configuration of each distribution
             for distribution in distributions:
                 distribution_id = distribution['Id']
+                distribution_arn = distribution['ARN']
 
                 # Get the distribution configuration using get_distribution_config
                 dist_config = client.get_distribution_config(Id=distribution_id)
@@ -50,19 +51,39 @@ class cloudfront_access_logging_enabled(Check):
                 # Log the result
                 if legacy_logging_config or realtime_log_config_arn:
                     status = logging_enabled or bool(realtime_log_config_arn)
-                    report.resource_ids_status[f"{distribution_id} Access Logging: {'Enabled' if status else 'Disabled'}"] = status
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=distribution_arn),
+                            status=CheckStatus.FAILED,
+                            summary=f"{distribution_id} Access Logging: {'Enabled' if status else 'Disabled'}"
+                        )
+                    )
 
                     if not status:
                         report.status = CheckStatus.FAILED  # Mark as failed if any distribution does not have logging enabled
 
                 else:
                     # If no logging configuration found, consider this as disabled
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=distribution_arn),
+                            status=CheckStatus.FAILED,
+                            summary=f"{distribution_id} Access Logging: Disabled"
+                        )
+                    )
                     report.resource_ids_status[f"{distribution_id} Access Logging: Disabled"] = False
                     report.status = CheckStatus.FAILED  # If there's no logging configuration at all, mark as failed
 
         except Exception as e:
             logging.error(f"Error while fetching CloudFront distribution config: {e}")
             report.status = CheckStatus.FAILED
-            report.resource_ids_status = {}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error while fetching CloudFront distribution config",
+                    exception=e
+                )
+            )
 
         return report

@@ -142,7 +142,7 @@ class CheckReport(BaseModel):
     def has_failed_resources(self):
         # return any(resource.status == CheckStatus.FAILED for resource in self.resource_ids_status)
         for resource in self.resource_ids_status:
-            print(resource)
+            #print(resource)
             if resource.status == CheckStatus.FAILED:
                 return True
         return False
