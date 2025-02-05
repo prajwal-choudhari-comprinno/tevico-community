@@ -6,7 +6,7 @@ DATE: 2025-01-10
 
 import boto3
 import logging
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class cloudfront_waf_protection_enabled(Check):
@@ -16,7 +16,7 @@ class cloudfront_waf_protection_enabled(Check):
         client = connection.client('cloudfront')
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         try:
             # Fetch all CloudFront distributions with pagination
@@ -33,11 +33,18 @@ class cloudfront_waf_protection_enabled(Check):
             # Check WAF association for each distribution
             for distribution in distributions:
                 distribution_id = distribution['Id']
+                distribution_arn = distribution['ARN']
                 web_acl_id = distribution.get('WebACLId', '')
 
                 # WAF is enabled if WebACLId is not an empty string
                 status = bool(web_acl_id)
-                report.resource_ids_status[f"{distribution_id} WAF association: {'Enabled' if status else 'Disabled'}"] = status
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=AwsResource(arn=distribution_arn),
+                        status=CheckStatus.FAILED,
+                        summary=f"{distribution_id} WAF association: {'Enabled' if status else 'Disabled'}"
+                    )
+                )
 
                 if not status:
                     report.status = CheckStatus.FAILED  # Mark as failed if any distribution lacks WAF protection
@@ -45,6 +52,13 @@ class cloudfront_waf_protection_enabled(Check):
         except Exception as e:
             logging.error(f"Error while checking CloudFront WAF protection: {e}")
             report.status = CheckStatus.FAILED
-            report.resource_ids_status = {}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error while fetching CloudFront distribution config",
+                    exception=e
+                )
+            )
 
         return report
