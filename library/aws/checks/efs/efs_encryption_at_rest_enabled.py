@@ -49,7 +49,7 @@ class efs_encryption_at_rest_enabled(Check):
             for fs in file_systems:
                 fs_id = fs['FileSystemId']
                 is_encrypted = fs.get('Encrypted', False)
-                arn = fs.get('FileSystemArn', f"unknown-arn-for-{fs_id}")
+                arn = fs.get('FileSystemArn')
                 
                 if is_encrypted:
                     resource_status = ResourceStatus(
