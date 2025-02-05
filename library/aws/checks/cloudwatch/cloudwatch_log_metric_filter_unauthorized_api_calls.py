@@ -8,7 +8,7 @@ import boto3
 import logging
 import re
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -22,7 +22,7 @@ class cloudwatch_log_metric_filter_unauthorized_api_calls(Check):
         
         # Initialize report status as 'Passed' unless we find a missing filter
         report.status = CheckStatus.PASSED
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         # Define the custom pattern for unauthorized API calls (UnauthorizedOperation errors)
         pattern = r"\$\.errorCode\s*=\s*.?\*UnauthorizedOperation.+\$\.errorCode\s*=\s*.?AccessDenied\*.?"
@@ -47,7 +47,8 @@ class cloudwatch_log_metric_filter_unauthorized_api_calls(Check):
             # Check for Metric Filters for unauthorized API calls in each log group
             for log_group in log_groups:
                 log_group_name = log_group['logGroupName']
-                
+                log_group_arn = log_group['arn']
+
                 # Fetch metric filters for the log group
                 filters = client.describe_metric_filters(logGroupName=log_group_name)
                 
@@ -61,17 +62,36 @@ class cloudwatch_log_metric_filter_unauthorized_api_calls(Check):
 
                 if matching_filters:
                     # If a matching filter is found, update the report status and details
-                    report.resource_ids_status[f"{log_group_name} has Metric Filters for Unauthorized API Calls: [{', '.join(matching_filters)}]"] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=log_group_arn),
+                            status=CheckStatus.PASSED,
+                            summary=f"{log_group_name} has Metric Filters for Unauthorized API Calls: [{', '.join(matching_filters)}]"
+                        )
+                    )
                     any_matching_filter_found = True
              
             # If no matching filter was found in any log group, set the report as failed
             if not any_matching_filter_found:
                 report.status = CheckStatus.FAILED
-                report.resource_ids_status["No matching filters found for Unauthorized API Calls in any log group"] = False
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=""),
+                        status=CheckStatus.FAILED,
+                        summary=f"No matching filters found for Unauthorized API Calls in any log group"
+                    )
+                )
 
         except Exception as e:
             logging.error(f"Error while fetching CloudWatch logs and metric filters: {e}")
             report.status = CheckStatus.FAILED
-            report.resource_ids_status = {}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error while fetching CloudWatch logs and metric filters",
+                    exception=e
+                )
+            )
 
         return report
