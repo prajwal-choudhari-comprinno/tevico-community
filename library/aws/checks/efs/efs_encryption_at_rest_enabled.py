@@ -6,7 +6,7 @@ DATE: 2025-01-24
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class efs_encryption_at_rest_enabled(Check):
@@ -15,7 +15,7 @@ class efs_encryption_at_rest_enabled(Check):
         # Initialize the report
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         # Initialize the EFS client
         client = connection.client('efs')
@@ -36,18 +36,38 @@ class efs_encryption_at_rest_enabled(Check):
             # Check encryption status for each file system
             for fs in file_systems:
                 fs_id = fs['FileSystemId']
+                fs_arn = fs['FileSystemArn']
                 is_encrypted = fs.get('Encrypted', False)
 
                 # Record the result for each file system
                 if is_encrypted:
-                    report.resource_ids_status[f"EFS {fs_id} is encrypted at rest."] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=fs_arn),
+                            status=CheckStatus.PASSED,
+                            summary=f"EFS {fs_id} is encrypted at rest."
+                        )
+                    )
                 else:
-                    report.resource_ids_status[f"EFS {fs_id} is not encrypted at rest."] = False
                     report.status = CheckStatus.FAILED
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=fs_arn),
+                            status=CheckStatus.FAILED,
+                            summary=f"EFS {fs_id} is not encrypted at rest."
+                        )
+                    )
+
 
         except Exception as e:
             # Handle unexpected errors
-            report.resource_ids_status[f"Unexpected error: {str(e)}"] = False
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error reading the file system."
+                )
+            )
             report.status = CheckStatus.FAILED
 
         return report
