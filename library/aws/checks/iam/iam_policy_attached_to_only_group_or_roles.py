@@ -5,14 +5,15 @@ DATE: 2024-10-10
 
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_policy_attached_to_only_group_or_roles(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
         client = connection.client('iam')
-
+        report.status = CheckStatus.PASSED
+        
         try:
             # List all IAM users
             users = client.list_users()['Users']
@@ -29,13 +30,12 @@ class iam_policy_attached_to_only_group_or_roles(Check):
                 else:
 
                     report.resource_ids_status[username] = False  # No violation
+                    report.status = CheckStatus.FAILED
 
-            # Overall check passes if no user has directly attached policies
-            report.status = not any(report.resource_ids_status.values())
 
         except Exception as e:
 
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
 
         return report
 
