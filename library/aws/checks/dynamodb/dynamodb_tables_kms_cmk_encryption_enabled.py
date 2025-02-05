@@ -38,7 +38,7 @@ class dynamodb_tables_kms_cmk_encryption_enabled(Check):
                         encryption_status = sse_description.get('Status')
                         kms_key_arn = sse_description.get('KMSMasterKeyArn')
 
-                        resource = AwsResource(arn=table_desc.get('TableArn', f"unknown-arn-for-{table_name}"))
+                        resource = AwsResource(arn=table_desc.get('TableArn'))
 
                         if encryption_status == 'ENABLED' and kms_key_arn:
                             key_metadata = kms_client.describe_key(KeyId=kms_key_arn)['KeyMetadata']

@@ -30,10 +30,10 @@ class dynamodb_tables_pitr_enabled(Check):
                     try:
                         # Describe the table to get ARN
                         table_desc = client.describe_table(TableName=table_name)['Table']
-                        resource = AwsResource(arn=table_desc.get('TableArn', f"unknown-arn-for-{table_name}"))
+                        resource = AwsResource(arn=table_desc.get('TableArn'))
                         response = client.describe_continuous_backups(TableName=table_name)
                         pitr_status = response['ContinuousBackupsDescription']['PointInTimeRecoveryDescription']['PointInTimeRecoveryStatus']
-                        resource = AwsResource(arn=table_desc.get('TableArn', f"unknown-arn-for-{table_name}"))
+                        
 
                         if pitr_status == 'ENABLED':
                             report.resource_ids_status.append(
