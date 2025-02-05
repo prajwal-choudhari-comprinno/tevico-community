@@ -5,7 +5,7 @@ DATE: 10-10-2024
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, ResourceStatus, AwsResource, GeneralResource
 from tevico.engine.entities.check.check import Check
 
 
@@ -18,7 +18,7 @@ class ec2_instance_managed_by_ssm(Check):
 
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED  # Assume passed unless we find an unmanaged instance
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         # Fetch all EC2 instances
         try:
@@ -37,7 +37,16 @@ class ec2_instance_managed_by_ssm(Check):
         # Check if there are instances
         if not instances:
             report.status = CheckStatus.FAILED
-            report.resource_ids_status['No Instances'] = False  # No instances available
+            print("in this place")
+            # BT commented report.resource_ids_status['No Instances'] = False  # No instances available
+            # resource_status = (resource=AwsResource(arn="arn:aws:iam::865246394951:instance-profile/ssm", status=CheckStatus.FAILED, summary="No instances available"))
+            report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=""),
+                        status=CheckStatus.FAILED,
+                        summary="No instances available."
+                    )
+            )
             return report
 
         for instance in instances:
