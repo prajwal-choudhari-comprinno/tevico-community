@@ -1,33 +1,64 @@
 """
-AUTHOR: Supriyo Bhakat
-EMAIL: supriyo.bhakat@comprinno.net
-DATE: 2024-11-14
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-10
 """
 
 import boto3
-
-from tevico.engine.entities.report.check_model import CheckReport
+import logging
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class cloudfront_waf_protection_enabled(Check):
+
     def execute(self, connection: boto3.Session) -> CheckReport:
-        report = CheckReport(name=__name__)
+        # Initialize CloudFront client and report
         client = connection.client('cloudfront')
-        response = client.list_distributions()
+        report = CheckReport(name=__name__)
+        report.status = CheckStatus.PASSED
+        report.resource_ids_status = []
 
-        distributions = response.get('DistributionList', {}).get('Items', [])
-        if not distributions:
-            report.passed = True
-            return report
+        try:
+            # Fetch all CloudFront distributions with pagination
+            distributions = []
+            next_marker = None
 
-        for distribution in distributions:
-            distribution_id = distribution['Id']
-            web_acl_id = distribution.get('WebACLId')
+            while True:
+                response = client.list_distributions(Marker=next_marker) if next_marker else client.list_distributions()
+                distributions.extend(response.get('DistributionList', {}).get('Items', []))
+                next_marker = response.get('NextMarker')
+                if not next_marker:
+                    break
 
-            if web_acl_id:
-                report.resource_ids_status[distribution_id] = True
-            else:
-                report.passed = False
-                report.resource_ids_status[distribution_id] = False
+            # Check WAF association for each distribution
+            for distribution in distributions:
+                distribution_id = distribution['Id']
+                distribution_arn = distribution['ARN']
+                web_acl_id = distribution.get('WebACLId', '')
+
+                # WAF is enabled if WebACLId is not an empty string
+                status = bool(web_acl_id)
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=AwsResource(arn=distribution_arn),
+                        status=CheckStatus.FAILED,
+                        summary=f"{distribution_id} WAF association: {'Enabled' if status else 'Disabled'}"
+                    )
+                )
+
+                if not status:
+                    report.status = CheckStatus.FAILED  # Mark as failed if any distribution lacks WAF protection
+
+        except Exception as e:
+            logging.error(f"Error while checking CloudFront WAF protection: {e}")
+            report.status = CheckStatus.FAILED
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error while fetching CloudFront distribution config",
+                    exception=e
+                )
+            )
 
         return report

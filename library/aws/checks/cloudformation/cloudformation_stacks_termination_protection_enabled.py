@@ -1,6 +1,6 @@
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -20,9 +20,9 @@ class cloudformation_stacks_termination_protection_enabled(Check):
                 continue
             
             if stack_details['EnableTerminationProtection']:
-                report.passed = True
+                report.status = CheckStatus.PASSED
                 report.resource_ids_status[stack_details['StackId']] = True
             else:
-                report.passed = False
+                report.status = CheckStatus.FAILED
                 report.resource_ids_status[stack_details['StackId']] = False
         return report

@@ -4,15 +4,17 @@ EMAIL: supriyo.bhakat@comprinno.net
 DATE: 2024-11-11
 """
 
+import re
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 
 class sns_topics_kms_encryption_at_rest_enabled(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
+        report.status = CheckStatus.PASSED
         sns_client = connection.client('sns')
 
         topics = sns_client.list_topics()['Topics']
@@ -28,8 +30,10 @@ class sns_topics_kms_encryption_at_rest_enabled(Check):
                     report.resource_ids_status[topic_arn] = True
                 else:
                     report.resource_ids_status[topic_arn] = False
+                    report.status = CheckStatus.FAILED
 
             except sns_client.exceptions.NotFoundException:
                 report.resource_ids_status[topic_arn] = False
+                report.status = CheckStatus.FAILED
 
         return report
