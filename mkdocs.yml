@@ -8,26 +8,56 @@ theme:
   favicon: assets/logo.png
   features:
     - navigation.instant
+    - navigation.instant.progress
     - navigation.sections
     - navigation.top
-    - navigation.expand
+    - navigation.tabs
+    - navigation.tabs.sticky
     - search.suggest
     - search.highlight
-    - toc.integrate
     - content.tabs.link
     - content.code.copy
+    - toc.follow
   
   # At a later time, we can define the light and the dark theme for the website
   palette:
     scheme: default
     primary: white
     accent: indigo
-  
+
+nav:
+  - Get Started:
+    - Welcome to Tevico Community: index.md
+    - Generate Report: generate-report.md
+    - Help with Tevico Community: help.md
+    - Project Status & Support: status.md
+  - Developer:
+    - Get Started: developer/getting-started.md
+    - Entities:
+      - Provider: developer/entities/provider.md
+      - Profile: developer/entities/profile.md
+      - Framework: developer/entities/framework.md
+      - Channel: developer/entities/channel.md
+    - Provider:
+      - AWS: developer/provider/aws-dev-setup.md
+    - Concepts:
+      - Workflow: developer/concepts/workflow.md
+      - File Structure: developer/concepts/file-structure.md
 
 plugins:
   - search
 
 markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+      title: Page contents
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
