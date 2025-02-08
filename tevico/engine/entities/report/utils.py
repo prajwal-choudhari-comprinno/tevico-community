@@ -1,7 +1,7 @@
 
 
 from functools import reduce
-from typing import List
+from typing import Dict, List
 
 from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.report.report_model import AnalyticsReport, CheckStatusReport, GeneralReport, SeverityReport
@@ -59,7 +59,7 @@ def __get_severities(checks: List[CheckReport]) -> List[str]:
 def generate_analytics(checks: List[CheckReport]) -> AnalyticsReport:
     
     # check_status = CheckStatusReport(total=0, passed=0, failed=0)
-    # severity: Dict[str, int] = { 'critical': 0, 'high': 0, 'medium': 0, 'low': 0 }
+    severity: SeverityReport = SeverityReport()
     
     by_services: List[GeneralReport] = []
     by_sections: List[GeneralReport] = []
