@@ -101,6 +101,9 @@ class CheckStatus(Enum):
     
     # If the AWS API call fails for unknown reasons
     UNKNOWN = 'unknown'
+    
+    # If the check errored out
+    ERRORED = 'errored'
 
 
 class ResourceStatus(BaseModel):
