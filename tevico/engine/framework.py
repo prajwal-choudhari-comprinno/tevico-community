@@ -245,7 +245,7 @@ class TevicoFramework():
             print(f'\n❌ Error creating zip file: {zip_file_path}')
             os._exit(1)
 
-        print(f'\n📦 Report zipped successfully: {os.path.abspath(zip_file_path)}')
+        print(f'📦 Report zipped successfully: {os.path.abspath(zip_file_path)}')
     
     def __get_war_structure(self, provider: str) -> Optional[Dict[str, Any]]:
         war_raw_path = f'./library/{provider}/frameworks/well_architected_review.yaml'
@@ -304,13 +304,19 @@ class TevicoFramework():
             ))
         
         print('\nReport Overview:')
-        print(f'#️⃣ Total    : {analytics_report.check_status.total}')
-        print(f'✅ Passed  : {analytics_report.check_status.passed}')
-        print(f'❌ Failed   : {analytics_report.check_status.failed}')
+        print(f'#️⃣   Total          : {analytics_report.check_status.total}\n')
+        
+        print('Out of which:')
+        print(f'✅  Passed         : {analytics_report.check_status.passed}')
+        print(f'❌  Failed         : {analytics_report.check_status.failed}')
+        print(f'⏩  Skipped        : {analytics_report.check_status.skipped}')
+        print(f'⚠️  Not Applicable : {analytics_report.check_status.not_applicable}')
+        print(f'❓  Unknown        : {analytics_report.check_status.unknown}')
+        print(f'🛑  Errored        : {analytics_report.check_status.errored}')
         
         print('\n🛠️  Building zipped package')
         
         self.__build_report()
         
-        print(f'\n🕒 Execution Time: {round(time.time() - start_time, 2)} seconds\n')
+        print(f'\n🕒 Execution Time: {round(time.time() - start_time, 2)} seconds')
         print('\n👋👋👋 Bye!')

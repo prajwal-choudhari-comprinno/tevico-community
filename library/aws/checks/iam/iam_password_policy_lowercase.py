@@ -18,6 +18,7 @@ class iam_password_policy_lowercase(Check):
         try:
             password_policy = client.get_account_password_policy()
         except client.exceptions.NoSuchEntityException:
+            report.status = CheckStatus.FAILED
             return report
 
         lowercase_required = password_policy.get('RequireLowercaseCharacters', False)
