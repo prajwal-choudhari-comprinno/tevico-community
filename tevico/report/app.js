@@ -5,10 +5,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function updateUI(reportsData, analyticsData) {
 
-    const reports = reportsData.filter(
-        (check) => check.check_metadata.severity === "critical",
-    )
-
     try {
         if (!analyticsData?.check_status) {
             throw new Error('Invalid data structure');
