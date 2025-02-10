@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field, field_validator
+from re import A
+from typing import Any, Dict, List, Optional, Union, ClassVar
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from tevico.engine.core.enums import FrameworkDimension
 from enum import Enum
@@ -53,8 +54,8 @@ class CheckMetadata(BaseModel):
 
 ######################################################################
 
-class AwsArn(BaseModel):
-    arn: str = Field(..., alias='Arn', description='Amazon Resource Name (ARN)')
+class AwsResource(BaseModel):
+    arn: str = Field(..., description='Amazon Resource Name (ARN)')
     
     @field_validator('arn')
     def validate_arn(cls, v):
@@ -65,7 +66,27 @@ class AwsArn(BaseModel):
             raise ValueError(f"Invalid ARN format: {v}")
         return v
 
-class ResourceStatus(Enum):
+    def __str__(self):
+        return self.arn
+
+    def model_dump(self, mode: str = 'json'):
+        if mode == 'json':
+            return self.arn
+        return super().model_dump(mode=mode)
+
+class GeneralResource(BaseModel):
+    resource: str = Field(..., description='Name of the resource')
+    
+    def __str__(self):
+        return self.resource
+    
+    def model_dump(self, mode: str = 'json'):
+        if mode == 'json':
+            return self.resource
+        return super().model_dump(mode=mode)
+
+
+class CheckStatus(Enum):
     # If the check passed
     PASSED = 'passed'
     
@@ -80,20 +101,52 @@ class ResourceStatus(Enum):
     
     # If the AWS API call fails for unknown reasons
     UNKNOWN = 'unknown'
+    
+    # If the check errored out
+    ERRORED = 'errored'
 
 
+class ResourceStatus(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    # The resource key represents the resource ID
+    # It can take the form of an ARN or a resource name
+    # We can further add support for other resource identifiers
+    # for different cloud providers.
+    resource: Union[AwsResource, GeneralResource]
+    
+    # The status of the check for this particular resource
+    status: CheckStatus
+    
+    # The message associated with the status
+    summary: Optional[str] = Field(..., description='Summary of the check status')
+    
+    # The error exception associated with the status
+    exception: Optional[Exception] = None
+
+    @field_validator('summary', mode='before')
+    def validate_summary(cls, v, values):
+        status = values.data.get('status')
+        if status is not CheckStatus.PASSED and v is None:
+            raise ValueError(f'Summary is required for statuses other than PASSED, currently status is set to {status}')
+        return v
 
 class CheckReport(BaseModel):
-    status: Optional[ResourceStatus] = None
+    status: Optional[CheckStatus] = None
     name: str
     execution_time: float = 0.0
     check_metadata: Optional[CheckMetadata] = None
     dimensions: List[FrameworkDimension] = []
     framework: Optional[str] = None
     section: Optional[str] = None
-    resource_ids_status: Dict[str, bool] = {}
+    resource_ids_status: List[ResourceStatus] = Field(default_factory=list)
     report_metadata: Optional[Dict[str, Any]] = None
     created_on: datetime = datetime.now()
 
     def has_failed_resources(self):
-        return any(status == False for status in self.resource_ids_status.values())
+        # return any(resource.status == CheckStatus.FAILED for resource in self.resource_ids_status)
+        for resource in self.resource_ids_status:
+            #print(resource)
+            if resource.status == CheckStatus.FAILED:
+                return True
+        return False
+

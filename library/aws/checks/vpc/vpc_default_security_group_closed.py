@@ -6,7 +6,7 @@ DATE: 2024-11-12
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -15,6 +15,7 @@ class vpc_default_security_group_closed(Check):
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
+        report.status = CheckStatus.PASSED
         ec2_client = connection.client('ec2')
 
         try:
@@ -38,8 +39,9 @@ class vpc_default_security_group_closed(Check):
                 if not all_closed:
                     break
 
-            report.status = all_closed
+            if not all_closed:
+                report.status = CheckStatus.FAILED
         except Exception as e:
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
 
         return report

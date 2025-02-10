@@ -6,7 +6,7 @@ DATE: 2024-11-08
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -14,6 +14,7 @@ class networkfirewall_multi_az_enabled(Check):
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
+        report.status = CheckStatus.PASSED
         client = connection.client('network-firewall')
         firewalls = client.list_firewalls()['Firewalls']
         
@@ -23,10 +24,9 @@ class networkfirewall_multi_az_enabled(Check):
             subnet_mappings = firewall_details['Firewall']['SubnetMappings']
             
             if len(subnet_mappings) > 1:
-                report.status = ResourceStatus.PASSED
                 report.resource_ids_status[firewall_name] = True
             else:
-                report.status = ResourceStatus.FAILED
+                report.status = CheckStatus.FAILED
                 report.resource_ids_status[firewall_name] = False
 
         return report

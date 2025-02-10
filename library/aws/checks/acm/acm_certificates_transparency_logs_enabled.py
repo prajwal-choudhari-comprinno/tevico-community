@@ -5,7 +5,7 @@ DATE: 2025-01-09
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class acm_certificates_transparency_logs_enabled(Check):
@@ -14,8 +14,8 @@ class acm_certificates_transparency_logs_enabled(Check):
 
         # Initialize report and certificates list
         report = CheckReport(name=__name__)
-        report.status = ResourceStatus.PASSED
-        report.resource_ids_status = {}
+        report.status = CheckStatus.PASSED
+        report.resource_ids_status = []
 
         try:
             # Initialize ACM client
@@ -41,28 +41,66 @@ class acm_certificates_transparency_logs_enabled(Check):
                             transparency_logging = cert_details.get('Certificate', {}).get('Options', {}).get('CertificateTransparencyLoggingPreference', 'ENABLED')
 
                             if transparency_logging != 'ENABLED':
-                                report.resource_ids_status[f"Certificate {cert_arn} has transparency logging disabled."] = False
-                                report.status = ResourceStatus.FAILED
+                                report.resource_ids_status.append(
+                                    ResourceStatus(
+                                        resource=AwsResource(arn=cert_arn),
+                                        status=CheckStatus.FAILED,
+                                        summary="Certificate " + cert_arn + " has transparency logging disabled. "
+                                    )
+                                )                                
+                                report.status = CheckStatus.FAILED
                             else:
-                                report.resource_ids_status[f"Certificate {cert_arn} has transparency logging enabled."] = True
+                                report.resource_ids_status.append(
+                                    ResourceStatus(
+                                        resource=AwsResource(arn=cert_arn),
+                                        status=CheckStatus.FAILED,
+                                        summary="Certificate " + cert_arn + " has transparency logging enabled. "
+                                    )
+                                )                                
 
                         except Exception as e:
                             # Handle errors in getting certificate details
-                            report.resource_ids_status[f"Error describing {cert_arn}"] = False
-                            report.status = ResourceStatus.FAILED
+                            report.resource_ids_status.append(
+                                ResourceStatus(
+                                    resource=AwsResource(arn=cert_arn),
+                                    status=CheckStatus.FAILED,
+                                    summary="Error describing " + cert_arn + "."
+                                )
+                            )                                                            
+                            report.status = CheckStatus.FAILED
 
             except Exception as e:
                 # Handle errors in listing certificates
-                report.resource_ids_status["ACM listing error"] = False
-                report.status = ResourceStatus.FAILED
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=""),
+                        status=CheckStatus.SKIPPED,
+                        summary="ACM listing error.",
+                        exception=e
+                    )
+                )
+                report.status = CheckStatus.FAILED
 
             if not certificates_found:
                 # No certificates found, mark the check as passed
-                report.resource_ids_status["No ACM certificates found"] = True
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=""),
+                        status=CheckStatus.SKIPPED,
+                        summary="No ACM certificates found."
+                    )
+                )                
 
         except Exception as e:
             # Handle any unexpected errors
-            report.resource_ids_status["Unexpected error"] = False
-            report.status = ResourceStatus.FAILED
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.FAILED,
+                    summary="Unexpected error.",
+                    exception=e
+                )
+            )                
+            report.status = CheckStatus.FAILED
 
         return report

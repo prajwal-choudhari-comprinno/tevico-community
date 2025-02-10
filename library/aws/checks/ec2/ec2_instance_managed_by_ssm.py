@@ -5,7 +5,7 @@ DATE: 10-10-2024
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, ResourceStatus, AwsResource, GeneralResource
 from tevico.engine.entities.check.check import Check
 
 
@@ -17,15 +17,15 @@ class ec2_instance_managed_by_ssm(Check):
         ssm_client = connection.client('ssm')
 
         report = CheckReport(name=__name__)
-        report.status = ResourceStatus.PASSED  # Assume passed unless we find an unmanaged instance
-        report.resource_ids_status = {}
+        report.status = CheckStatus.PASSED  # Assume passed unless we find an unmanaged instance
+        report.resource_ids_status = []
 
         # Fetch all EC2 instances
         try:
             instances_response = ec2_client.describe_instances()
             instances = [i for r in instances_response['Reservations'] for i in r['Instances']]
         except Exception as e:
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
             return report
 
         # Remove instances in states ["pending", "terminated", "stopped"]
@@ -36,8 +36,17 @@ class ec2_instance_managed_by_ssm(Check):
 
         # Check if there are instances
         if not instances:
-            report.status = ResourceStatus.FAILED
-            report.resource_ids_status['No Instances'] = False  # No instances available
+            report.status = CheckStatus.FAILED
+            print("in this place")
+            # BT commented report.resource_ids_status['No Instances'] = False  # No instances available
+            # resource_status = (resource=AwsResource(arn="arn:aws:iam::865246394951:instance-profile/ssm", status=CheckStatus.FAILED, summary="No instances available"))
+            report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=""),
+                        status=CheckStatus.FAILED,
+                        summary="No instances available."
+                    )
+            )
             return report
 
         for instance in instances:
@@ -51,10 +60,10 @@ class ec2_instance_managed_by_ssm(Check):
                 managed_instance_ids = {m['InstanceId'] for m in managed_instances}
 
                 if instance_id not in managed_instance_ids:
-                    report.status = ResourceStatus.FAILED
+                    report.status = CheckStatus.FAILED
                     report.resource_ids_status[instance_id] = False  # Mark as unmanaged
             except Exception as e:
-                report.status = ResourceStatus.FAILED
+                report.status = CheckStatus.FAILED
                 report.resource_ids_status[instance_id] = False
 
         return report

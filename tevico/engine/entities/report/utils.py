@@ -1,18 +1,26 @@
 
 
 from functools import reduce
-from typing import List
+from typing import Dict, List
 
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.report.report_model import AnalyticsReport, CheckStatusReport, GeneralReport, SeverityReport
 
 
 def __check_status_accumulator(acc: CheckStatusReport, check: CheckReport):
     acc.total += 1
-    if check.status is ResourceStatus.PASSED:
+    if check.status is CheckStatus.PASSED:
         acc.passed += 1
-    else:
+    elif check.status is CheckStatus.FAILED:
         acc.failed += 1
+    elif check.status is CheckStatus.SKIPPED:
+        acc.skipped += 1
+    elif check.status is CheckStatus.NOT_APPLICABLE:
+        acc.not_applicable += 1
+    elif check.status is CheckStatus.UNKNOWN:
+        acc.unknown += 1
+    elif check.status is CheckStatus.ERRORED:
+        acc.errored += 1
     return acc
 
 def __severity_accumulator(acc: SeverityReport, check: CheckReport):
@@ -51,7 +59,7 @@ def __get_severities(checks: List[CheckReport]) -> List[str]:
 def generate_analytics(checks: List[CheckReport]) -> AnalyticsReport:
     
     # check_status = CheckStatusReport(total=0, passed=0, failed=0)
-    # severity: Dict[str, int] = { 'critical': 0, 'high': 0, 'medium': 0, 'low': 0 }
+    severity: SeverityReport = SeverityReport()
     
     by_services: List[GeneralReport] = []
     by_sections: List[GeneralReport] = []
@@ -95,7 +103,7 @@ def generate_analytics(checks: List[CheckReport]) -> AnalyticsReport:
     
     check_status = reduce(__check_status_accumulator, checks, CheckStatusReport(total=0, passed=0, failed=0))
     
-    severity = reduce(__severity_accumulator, checks, severity.copy())
+    severity = reduce(__severity_accumulator, checks, severity.model_copy())
     
     analytics = AnalyticsReport(
         check_status=check_status,

@@ -5,7 +5,7 @@ DATE: 2025-01-09
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -19,8 +19,8 @@ class cloudfront_distributions_using_deprecated_ssl_protocols(Check):
         report = CheckReport(name=__name__)
 
         # Initialize report status as 'Passed' unless we find a distribution using deprecated SSL protocols
-        report.status = ResourceStatus.PASSED
-        report.resource_ids_status = {}
+        report.status = CheckStatus.PASSED
+        report.resource_ids_status = []
 
         try:
             # Initialize pagination
@@ -43,6 +43,8 @@ class cloudfront_distributions_using_deprecated_ssl_protocols(Check):
             # Iterate over distributions to check SSL protocols
             for distribution in distributions:
                 distribution_id = distribution['Id']
+                distribution_arn = distribution['ARN']
+
                 # Fetch the SSL configuration for the distribution
                 viewer_certificate = distribution.get('ViewerCertificate', {})
                 ssl_protocols = viewer_certificate.get('MinimumProtocolVersion')
@@ -50,13 +52,32 @@ class cloudfront_distributions_using_deprecated_ssl_protocols(Check):
 
                 # Check for deprecated SSL protocols (TLSv1, TLSv1.1, SSLv3)
                 if ssl_protocols in ['TLSv1', 'TLSv1.1', 'SSLv3']:
-                    report.resource_ids_status[f"{distribution_id} uses the deprecated SSL protocol {ssl_protocols}."] = False
-                    report.status = ResourceStatus.FAILED  # Mark report as 'Failed' if any distribution is using deprecated SSL protocols
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=distribution_arn),
+                            status=CheckStatus.FAILED,
+                            summary=f"{distribution_id} uses the deprecated SSL protocol {ssl_protocols}."
+                        )
+                    )
+                    report.status = CheckStatus.FAILED  # Mark report as 'Failed' if any distribution is using deprecated SSL protocols
                 else:
-                    report.resource_ids_status[f"{distribution_id} uses {ssl_protocols}, not a deprecated SSL protocol."] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=distribution_arn),
+                            status=CheckStatus.PASSED,
+                            summary=f"{distribution_id} uses {ssl_protocols}, not a deprecated SSL protocol."
+                        )
+                    )
 
         except Exception as e:
-            report.status = ResourceStatus.FAILED
-            report.resource_ids_status = {}
+            report.status = CheckStatus.FAILED
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error while fetching CloudFront distribution config",
+                    exception=e
+                )
+            )
 
         return report

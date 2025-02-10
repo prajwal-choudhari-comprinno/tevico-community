@@ -5,7 +5,7 @@ DATE: 2024-10-10
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_password_policy_number(Check):
@@ -21,9 +21,9 @@ class iam_password_policy_number(Check):
             report.resource_ids_status['password_policy'] = requires_number
 
         except client.exceptions.NoSuchEntityException:
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
             report.resource_ids_status['password_policy'] = False
         except Exception:
-            report.status = ResourceStatus.FAILED
+            report.status = CheckStatus.FAILED
 
         return report
