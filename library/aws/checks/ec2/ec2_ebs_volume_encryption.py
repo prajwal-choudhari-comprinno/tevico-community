@@ -5,7 +5,7 @@ DATE: 10-10-2024
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -21,16 +21,30 @@ class ec2_ebs_volume_encryption(Check):
         
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED  # Assume passed unless we find an unencrypted volume
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
+
+        if not volumes:
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.SKIPPED,
+                    summary=f"No Volumes found"
+                )
+            )
 
         for volume in volumes:
             volume_id = volume['VolumeId']
             encrypted = volume.get('Encrypted', False)
 
             # Log the encryption status of each volume
-            report.resource_ids_status[volume_id] = encrypted
-
             if not encrypted:
-                report.status = CheckStatus.FAILED  # If any volume is not encrypted, mark the report as failed
+                report.status = CheckStatus.FAILED
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=volume_id),
+                        status=CheckStatus.FAILED,
+                        summary=f"Volume {volume_id} is not Encrypted."
+                    )
+                )
 
         return report                                       

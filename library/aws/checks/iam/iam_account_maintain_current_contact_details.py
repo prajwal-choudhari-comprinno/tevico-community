@@ -6,7 +6,7 @@ DATE: 2024-10-17
 import boto3
 from typing import List, Dict, Any
 from datetime import datetime
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_account_maintain_current_contact_details(Check):
@@ -56,10 +56,22 @@ class iam_account_maintain_current_contact_details(Check):
                 if not account_details.get(check):
                     # print(f"Check failed: '{check}' is missing or empty.")
                     all_checks_passed = False
-                    report.resource_ids_status[check] = False
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(resource=""),
+                            status=CheckStatus.FAILED,
+                            summary=f"Check failed: '{check}' is missing or empty."
+                        )
+                    )
                 else:
                     # print(f"Check passed: '{check}' is present.")
-                    report.resource_ids_status[check] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(resource=""),
+                            status=CheckStatus.PASSED,
+                            summary=f"Check passed: '{check}' is present."
+                        )
+                    )
 
             # Set the final report status based on whether all checks passed
             if all_checks_passed:

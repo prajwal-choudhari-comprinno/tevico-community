@@ -6,7 +6,7 @@ DATE: 2025-1-7
 
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -24,7 +24,7 @@ class iam_inline_policy_admin_privileges_found(Check):
 
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED  # Default to passed until an admin inline policy is found
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         def has_admin_privileges(policy_document):
             """Check if the policy document grants admin privileges."""
@@ -68,6 +68,7 @@ class iam_inline_policy_admin_privileges_found(Check):
                                     **{entity_type + 'Name': entity_name, 'PolicyName': policy_name}
                                 )['PolicyDocument']
 
+
                                 if has_admin_privileges(policy_document):
                                     # Add the failed policy name to the list
                                     failed_policies.append(policy_name)
@@ -76,16 +77,38 @@ class iam_inline_policy_admin_privileges_found(Check):
                             # If there were failed policies, store them as a comma-separated list
                             if failed_policies:
                                 # Store the status as False and append policy names
-                                report.resource_ids_status[f"{entity_type}::{entity_name} has inline policy {', '.join(failed_policies)} with full administrative privileges." ] = False
+                                report.resource_ids_status.append(
+                                    ResourceStatus(
+                                        resource=GeneralResource(resource=""),
+                                        status=CheckStatus.FAILED,
+                                        summary=f"{entity_type}::{entity_name} has inline policy {', '.join(failed_policies)} with full administrative privileges."
+                                    )
+                                )
+                                #report.resource_ids_status[f"{entity_type}::{entity_name} has inline policy {', '.join(failed_policies)} with full administrative privileges." ] = False
                                 
                             # If no failed policies, store the success status as True
                             elif f"{entity_type}::{entity_name}" not in report.resource_ids_status:
-                                report.resource_ids_status[f"{entity_type}::{entity_name} has not any inline policy with full administrative privileges."] = True
+                                report.resource_ids_status.append(
+                                    ResourceStatus(
+                                        resource=GeneralResource(resource=""),
+                                        status=CheckStatus.FAILED,
+                                        summary=f"{entity_type}::{entity_name} has not any inline policy with full administrative privileges."
+                                    )
+                                )
+                                #report.resource_ids_status[f"{entity_type}::{entity_name} has not any inline policy with full administrative privileges."] = True
+
 
                         except (BotoCoreError, ClientError):
                             # Mark as fail on error and add to the status
                             report.status = CheckStatus.FAILED
-                            report.resource_ids_status[f"{entity_type}::{entity_name}"] = False
+                            report.resource_ids_status.append(
+                                ResourceStatus(
+                                    resource=GeneralResource(resource=""),
+                                    status=CheckStatus.FAILED,
+                                    summary=f"Error fetching {entity_type}::{entity_name}."
+                                )
+                            )
+                            #report.resource_ids_status[f"{entity_type}::{entity_name}"] = False
             except (BotoCoreError, ClientError):
                 report.status = CheckStatus.FAILED
 
@@ -113,8 +136,8 @@ class iam_inline_policy_admin_privileges_found(Check):
         #     name_key='RoleName'
         # )
         # If any failure was found, the check should fail
-        if any(status is False for status in report.resource_ids_status.values()):
-            report.status = CheckStatus.FAILED  # Ensure this is a boolean
+        #if any(status is False for status in report.resource_ids_status.values()):
+        #    report.status = CheckStatus.FAILED  # Ensure this is a boolean
 
         return report
  
