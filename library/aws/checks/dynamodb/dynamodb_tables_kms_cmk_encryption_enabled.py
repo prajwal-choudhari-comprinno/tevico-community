@@ -29,16 +29,17 @@ class dynamodb_tables_kms_cmk_encryption_enabled(Check):
                 table_names = page.get('TableNames', [])
 
                 for table_name in table_names:
-                    try:
-                        # Describe the table
-                        table_desc = dynamodb_client.describe_table(TableName=table_name)['Table']
+                    
+                    # Describe the table
+                    table_desc = dynamodb_client.describe_table(TableName=table_name)['Table']
+                    resource = AwsResource(arn=table_desc.get('TableArn'))
 
+                    try:
+                        
                         # Retrieve the encryption settings
                         sse_description = table_desc.get('SSEDescription', {})
                         encryption_status = sse_description.get('Status')
                         kms_key_arn = sse_description.get('KMSMasterKeyArn')
-
-                        resource = AwsResource(arn=table_desc.get('TableArn'))
 
                         if encryption_status == 'ENABLED' and kms_key_arn:
                             key_metadata = kms_client.describe_key(KeyId=kms_key_arn)['KeyMetadata']
@@ -70,15 +71,6 @@ class dynamodb_tables_kms_cmk_encryption_enabled(Check):
                             )
                             report.status = CheckStatus.FAILED
 
-                    except kms_client.exceptions.NotFoundException:
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                resource=resource,
-                                status=CheckStatus.FAILED,
-                                summary=f"KMS key for DynamoDB table {table_name} not found."
-                            )
-                        )
-                        report.status = CheckStatus.FAILED
                     except Exception as e:
                         report.resource_ids_status.append(
                             ResourceStatus(
@@ -110,4 +102,5 @@ class dynamodb_tables_kms_cmk_encryption_enabled(Check):
                 )
             )
             report.status = CheckStatus.FAILED
+            
         return report
