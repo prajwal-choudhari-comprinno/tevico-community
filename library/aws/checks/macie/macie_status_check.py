@@ -20,7 +20,7 @@ class macie_status_check(Check):
                 report.status = CheckStatus.PASSED
             else:
                 report.status = CheckStatus.FAILED
-        except (client.exceptions.AccessDeniedException, EndpointConnectionError):
+        except Exception as e:
             report.status = CheckStatus.FAILED
 
         return report
