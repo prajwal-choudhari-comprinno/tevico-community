@@ -112,9 +112,10 @@ sections:
           - ec2_network_acl_allow_ingress_any_port
           - ec2_network_acl_allow_ingress_tcp_port_22
           - ec2_security_group_default_restrict_traffic
+          - eks_control_plane_endpoint_access_restricted
           - elb_ssl_listeners_enabled
           # @deepak.puri - Fix ARN issue for WAF ACL
-          # - elb_waf_acl_attached
+          - elb_waf_acl_attached
           - networkfirewall_multi_az_enabled
           - vpc_default_security_group_closed
           - vpc_endpoint_services_allowed_principals_trust_boundaries
@@ -207,6 +208,7 @@ sections:
           - apigatewayv2_api_access_logging_enabled
           - cloudfront_access_logging_enabled
           - cloudfront_cloudwatch_logging_enabled
+          - eks_cluster_logging_enabled
           - elb_v2_logging_enabled
           - rds_instance_integration_cloudwatch_logging_enabled
           - vpc_flowlogs_enable_logging
