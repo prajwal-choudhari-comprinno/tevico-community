@@ -97,6 +97,8 @@ sections:
           - ec2_launch_template_no_secrets
           - ec2_instance_profile_attached
           - ec2_imdsv2_enabled
+          - lambda_function_no_secrets_in_code
+          - lambda_function_no_secrets_in_variables
       - name: Network Security
         description: |
           The Network Security section includes the ability to protect network traffic and resources from unauthorized
@@ -116,6 +118,7 @@ sections:
           - elb_ssl_listeners_enabled
           # @deepak.puri - Fix ARN issue for WAF ACL
           - elb_waf_acl_attached
+          - lambda_function_not_publicly_accessible
           - networkfirewall_multi_az_enabled
           - vpc_default_security_group_closed
           - vpc_endpoint_services_allowed_principals_trust_boundaries
