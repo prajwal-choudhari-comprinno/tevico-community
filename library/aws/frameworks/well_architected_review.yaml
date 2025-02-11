@@ -134,6 +134,9 @@ sections:
           - macie_auto_sensitive_data_discovery_check
           - macie_status_check
           - securityhub_enabled
+          - ecr_image_private_image_scanning_enabled
+          - ecr_repository_scan_images_on_push_enabled
+          - ecr_repository_scan_vulnerabilities_in_latest_image
 
   - name: Performance Efficiency
     description: |

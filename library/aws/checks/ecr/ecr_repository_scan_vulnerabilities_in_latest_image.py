@@ -36,7 +36,7 @@ class ecr_repository_scan_vulnerabilities_in_latest_image(Check):
 
             for repo in repositories:
                 repo_name = repo['repositoryName']
-                resource = AwsResource(arn=repo.get('repositoryArn', f"unknown-arn-for-{repo_name}"))
+                resource = AwsResource(arn=repo.get('repositoryArn'))
                 try:
                     images = client.list_images(
                         repositoryName=repo_name,
@@ -119,7 +119,6 @@ class ecr_repository_scan_vulnerabilities_in_latest_image(Check):
                             resource=resource,
                             status=CheckStatus.FAILED,
                             summary=f"Error checking scan results for repository {repo_name}: {str(e)}",
-                            exception=e
                         )
                     )
                     report.status = CheckStatus.FAILED
