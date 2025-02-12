@@ -20,6 +20,17 @@ class iam_user_mfa_enabled_console_access(Check):
 
         try:
             users = client.list_users()['Users']
+            
+            if not users:
+                report.status = CheckStatus.SKIPPED
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=""),
+                        status=CheckStatus.SKIPPED,
+                        summary="No IAM users found."
+                    )
+                )
+                return report
 
             for user in users:
                 username = user['UserName']

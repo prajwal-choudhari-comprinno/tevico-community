@@ -1,4 +1,3 @@
-
 """
 AUTHOR: deepak-puri-comprinno
 EMAIL: deepak.puri@comprinno.net
@@ -6,7 +5,7 @@ DATE: 2024-11-13
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class apigateway_rest_api_client_certificate_enabled(Check):
@@ -14,37 +13,51 @@ class apigateway_rest_api_client_certificate_enabled(Check):
         client = connection.client('apigateway')
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
-        
+        report.resource_ids_status = []
+
         try:
-            # Use pagination to handle large number of APIs efficiently
             paginator = client.get_paginator('get_rest_apis')
             for page in paginator.paginate():
                 for api in page.get('items', []):
                     api_id = api['id']
                     api_name = api.get('name', 'Unnamed API')
-                    
+                    api_arn = f"arn:aws:apigateway::{api_id}"
+                    resource = AwsResource(arn=api_arn)
+
                     try:
-                        # Get stages directly since pagination is not supported
                         stages_response = client.get_stages(restApiId=api_id)
-                        
-                        # Process each stage in the response
                         for stage in stages_response.get('item', []):
                             stage_name = stage.get('stageName', 'unknown')
-                            
-                            # Check if client certificate is enabled for this stage
                             has_cert = stage.get('clientCertificateId') is not None
                             
-                            # Use formatted string for resource ID
-                            resource_id = f"{api_name}-{stage_name}"
-                            report.resource_ids_status[resource_id] = has_cert
+                            report.resource_ids_status.append(
+                                ResourceStatus(
+                                    resource=resource,
+                                    status=CheckStatus.PASSED if has_cert else CheckStatus.FAILED,
+                                    summary=f"Client certificate {'enabled' if has_cert else 'not enabled'} for {api_name}-{stage_name}."
+                                )
+                            )
                             
                             if not has_cert:
                                 report.status = CheckStatus.FAILED
-                                
-                    except client.exceptions.ClientError as e:
+                    
+                    except Exception as e:
                         report.status = CheckStatus.FAILED
-                                
-        except client.exceptions.ClientError as e:
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=resource,
+                                status=CheckStatus.FAILED,
+                                summary=f"Error checking client certificate for {api_name}: {str(e)}"
+                            )
+                        )
+        except Exception as e:
             report.status = CheckStatus.FAILED
-            
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error accessing API Gateway: {str(e)}"
+                )
+            )
+
         return report

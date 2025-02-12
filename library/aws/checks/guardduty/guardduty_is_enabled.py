@@ -27,16 +27,13 @@ class guardduty_is_enabled(Check):
                         continue
 
                     for detector_id in detectors['DetectorIds']:
-                        resource_key = f"{region}-{detector_id}"
                         try:
                             detector = regional_client.get_detector(DetectorId=detector_id)
                             if detector.get('Status') is None or not detector.get('Status'):
-                                report.resource_ids_status[resource_key] = False
                                 report.status = CheckStatus.FAILED
                             else:
-                                report.resource_ids_status[resource_key] = True
+                                report.status = CheckStatus.PASSED
                         except ClientError:
-                            report.resource_ids_status[resource_key] = False
                             report.status = CheckStatus.FAILED
 
                 except ClientError:
