@@ -67,7 +67,7 @@ class iam_policy_allows_privilege_escalation(Check):
 
             # Set overall check status
             # report.status = not any(report.resource_ids_status.values())
-            if not any(report.resource_ids_status.values()):
+            if not resource_ids_status:
                 report.status = CheckStatus.FAILED
             else:
                 report.status = CheckStatus.PASSED

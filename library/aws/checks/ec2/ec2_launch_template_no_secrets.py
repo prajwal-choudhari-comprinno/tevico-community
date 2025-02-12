@@ -7,7 +7,7 @@ import boto3
 import base64
 import re
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -17,7 +17,7 @@ class ec2_launch_template_no_secrets(Check):
         ec2_client = connection.client('ec2')
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED  # Assume passed unless secrets are found
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         try:
             # Fetch all launch templates
@@ -25,12 +25,25 @@ class ec2_launch_template_no_secrets(Check):
             launch_templates = templates_response.get('LaunchTemplates', [])
         except Exception as e:
             report.status = CheckStatus.FAILED
-            #report.message = f"Error fetching launch templates: {str(e)}"
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error in fetching Launch Templates.",
+                    exception=e
+                )
+            )
             return report
 
         if not launch_templates:
             report.status = CheckStatus.FAILED
-            report.resource_ids_status['No Launch Templates'] = False  # No launch templates found
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.NOT_APPLICABLE,
+                    summary=f"No Launch Templates"
+                )
+            )
             return report
 
         for template in launch_templates:
@@ -45,7 +58,14 @@ class ec2_launch_template_no_secrets(Check):
                 versions = version_response['LaunchTemplateVersions']
             except Exception as e:
                 report.status = CheckStatus.FAILED
-                report.resource_ids_status[template_name] = False
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=""),
+                        status=CheckStatus.FAILED,
+                        summary=f"Error fetching template versions for {template_name}:",
+                        exception=e
+                    )
+                )
                 #report.message = f"Error fetching template versions for {template_name}: {str(e)}"
                 continue
 
@@ -59,19 +79,27 @@ class ec2_launch_template_no_secrets(Check):
                         decoded_user_data = base64.b64decode(user_data_encoded).decode('utf-8', errors='ignore')
                     except Exception as e:
                         report.status = CheckStatus.FAILED
-                        report.resource_ids_status[f"{template_name}-v{version_number}"] = False
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(resource=""),
+                                status=CheckStatus.FAILED,
+                                summary=f"Error decoding user data for {template_name} version {version_number}:",
+                                exception=e
+                            )
+                        )
                         #report.message = f"Error decoding user data for {template_name} version {version_number}: {str(e)}"
                         continue
 
                     # Check for sensitive information
                     if self.contains_sensitive_data(decoded_user_data):
                         report.status = CheckStatus.FAILED
-                        report.resource_ids_status[f"{template_name}-v{version_number}"] = False
-                        # report.resource_ids_status[f"{template_name}-v{version_number}"] = (
-                        #    f"Launch Template {template_name} version {version_number} contains sensitive data in user data."
-                        #)
-                else:
-                    report.resource_ids_status[f"{template_name}-v{version_number}"] = True  # No secrets, user data is empty
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(resource=""),
+                                status=CheckStatus.FAILED,
+                                summary=f"Launch Template {template_name} version {version_number} contains sensitive data in user data."
+                            )
+                        )
 
         return report
 
