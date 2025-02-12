@@ -19,14 +19,10 @@ class iam_user_mfa_enabled_console_access(Check):
                 # Check if MFA devices are attached to each user
                 mfa_devices = client.list_mfa_devices(UserName=username)['MFADevices']
                 if mfa_devices:
-
-                    report.resource_ids_status[username] = True
+                    report.status = CheckStatus.PASSED
                 else:
-
-                    report.resource_ids_status[username] = False
                     report.status = CheckStatus.FAILED
         except Exception as e:
-
             report.status = CheckStatus.FAILED
         return report
 
