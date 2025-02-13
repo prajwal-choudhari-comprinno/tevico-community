@@ -44,12 +44,17 @@ class iam_user_multiple_active_access_keys(Check):
                     )
                 )
 
-                # If any user has more than one active key, mark overall report as FAILED
-                if active_keys_count > 1:
-                    report.status = CheckStatus.FAILED
-
         except Exception as e:
             report.status = CheckStatus.ERRORED
             report.report_metadata = {"error": str(e)}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=resource,
+                    status=status,
+                    summary=f"Error while checking access keys for IAM users.",
+                    exception=e
+                )
+            )
+
                         
         return report

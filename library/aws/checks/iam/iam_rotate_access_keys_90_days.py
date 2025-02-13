@@ -8,7 +8,7 @@ import boto3
 import datetime
 import pytz
 
-from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, ResourceStatus, GeneralResource
+from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -21,7 +21,18 @@ class iam_rotate_access_keys_90_days(Check):
         report.resource_ids_status = []
 
         try:
-            users = client.list_users()['Users']
+            users = client.list_users().get('Users', [])
+
+            if not users:
+                report.status = CheckStatus.SKIPPED
+                report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(resource=""),
+                            status=CheckStatus.SKIPPED,
+                            summary=f"No IAM users found."
+                        )
+                    )
+                return report
 
             for user in users:
                 username = user['UserName']
@@ -29,7 +40,17 @@ class iam_rotate_access_keys_90_days(Check):
                 resource = AwsResource(arn=arn)
 
                 response = client.list_access_keys(UserName=username)
-                access_keys = response['AccessKeyMetadata']
+                access_keys = response.get('AccessKeyMetadata', [])
+
+                if not access_keys:
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=resource,
+                            status=CheckStatus.SKIPPED,
+                            summary=f"No access keys found."
+                        )
+                    )
+                    continue
 
                 for key in access_keys:
                     key_id = key['AccessKeyId']
@@ -38,28 +59,8 @@ class iam_rotate_access_keys_90_days(Check):
 
                     # Calculate key age
                     days_since_created = (datetime.datetime.now(pytz.utc) - create_date).days
-
-                    if status == 'Active' and days_since_created > maximum_key_age:
-                        # Key is outdated
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                resource=resource,
-                                status=CheckStatus.FAILED,
-                                summary=f"Access Key {key_id} is active but older than {maximum_key_age} days ({days_since_created} days old)."
-                            )
-                        )
-                        report.status = CheckStatus.FAILED
-                    elif status == 'Active':
-                        # Key is compliant
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                resource=resource,
-                                status=CheckStatus.PASSED,
-                                summary=f"Access Key {key_id} is active and compliant ({days_since_created} days old)."
-                            )
-                        )
-                    else:
-                        # Key is inactive
+                    
+                    if status == 'Inactive':
                         report.resource_ids_status.append(
                             ResourceStatus(
                                 resource=resource,
@@ -67,9 +68,36 @@ class iam_rotate_access_keys_90_days(Check):
                                 summary=f"Access Key {key_id} is inactive."
                             )
                         )
+                    elif days_since_created > maximum_key_age:
+                        # Key is outdated
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=resource,
+                                status=CheckStatus.FAILED,
+                                summary=f"Access Key {key_id} is {status} but older than {maximum_key_age} days ({days_since_created} days old)."
+                            )
+                        )
+                        report.status = CheckStatus.FAILED
+                    else:
+                        # Key is compliant
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=resource,
+                                status=CheckStatus.PASSED,
+                                summary=f"Access Key {key_id} is {status} and compliant ({days_since_created} days old)."
+                            )
+                        )
 
         except Exception as e:
             report.status = CheckStatus.ERRORED
             report.report_metadata = {"error": str(e)}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=resource,
+                    status=CheckStatus.ERRORED,
+                    summary=f"Error occurred while checking access key rotation",
+                    exception=e
+                )
+            )
             
         return report

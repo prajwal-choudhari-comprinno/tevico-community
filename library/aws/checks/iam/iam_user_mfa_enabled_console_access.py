@@ -19,61 +19,96 @@ class iam_user_mfa_enabled_console_access(Check):
         report.resource_ids_status = []
 
         try:
-            users = client.list_users()['Users']
-            
+            users = client.list_users().get('Users', [])
+
             if not users:
                 report.status = CheckStatus.SKIPPED
                 report.resource_ids_status.append(
-                    ResourceStatus(
-                        resource=GeneralResource(resource=""),
-                        status=CheckStatus.SKIPPED,
-                        summary="No IAM users found."
+                        ResourceStatus(
+                            resource=GeneralResource(resource=""),
+                            status=CheckStatus.SKIPPED,
+                            summary=f"No IAM users found."
+                        )
                     )
-                )
                 return report
 
             for user in users:
                 username = user['UserName']
                 arn = user['Arn']
                 resource = AwsResource(arn=arn)
-                
-                # First check if user has console access
+
+                # Check if the user has console access
                 try:
-                    # get_login_profile raises NoSuchEntity if user has no console access
                     client.get_login_profile(UserName=username)
-                    has_console_access = True
+                    
                 except client.exceptions.NoSuchEntityException:
                     # User doesn't have console access, skip MFA check
                     report.resource_ids_status.append(
-                        ResourceStatus(resource=resource, 
-                                       status=CheckStatus.PASSED, 
-                                       summary=f"Console access is not enabled."
-                                    )
+                        ResourceStatus(
+                            resource=resource,
+                            status=CheckStatus.SKIPPED,
+                            summary="User does not have console access."
+                        )
                     )
                     continue
                 except Exception as e:
-                    report.report_metadata = {f"Error checking login profile for user {username}": str(e)}
+                    report.report_metadata = {"error": str(e)}
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=resource,
+                            status=CheckStatus.ERRORED,
+                            summary=f"Error checking console access.",
+                            exception=e
+                        )
+                    )
+                    report.status = CheckStatus.ERRORED
                     continue
 
-                # Only check MFA if user has console access
-                if has_console_access:
-                    response = client.list_mfa_devices(UserName=username)
-                    mfa_devices = response['MFADevices']
+                # Check if MFA is enabled for console-access users
+                try:
+                    mfa_response = client.list_mfa_devices(UserName=username)
+                    mfa_devices = mfa_response.get('MFADevices', [])
 
                     if mfa_devices:
-                        for mfa_device in mfa_devices:
-                            if mfa_device['EnableDate']:
-                                report.resource_ids_status.append(
-                                    ResourceStatus(resource=resource, status=CheckStatus.PASSED, summary=f"Console access is enabled with MFA configured.")
-                                )
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=resource,
+                                status=CheckStatus.PASSED,
+                                summary="Console access is enabled with MFA configured."
+                            )
+                        )
                     else:
                         report.resource_ids_status.append(
-                            ResourceStatus(resource=resource, status=CheckStatus.FAILED, summary=f"Console access is enabled, but MFA is not configured.")
+                            ResourceStatus(
+                                resource=resource,
+                                status=CheckStatus.FAILED,
+                                summary="Console access is enabled, but MFA is not configured."
+                            )
                         )
                         report.status = CheckStatus.FAILED
+
+                except Exception as e:
+                    report.report_metadata = {"error": str(e)}
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=resource,
+                            status=CheckStatus.ERRORED,
+                            summary=f"Error checking MFA configuration.",
+                            exception=e
+                        )
+                    )
+                    report.status = CheckStatus.ERRORED
 
         except Exception as e:
             report.status = CheckStatus.ERRORED
             report.report_metadata = {"error": str(e)}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=resource,
+                    status=CheckStatus.ERRORED,
+                    summary=f"Error while checking MFA for IAM users",
+                    exception=e
+                )
+            )
 
         return report

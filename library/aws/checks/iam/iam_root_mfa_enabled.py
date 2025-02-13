@@ -20,7 +20,6 @@ class iam_root_mfa_enabled(Check):
         
         try:
             client = connection.client("iam")
-            sts_client = connection.client("sts")
 
             # Fetch account summary
             account_summary = client.get_account_summary()
@@ -36,13 +35,16 @@ class iam_root_mfa_enabled(Check):
                 )
             )
 
-            if not root_mfa_enabled:
-                report.status = CheckStatus.FAILED
-
         except Exception as e:
-            logging.error(f"Error while checking root MFA configuration: {e}")
-            report.status = CheckStatus.FAILED
+            report.status = CheckStatus.ERRORED
             report.report_metadata = {"error": str(e)}
-
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.PASSED if root_mfa_enabled else CheckStatus.ERRORED,
+                    summary=f"Error while checking root MFA configuration.",
+                    exception=e
+                )
+            )
 
         return report

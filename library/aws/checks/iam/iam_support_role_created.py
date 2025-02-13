@@ -73,7 +73,7 @@ class iam_support_role_created(Check):
                         ResourceStatus(
                             resource=GeneralResource(resource=""),
                             status=CheckStatus.FAILED,
-                            summary="No support-specific IAM role found attached to the IAM policy."
+                            summary=f"No support-specific IAM role found attached to the IAM policy {required_policy_name}."
                         )
                     )
             else:
@@ -82,12 +82,21 @@ class iam_support_role_created(Check):
                     ResourceStatus(
                         resource=AwsResource(arn=policy_arn),
                         status=CheckStatus.FAILED,
-                        summary=f"Policy is not attached to any IAM roles."
+                        summary=f"{required_policy_name}: Policy is not attached to any IAM roles."
                     )
                 )
 
         except Exception as e:
             report.status = CheckStatus.ERRORED
             report.report_metadata = {"error": str(e)}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.ERRORED,
+                    summary=f"Error occurred while checking access key rotation",
+                    exception=e
+                )
+            )
+            
 
         return report
