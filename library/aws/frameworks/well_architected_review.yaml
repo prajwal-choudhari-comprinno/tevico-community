@@ -97,6 +97,8 @@ sections:
           - ec2_launch_template_no_secrets
           - ec2_instance_profile_attached
           - ec2_imdsv2_enabled
+          - lambda_function_no_secrets_in_code
+          - lambda_function_no_secrets_in_variables
       - name: Network Security
         description: |
           The Network Security section includes the ability to protect network traffic and resources from unauthorized
@@ -112,9 +114,11 @@ sections:
           - ec2_network_acl_allow_ingress_any_port
           - ec2_network_acl_allow_ingress_tcp_port_22
           - ec2_security_group_default_restrict_traffic
+          - eks_control_plane_endpoint_access_restricted
           - elb_ssl_listeners_enabled
           # @deepak.puri - Fix ARN issue for WAF ACL
-          # - elb_waf_acl_attached
+          - elb_waf_acl_attached
+          - lambda_function_not_publicly_accessible
           - networkfirewall_multi_az_enabled
           - vpc_default_security_group_closed
           - vpc_endpoint_services_allowed_principals_trust_boundaries
@@ -134,6 +138,9 @@ sections:
           - macie_auto_sensitive_data_discovery_check
           - macie_status_check
           - securityhub_enabled
+          - ecr_image_private_image_scanning_enabled
+          - ecr_repository_scan_images_on_push_enabled
+          - ecr_repository_scan_vulnerabilities_in_latest_image
 
   - name: Performance Efficiency
     description: |
@@ -204,6 +211,7 @@ sections:
           - apigatewayv2_api_access_logging_enabled
           - cloudfront_access_logging_enabled
           - cloudfront_cloudwatch_logging_enabled
+          - eks_cluster_logging_enabled
           - elb_v2_logging_enabled
           - rds_instance_integration_cloudwatch_logging_enabled
           - vpc_flowlogs_enable_logging

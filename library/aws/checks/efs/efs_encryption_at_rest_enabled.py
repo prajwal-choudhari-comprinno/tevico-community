@@ -16,6 +16,7 @@ class efs_encryption_at_rest_enabled(Check):
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
         report.resource_ids_status = []
+        report.resource_ids_status = []
 
         # Initialize the EFS client
         client = connection.client('efs')
@@ -48,6 +49,7 @@ class efs_encryption_at_rest_enabled(Check):
             # Check encryption status for each file system
             for fs in file_systems:
                 fs_id = fs['FileSystemId']
+                fs_arn = fs['FileSystemArn']
                 is_encrypted = fs.get('Encrypted', False)
                 arn = fs.get('FileSystemArn')
                 

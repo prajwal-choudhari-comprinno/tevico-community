@@ -6,7 +6,7 @@ DATE: 2024-11-12
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -27,6 +27,13 @@ class ssm_patch_manager_enabled(Check):
                     compliance_info = ssm_client.describe_instance_patch_states(InstanceIds=[instance_id])
 
                     if compliance_info['InstancePatchStates']:
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(resource=""),
+                                status=CheckStatus.PASSED,
+                                summary=f"{instance_id} "
+                            )
+                        )
                         report.resource_ids_status[instance_id] = True
                     else:
                         report.resource_ids_status[instance_id] = False
@@ -36,7 +43,5 @@ class ssm_patch_manager_enabled(Check):
                     report.resource_ids_status[instance_id] = False
                     report.status = CheckStatus.FAILED
 
-        if all(report.resource_ids_status.values()):
-            report.status = CheckStatus.PASSED
 
         return report

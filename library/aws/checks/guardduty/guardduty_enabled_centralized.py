@@ -29,7 +29,6 @@ class guardduty_enabled_centralized(Check):
                     
                     # Check if GuardDuty is active
                     if detector_info['Status'] != 'ENABLED':
-                        report.resource_ids_status[f"{region}-{detector_id}"] = False
                         report.status = CheckStatus.FAILED
                         continue
                     
@@ -37,12 +36,10 @@ class guardduty_enabled_centralized(Check):
                     try:
                         admin_account = regional_client.get_master_account(DetectorId=detector_id)
                         if 'Master' in admin_account and admin_account['Master']['RelationshipStatus'] == 'Enabled':
-                            report.resource_ids_status[f"{region}-{detector_id}"] = True
+                            report.status = CheckStatus.PASSED
                         else:
-                            report.resource_ids_status[f"{region}-{detector_id}"] = False
                             report.status = CheckStatus.FAILED
                     except regional_client.exceptions.BadRequestException:
-                        report.resource_ids_status[f"{region}-{detector_id}"] = False
                         report.status = CheckStatus.FAILED
                 else:
                     # No detectors found in this region, mark check as failed for centralization purposes

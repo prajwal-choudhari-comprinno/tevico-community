@@ -37,13 +37,10 @@ class ec2_instance_managed_by_ssm(Check):
         # Check if there are instances
         if not instances:
             report.status = CheckStatus.FAILED
-            print("in this place")
-            # BT commented report.resource_ids_status['No Instances'] = False  # No instances available
-            # resource_status = (resource=AwsResource(arn="arn:aws:iam::865246394951:instance-profile/ssm", status=CheckStatus.FAILED, summary="No instances available"))
             report.resource_ids_status.append(
                     ResourceStatus(
                         resource=GeneralResource(resource=""),
-                        status=CheckStatus.FAILED,
+                        status=CheckStatus.NOT_APPLICABLE,
                         summary="No instances available."
                     )
             )
@@ -61,9 +58,21 @@ class ec2_instance_managed_by_ssm(Check):
 
                 if instance_id not in managed_instance_ids:
                     report.status = CheckStatus.FAILED
-                    report.resource_ids_status[instance_id] = False  # Mark as unmanaged
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(resource=""),
+                            status=CheckStatus.FAILED,
+                            summary=f"EC2 instance {instance_id} is not managed by SSM."
+                        )
+                    )
             except Exception as e:
                 report.status = CheckStatus.FAILED
-                report.resource_ids_status[instance_id] = False
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=""),
+                        status=CheckStatus.FAILED,
+                        summary=f"Error in getting instance details."
+                    )
+                )
 
         return report

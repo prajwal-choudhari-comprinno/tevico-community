@@ -7,7 +7,7 @@ import base64
 import boto3
 import re
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -17,7 +17,7 @@ class ec2_instance_secrets_user_data(Check):
         ec2_client = connection.client('ec2')
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED  # Assume passed unless we find secrets
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         # Fetch all EC2 instances
         try:
@@ -25,18 +25,32 @@ class ec2_instance_secrets_user_data(Check):
             instances = [i for r in instances_response['Reservations'] for i in r['Instances']]
         except Exception as e:
             report.status = CheckStatus.FAILED
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error in fetching EC2 instances.",
+                    exception=e
+                )
+            )
             #report.message = f"Error fetching EC2 instances: {str(e)}"
             return report
 
         # Check each instance
         if not instances:
             report.status = CheckStatus.FAILED
-            report.resource_ids_status['No Instances'] = False  # No instances available
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(resource=""),
+                    status=CheckStatus.NOT_APPLICABLE,
+                    summary=f"No EC2 instances"
+                )
+            )
             return report
 
         for instance in instances:
             instance_id = instance['InstanceId']
-            report.resource_ids_status[instance_id] = True  # Assume no secrets initially
+            instance_arn = instance['IamInstanceProfile']['Arn']
 
             # Retrieve user data for the instance
             try:
@@ -50,8 +64,14 @@ class ec2_instance_secrets_user_data(Check):
                     decoded_user_data = ''
             except Exception as e:
                 report.status = CheckStatus.FAILED
-                report.resource_ids_status[instance_id] = False
-                #report.message = f"Error retrieving user data for instance {instance_id}: {str(e)}"
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(resource=""),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary=f"Error retrieving user data for instance {instance_id}:",
+                        exception=e
+                    )
+                )
                 continue  # Skip to next instance
 
             # Enhanced checks for sensitive data in user data
@@ -72,22 +92,37 @@ class ec2_instance_secrets_user_data(Check):
             # Check for sensitive keywords
             if any(keyword in decoded_user_data.lower() for keyword in sensitive_keywords):
                 report.status = CheckStatus.FAILED
-                report.resource_ids_status[instance_id] = False  # Mark as having secrets
-                #report.resource_ids_status[instance_id] = f"EC2 Instance {instance_id} has sensitive keywords in user data."
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=AwsResource(Arn=instance_arn),
+                        status=CheckStatus.FAILED,
+                        summary=f"EC2 Instance {instance_id} has sensitive keywords in user data."
+                    )
+                )
 
             # Check against regex patterns
             for pattern in regex_patterns:
                 if re.search(pattern, decoded_user_data):
                     report.status = CheckStatus.FAILED
-                    report.resource_ids_status[instance_id] = False  # Mark as having secrets
-                   #report.resource_ids_status[instance_id] = f"EC2 Instance {instance_id} has sensitive patterns in user data."
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(Arn=instance_arn),
+                            status=CheckStatus.FAILED,
+                            summary=f"EC2 Instance {instance_id} has sensitive patterns in user data."
+                        )
+                    )
                     break  # No need to check further patterns for this instance
 
             # Optional: Check for high entropy strings (indicative of secrets)
             if self.is_high_entropy(decoded_user_data):
                 report.status = CheckStatus.FAILED
-                report.resource_ids_status[instance_id] = False
-                #report.resource_ids_status[instance_id] = f"EC2 Instance {instance_id} contains high entropy strings in user data."
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=AwsResource(Arn=instance_arn),
+                        status=CheckStatus.FAILED,
+                        summary=f"EC2 Instance {instance_id} contains high entropy strings in user data."
+                    )
+                )
 
         return report
 
