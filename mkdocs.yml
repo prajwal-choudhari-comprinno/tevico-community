@@ -13,6 +13,8 @@ theme:
     - navigation.top
     - navigation.tabs
     - navigation.tabs.sticky
+    - navigation.expand
+    - navigation.path
     - search.suggest
     - search.highlight
     - content.tabs.link
@@ -28,33 +30,42 @@ theme:
 nav:
   - Get Started:
     - Welcome to Tevico Community: index.md
-    - Generate Report: generate-report.md
-    - Help with Tevico Community: help.md
-    - Project Status & Support: status.md
+    - Manually Generate Report:
+      - Project Setup: project-setup.md
+      - CLI Params: cli-params.md
+    - Additional Resources:
+        - Help with Tevico Community: help.md
+        - Project Status & Support: project-status.md
   - Developer:
     - Get Started: developer/getting-started.md
-    - Entities:
-      - Provider: developer/entities/provider.md
-      - Profile: developer/entities/profile.md
-      - Framework: developer/entities/framework.md
-      - Channel: developer/entities/channel.md
     - Provider:
-      - AWS: developer/provider/aws-dev-setup.md
+      - AWS:
+        - Dev Setup: developer/provider/aws-dev-setup.md
     - Concepts:
+      - Entities:
+        - Check: developer/entities/check.md
+        - Provider: developer/entities/provider.md
+        - Profile: developer/entities/profile.md
+        - Framework: developer/entities/framework.md
+        - Channel: developer/entities/channel.md
       - Workflow: developer/concepts/workflow.md
       - File Structure: developer/concepts/file-structure.md
 
 plugins:
   - search
+  - open-in-new-tab
 
 markdown_extensions:
+  - admonition
+  - pymdownx.details
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
   - toc:
       permalink: true
       title: Page contents

@@ -1,4 +1,4 @@
-# Generate Report
+# Project Setup
 
 The Tevico Community project is designed to run seamlessly on cloud service providers like AWS CloudShell. To get started quickly, copy and execute the following command in your CloudShell terminal:
 
@@ -14,7 +14,7 @@ For more customization options, you can use various CLI parameters. To take full
 
 **TLDR;** You just want to copy paste and setup the project here's a snippet for you! Once you execute these commands, you can skip the **Project Setup** section.
 
-```bash
+```bash title="TLDR; Project Setup"
 git clone https://github.com/comprinnotech/tevico-community.git
 cd tevico-community
 
@@ -58,3 +58,5 @@ pip3 install poetry
 ```bash title="Install Dependencies"
 poetry install
 ```
+
+The project setup is now complete! For information on how to run the project using various command-line parameters, please refer to the [CLI Parameters](cli-params.md) page.
