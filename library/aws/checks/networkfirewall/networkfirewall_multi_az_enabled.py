@@ -58,7 +58,8 @@ class networkfirewall_multi_az_enabled(Check):
                         ResourceStatus(
                             resource=AwsResource(arn=firewall_arn),
                             status=CheckStatus.FAILED,
-                            summary=f"Firewall {firewall_name} not found."
+                            summary=f"Firewall {firewall_name} not found.",
+                            exception=client.exceptions.ResourceNotFoundException
                         )
                     )
                     report.status = CheckStatus.FAILED
@@ -68,7 +69,8 @@ class networkfirewall_multi_az_enabled(Check):
                         ResourceStatus(
                             resource=AwsResource(arn=firewall_arn),
                             status=CheckStatus.FAILED,
-                            summary=f"Error retrieving firewall details for {firewall_name}: {str(e)}"
+                            summary=f"Error retrieving firewall details for {firewall_name}: {str(e)}",
+                            exception=e
                         )
                     )
                     report.status = CheckStatus.FAILED
@@ -79,7 +81,8 @@ class networkfirewall_multi_az_enabled(Check):
                 ResourceStatus(
                     resource=GeneralResource(resource=""),
                     status=CheckStatus.FAILED,
-                    summary=f"Error retrieving firewall list: {str(e)}"
+                    summary=f"Error retrieving firewall list: {str(e)}",
+                    exception=e
                 )
             )
 
