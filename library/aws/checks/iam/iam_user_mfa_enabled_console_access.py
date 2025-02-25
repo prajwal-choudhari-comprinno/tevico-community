@@ -47,7 +47,7 @@ class iam_user_mfa_enabled_console_access(Check):
                         ResourceStatus(
                             resource=resource,
                             status=CheckStatus.SKIPPED,
-                            summary="User does not have console access."
+                            summary="User {username} does not have console access."
                         )
                     )
                     continue

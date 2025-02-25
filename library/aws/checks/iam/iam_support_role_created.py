@@ -62,7 +62,7 @@ class iam_support_role_created(Check):
                         ResourceStatus(
                             resource=AwsResource(arn=role_arn_template.format(account_id, role_name)),
                             status=CheckStatus.PASSED,
-                            summary=f"Support Role created and attached to IAM policy: {required_policy_name}."
+                            summary=f"Support Role created and IAM policy, {required_policy_name} is attached to it."
                         )
                     )
 
@@ -73,7 +73,7 @@ class iam_support_role_created(Check):
                         ResourceStatus(
                             resource=GeneralResource(resource=""),
                             status=CheckStatus.FAILED,
-                            summary=f"No support-specific IAM role found attached to the IAM policy {required_policy_name}."
+                            summary=f"No support-specific IAM role found with IAM policy attached."
                         )
                     )
             else:
