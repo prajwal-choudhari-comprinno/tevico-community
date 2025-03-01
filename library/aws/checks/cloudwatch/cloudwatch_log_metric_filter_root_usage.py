@@ -97,7 +97,7 @@ class cloudwatch_log_metric_filter_root_usage(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.FAILED,
                         summary=f"No log group with the required filter and alarm found"
                     )
@@ -108,10 +108,10 @@ class cloudwatch_log_metric_filter_root_usage(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error while checking log metric filters and alarms",
-                    exception=e
+                    exception=str(e)
                 )
             )            
 

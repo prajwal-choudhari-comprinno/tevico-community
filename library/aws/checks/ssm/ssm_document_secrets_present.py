@@ -7,7 +7,7 @@ DATE: 2024-11-11
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -34,14 +34,20 @@ class ssm_document_secrets_present(Check):
                 if 'SecretsManager' in document_content or 'ParameterStore' in document_content:
                     missing_secrets.append(document_name)
             except Exception as e:
-                report.resource_ids_status[document_name] = False
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=document_name),
+                        status=CheckStatus.FAILED,
+                        summary=''
+                    )
+                )
                 report.status = CheckStatus.FAILED
                 continue
 
       
         if missing_secrets:
             report.status = CheckStatus.FAILED
-            report.resource_ids_status.update({doc: False for doc in missing_secrets})
+            # report.resource_ids_status.update({doc: False for doc in missing_secrets})
         else:
             report.status = CheckStatus.PASSED
         

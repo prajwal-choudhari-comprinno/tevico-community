@@ -25,7 +25,7 @@ class iam_user_mfa_enabled_console_access(Check):
                 report.status = CheckStatus.SKIPPED
                 report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=GeneralResource(resource=""),
+                            resource=GeneralResource(name=""),
                             status=CheckStatus.SKIPPED,
                             summary=f"No IAM users found."
                         )
@@ -58,7 +58,7 @@ class iam_user_mfa_enabled_console_access(Check):
                             resource=resource,
                             status=CheckStatus.ERRORED,
                             summary=f"Error checking console access.",
-                            exception=e
+                            exception=str(e)
                         )
                     )
                     report.status = CheckStatus.ERRORED
@@ -94,7 +94,7 @@ class iam_user_mfa_enabled_console_access(Check):
                             resource=resource,
                             status=CheckStatus.ERRORED,
                             summary=f"Error checking MFA configuration.",
-                            exception=e
+                            exception=str(e)
                         )
                     )
                     report.status = CheckStatus.ERRORED
@@ -107,7 +107,7 @@ class iam_user_mfa_enabled_console_access(Check):
                     resource=resource,
                     status=CheckStatus.ERRORED,
                     summary=f"Error while checking MFA for IAM users",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

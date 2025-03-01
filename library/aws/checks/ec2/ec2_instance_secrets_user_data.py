@@ -27,10 +27,10 @@ class ec2_instance_secrets_user_data(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error in fetching EC2 instances.",
-                    exception=e
+                    exception=str(e)
                 )
             )
             #report.message = f"Error fetching EC2 instances: {str(e)}"
@@ -41,7 +41,7 @@ class ec2_instance_secrets_user_data(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.NOT_APPLICABLE,
                     summary=f"No EC2 instances"
                 )
@@ -66,10 +66,10 @@ class ec2_instance_secrets_user_data(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary=f"Error retrieving user data for instance {instance_id}:",
-                        exception=e
+                        exception=str(e)
                     )
                 )
                 continue  # Skip to next instance

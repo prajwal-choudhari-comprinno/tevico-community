@@ -1,6 +1,6 @@
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -19,10 +19,22 @@ class rds_instance_deletion_protection(Check):
                 instance_name = instance['DBInstanceIdentifier']
                 
                 if instance['DeletionProtection']:
-                    report.resource_ids_status[instance_name] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_name),
+                            status=CheckStatus.PASSED,
+                            summary=''
+                        )
+                    )
                 else:
                     report.status = CheckStatus.FAILED
-                    report.resource_ids_status[instance_name] = False
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_name),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
                          
         except Exception as e:
             report.status = CheckStatus.FAILED

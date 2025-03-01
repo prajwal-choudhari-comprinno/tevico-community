@@ -73,10 +73,10 @@ class acm_certificates_transparency_logs_enabled(Check):
                 # Handle errors in listing certificates
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.SKIPPED,
                         summary="ACM listing error.",
-                        exception=e
+                        exception=str(e)
                     )
                 )
                 report.status = CheckStatus.FAILED
@@ -85,7 +85,7 @@ class acm_certificates_transparency_logs_enabled(Check):
                 # No certificates found, mark the check as passed
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.SKIPPED,
                         summary="No ACM certificates found."
                     )
@@ -95,10 +95,10 @@ class acm_certificates_transparency_logs_enabled(Check):
             # Handle any unexpected errors
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary="Unexpected error.",
-                    exception=e
+                    exception=str(e)
                 )
             )                
             report.status = CheckStatus.FAILED

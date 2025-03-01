@@ -6,9 +6,8 @@ DATE: 2025-01-14
 
 import boto3
 import datetime
-import pytz
 
-from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
+from tevico.engine.entities.report.check_model import AwsResource, CheckException, CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -19,6 +18,9 @@ class iam_rotate_access_keys_90_days(Check):
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
         report.resource_ids_status = []
+        
+        resource = GeneralResource(name='')
+        arn = ''
 
         try:
             users = client.list_users().get('Users', [])
@@ -27,7 +29,7 @@ class iam_rotate_access_keys_90_days(Check):
                 report.status = CheckStatus.SKIPPED
                 report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=GeneralResource(resource=""),
+                            resource=GeneralResource(name=""),
                             status=CheckStatus.SKIPPED,
                             summary=f"No IAM users found."
                         )
@@ -58,7 +60,7 @@ class iam_rotate_access_keys_90_days(Check):
                     create_date = key['CreateDate']
 
                     # Calculate key age
-                    days_since_created = (datetime.datetime.now(pytz.utc) - create_date).days
+                    days_since_created = (datetime.datetime.now(tz=datetime.timezone.utc) - create_date).days
                     
                     if status == 'Inactive':
                         report.resource_ids_status.append(
@@ -93,10 +95,10 @@ class iam_rotate_access_keys_90_days(Check):
             report.report_metadata = {"error": str(e)}
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=resource,
+                    resource=GeneralResource(name=arn),
                     status=CheckStatus.ERRORED,
                     summary=f"Error occurred while checking access key rotation",
-                    exception=e
+                    exception=str(e)
                 )
             )
             

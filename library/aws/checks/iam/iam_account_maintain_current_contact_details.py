@@ -58,7 +58,7 @@ class iam_account_maintain_current_contact_details(Check):
                     all_checks_passed = False
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=GeneralResource(resource=""),
+                            resource=GeneralResource(name=""),
                             status=CheckStatus.FAILED,
                             summary=f"Check failed: '{check}' is missing or empty."
                         )
@@ -67,7 +67,7 @@ class iam_account_maintain_current_contact_details(Check):
                     # print(f"Check passed: '{check}' is present.")
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=GeneralResource(resource=""),
+                            resource=GeneralResource(name=""),
                             status=CheckStatus.PASSED,
                             summary=f"Check passed: '{check}' is present."
                         )

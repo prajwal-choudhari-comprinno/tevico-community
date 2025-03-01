@@ -74,6 +74,8 @@ class Provider(ABC):
             print(f'\t\t* Check Not Applicable ⚠️: {res.name} ({res.execution_time} seconds)')
         elif res is not None and res.status is CheckStatus.UNKNOWN:
             print(f'\t\t* Check Unknown ❓: {res.name} ({res.execution_time} seconds)')
+        elif res is not None and res.status is CheckStatus.ERRORED:
+            print(f'\t\t* Check Errored 🚨: {res.name} ({res.execution_time} seconds)')
         else:
             print(f'\t\t* Check Unknown ❓: {res.name} ({res.execution_time} seconds)')
         

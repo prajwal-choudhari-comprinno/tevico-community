@@ -24,7 +24,7 @@ class networkfirewall_multi_az_enabled(Check):
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No Network Firewall resources found."
                     )
@@ -53,13 +53,13 @@ class networkfirewall_multi_az_enabled(Check):
                     if not is_multi_az:
                         report.status = CheckStatus.FAILED  # At least one firewall is non-compliant
 
-                except client.exceptions.ResourceNotFoundException:
+                except client.exceptions.ResourceNotFoundException as e:
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=AwsResource(arn=firewall_arn),
                             status=CheckStatus.FAILED,
                             summary=f"Firewall {firewall_name} not found.",
-                            exception=client.exceptions.ResourceNotFoundException
+                            exception=str(e)
                         )
                     )
                     report.status = CheckStatus.FAILED
@@ -70,7 +70,7 @@ class networkfirewall_multi_az_enabled(Check):
                             resource=AwsResource(arn=firewall_arn),
                             status=CheckStatus.FAILED,
                             summary=f"Error retrieving firewall details for {firewall_name}: {str(e)}",
-                            exception=e
+                            exception=str(e)
                         )
                     )
                     report.status = CheckStatus.FAILED
@@ -79,10 +79,10 @@ class networkfirewall_multi_az_enabled(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error retrieving firewall list: {str(e)}",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

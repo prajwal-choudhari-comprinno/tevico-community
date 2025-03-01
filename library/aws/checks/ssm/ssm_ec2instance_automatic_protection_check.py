@@ -5,7 +5,7 @@ DATE: 2024-11-12
 """
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -33,20 +33,44 @@ class ssm_ec2instance_automatic_protection_check(Check):
                         is_protected = protection_info['DisableApiTermination']['Value']
 
                         if is_protected:
-                            report.resource_ids_status[instance_id] = True  
+                            report.resource_ids_status.append(
+                                ResourceStatus(
+                                    resource=GeneralResource(name=instance_id),
+                                    status=CheckStatus.PASSED,
+                                    summary=''
+                                )
+                            )
                         else:
-                            report.resource_ids_status[instance_id] = False  
+                            report.resource_ids_status.append(
+                                ResourceStatus(
+                                    resource=GeneralResource(name=instance_id),
+                                    status=CheckStatus.FAILED,
+                                    summary=''
+                                )
+                            )
                             report.status = CheckStatus.FAILED
 
                     else:
-                        report.resource_ids_status[instance_id] = False  
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(name=instance_id),
+                                status=CheckStatus.FAILED,
+                                summary=''
+                            )
+                        )
                         report.status = CheckStatus.FAILED
 
                 except (ssm_client.exceptions.InvalidInstanceId, ec2_client.exceptions.ClientError) as e:
-                    report.resource_ids_status[instance_id] = False  
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_id),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
                     report.status = CheckStatus.FAILED
 
-        if all(report.resource_ids_status.values()):
+        if all(report.resource_ids_status):
             report.status = CheckStatus.PASSED
 
         return report

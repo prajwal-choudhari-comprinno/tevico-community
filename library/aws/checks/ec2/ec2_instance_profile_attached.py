@@ -5,7 +5,7 @@ DATE: 10-10-2024
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -15,6 +15,7 @@ class ec2_instance_profile_attached(Check):
         ec2_client = connection.client('ec2')
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED  # Start assuming all instances have profiles
+        report.resource_ids_status = []
 
         try:
             # Fetch all EC2 instances
@@ -36,10 +37,22 @@ class ec2_instance_profile_attached(Check):
                 instance_profile = instance.get('IamInstanceProfile', None)
 
                 if instance_profile:
-                    report.resource_ids_status[instance_id] = True  # Instance has a profile attached
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_id),
+                            status=CheckStatus.PASSED,
+                            summary=''
+                        )
+                    )
                 else:
                     report.status = CheckStatus.FAILED
-                    report.resource_ids_status[instance_id] = False  # No profile attached
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_id),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
                     #report.message = f"EC2 Instance {instance_id} does not have an IAM instance profile attached."
 
         return report

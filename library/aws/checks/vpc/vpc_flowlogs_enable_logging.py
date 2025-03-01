@@ -6,7 +6,7 @@ DATE: 2024-11-12
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class vpc_flowlogs_enable_logging(Check):
@@ -27,10 +27,22 @@ class vpc_flowlogs_enable_logging(Check):
                 
 
                 if not response['FlowLogs']:
-                    report.resource_ids_status[vpc_id] = False
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=vpc_id),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
                     report.status = CheckStatus.FAILED
                 else:
-                    report.resource_ids_status[vpc_id] = True  
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=vpc_id),
+                            status=CheckStatus.PASSED,
+                            summary=''
+                        )
+                    )
 
             
         except Exception as e:

@@ -54,7 +54,7 @@ class apigateway_rest_api_client_certificate_enabled(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error accessing API Gateway: {str(e)}"
                 )

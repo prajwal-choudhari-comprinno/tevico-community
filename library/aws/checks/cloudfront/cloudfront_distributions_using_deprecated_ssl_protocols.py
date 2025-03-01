@@ -73,10 +73,10 @@ class cloudfront_distributions_using_deprecated_ssl_protocols(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error while fetching CloudFront distribution config",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

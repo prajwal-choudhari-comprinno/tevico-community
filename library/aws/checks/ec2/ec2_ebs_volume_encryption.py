@@ -26,7 +26,7 @@ class ec2_ebs_volume_encryption(Check):
         if not volumes:
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.SKIPPED,
                     summary=f"No Volumes found"
                 )
@@ -41,7 +41,7 @@ class ec2_ebs_volume_encryption(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=volume_id),
+                        resource=GeneralResource(name=volume_id),
                         status=CheckStatus.FAILED,
                         summary=f"Volume {volume_id} is not Encrypted."
                     )

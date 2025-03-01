@@ -79,23 +79,21 @@ class iam_inline_policy_admin_privileges_found(Check):
                                 # Store the status as False and append policy names
                                 report.resource_ids_status.append(
                                     ResourceStatus(
-                                        resource=GeneralResource(resource=""),
+                                        resource=GeneralResource(name=""),
                                         status=CheckStatus.FAILED,
                                         summary=f"{entity_type}::{entity_name} has inline policy {', '.join(failed_policies)} with full administrative privileges."
                                     )
                                 )
-                                #report.resource_ids_status[f"{entity_type}::{entity_name} has inline policy {', '.join(failed_policies)} with full administrative privileges." ] = False
                                 
                             # If no failed policies, store the success status as True
                             elif f"{entity_type}::{entity_name}" not in report.resource_ids_status:
                                 report.resource_ids_status.append(
                                     ResourceStatus(
-                                        resource=GeneralResource(resource=""),
+                                        resource=GeneralResource(name=""),
                                         status=CheckStatus.FAILED,
                                         summary=f"{entity_type}::{entity_name} has not any inline policy with full administrative privileges."
                                     )
                                 )
-                                #report.resource_ids_status[f"{entity_type}::{entity_name} has not any inline policy with full administrative privileges."] = True
 
 
                         except (BotoCoreError, ClientError):
@@ -103,12 +101,11 @@ class iam_inline_policy_admin_privileges_found(Check):
                             report.status = CheckStatus.FAILED
                             report.resource_ids_status.append(
                                 ResourceStatus(
-                                    resource=GeneralResource(resource=""),
+                                    resource=GeneralResource(name=""),
                                     status=CheckStatus.FAILED,
                                     summary=f"Error fetching {entity_type}::{entity_name}."
                                 )
                             )
-                            #report.resource_ids_status[f"{entity_type}::{entity_name}"] = False
             except (BotoCoreError, ClientError):
                 report.status = CheckStatus.FAILED
 

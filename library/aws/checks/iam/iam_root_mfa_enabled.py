@@ -29,7 +29,7 @@ class iam_root_mfa_enabled(Check):
             # Update report based on MFA status
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.PASSED if root_mfa_enabled else CheckStatus.FAILED,
                     summary=f"Root account MFA is {'enabled' if root_mfa_enabled else 'not enabled'}."
                 )
@@ -40,10 +40,10 @@ class iam_root_mfa_enabled(Check):
             report.report_metadata = {"error": str(e)}
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.PASSED if root_mfa_enabled else CheckStatus.ERRORED,
                     summary=f"Error while checking root MFA configuration.",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

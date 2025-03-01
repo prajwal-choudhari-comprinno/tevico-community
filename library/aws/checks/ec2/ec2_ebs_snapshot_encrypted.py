@@ -30,7 +30,7 @@ class ec2_ebs_snapshot_encrypted(Check):
             if not snapshots:
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.SKIPPED,
                         summary=f"No Snapshots found"
                     )
@@ -46,7 +46,7 @@ class ec2_ebs_snapshot_encrypted(Check):
                     report.status = CheckStatus.FAILED
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=GeneralResource(resource=snapshot_id),
+                            resource=GeneralResource(name=snapshot_id),
                             status=CheckStatus.FAILED,
                             summary=f"Snapshot {snapshot_id} is not Encrypted."
                         )
@@ -57,10 +57,10 @@ class ec2_ebs_snapshot_encrypted(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error in reading snapshots",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

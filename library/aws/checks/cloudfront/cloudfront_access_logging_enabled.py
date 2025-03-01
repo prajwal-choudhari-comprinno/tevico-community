@@ -71,7 +71,6 @@ class cloudfront_access_logging_enabled(Check):
                             summary=f"{distribution_id} Access Logging: Disabled"
                         )
                     )
-                    report.resource_ids_status[f"{distribution_id} Access Logging: Disabled"] = False
                     report.status = CheckStatus.FAILED  # If there's no logging configuration at all, mark as failed
 
         except Exception as e:
@@ -79,10 +78,10 @@ class cloudfront_access_logging_enabled(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error while fetching CloudFront distribution config",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

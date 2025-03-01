@@ -127,7 +127,7 @@ class cloudtrail_s3_bucket_access_logging_enabled(Check):
                                 resource=AwsResource(arn=trail_arn),
                                 status=CheckStatus.FAILED,
                                 summary=f"CloudTrail {trail_name} - Error checking S3 bucket {s3_bucket_name}.",
-                                exception=e
+                                exception=str(e)
                             )
                         )
 
@@ -139,7 +139,7 @@ class cloudtrail_s3_bucket_access_logging_enabled(Check):
                     resource=AwsResource(arn=trail_arn),
                     status=CheckStatus.FAILED,
                     summary=f"Error while retrieving CloudTrail trails.",
-                    exception=e
+                    exception=str(e)
                 )
             )        
         return report

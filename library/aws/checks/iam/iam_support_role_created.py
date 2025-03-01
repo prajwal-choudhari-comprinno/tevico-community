@@ -42,7 +42,7 @@ class iam_support_role_created(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.FAILED,
                         summary=f"{required_policy_name}: IAM Policy does not exist."
                     )
@@ -71,7 +71,7 @@ class iam_support_role_created(Check):
                     report.status = CheckStatus.FAILED
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=GeneralResource(resource=""),
+                            resource=GeneralResource(name=""),
                             status=CheckStatus.FAILED,
                             summary=f"No support-specific IAM role found with IAM policy attached."
                         )
@@ -91,10 +91,10 @@ class iam_support_role_created(Check):
             report.report_metadata = {"error": str(e)}
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.ERRORED,
                     summary=f"Error occurred while checking access key rotation",
-                    exception=e
+                    exception=str(e)
                 )
             )
             

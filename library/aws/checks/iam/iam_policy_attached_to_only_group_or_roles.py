@@ -5,7 +5,7 @@ DATE: 2024-10-10
 
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_policy_attached_to_only_group_or_roles(Check):
@@ -26,10 +26,22 @@ class iam_policy_attached_to_only_group_or_roles(Check):
 
                 if attached_policies:
 
-                    report.resource_ids_status[username] = True  # Flag as a violation
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=username),
+                            status=CheckStatus.PASSED,
+                            summary=''
+                        )
+                    )  # Flag as a violation
                 else:
 
-                    report.resource_ids_status[username] = False  # No violation
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=username),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )  # No violation
                     report.status = CheckStatus.FAILED
 
 

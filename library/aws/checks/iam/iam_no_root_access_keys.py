@@ -6,7 +6,7 @@ DATE: 2024-10-10
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_no_root_access_keys(Check):
@@ -22,9 +22,21 @@ class iam_no_root_access_keys(Check):
 
             if has_active_root_keys:
                 report.status = CheckStatus.FAILED
-                report.resource_ids_status['root_account'] = False
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name='root_account'),
+                        status=CheckStatus.FAILED,
+                        summary='',
+                    )
+                )
             else:
-                report.resource_ids_status['root_account'] = True
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name='root_account'),
+                        status=CheckStatus.PASSED,
+                        summary='',
+                    )
+                )
 
             iam_users = client.list_users()['Users']
 
@@ -38,9 +50,21 @@ class iam_no_root_access_keys(Check):
 
                 if has_active_iam_keys:
                     report.status = CheckStatus.FAILED
-                    report.resource_ids_status[user_name] = False
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=user_name),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
                 else:
-                    report.resource_ids_status[user_name] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=user_name),
+                            status=CheckStatus.PASSED,
+                            summary=''
+                        )
+                    )
 
         except Exception:
             report.status = CheckStatus.FAILED

@@ -25,7 +25,7 @@ class organizations_account_part_of_organizations(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.FAILED,
                         summary="No AWS Organizations found for this account."
                     )
@@ -78,7 +78,7 @@ class organizations_account_part_of_organizations(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error accessing AWS Organizations: {str(e)}"
                 )

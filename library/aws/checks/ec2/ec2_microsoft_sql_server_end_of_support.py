@@ -82,7 +82,7 @@ class ec2_microsoft_sql_server_end_of_support(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error occurred during execution: {str(e)}"
                 )

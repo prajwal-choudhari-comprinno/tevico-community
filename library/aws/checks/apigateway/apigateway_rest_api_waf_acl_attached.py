@@ -77,7 +77,7 @@ class apigateway_rest_api_waf_acl_attached(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error accessing API Gateway REST APIs: {str(e)}"
                 )

@@ -29,18 +29,29 @@ class ssm_patch_manager_enabled(Check):
                     if compliance_info['InstancePatchStates']:
                         report.resource_ids_status.append(
                             ResourceStatus(
-                                resource=GeneralResource(resource=""),
+                                resource=GeneralResource(name=instance_id),
                                 status=CheckStatus.PASSED,
-                                summary=f"{instance_id} "
+                                summary=''
                             )
                         )
-                        report.resource_ids_status[instance_id] = True
                     else:
-                        report.resource_ids_status[instance_id] = False
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(name=instance_id),
+                                status=CheckStatus.FAILED,
+                                summary=''
+                            )
+                        )
                         report.status = CheckStatus.FAILED
 
                 except ssm_client.exceptions.InvalidInstanceId:
-                    report.resource_ids_status[instance_id] = False
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_id),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
                     report.status = CheckStatus.FAILED
 
 

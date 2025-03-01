@@ -52,7 +52,7 @@ class iam_user_multiple_active_access_keys(Check):
                     resource=resource,
                     status=status,
                     summary=f"Error while checking access keys for IAM users.",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

@@ -29,7 +29,7 @@ class ec2_imdsv2_enabled(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.SKIPPED,
                         summary=f"No EC2 instances found."
                     )
@@ -68,10 +68,10 @@ class ec2_imdsv2_enabled(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.PASSED,
                     summary=f"Error while fetching EC2 instance metadata:",
-                    exception=e
+                    exception=str(e)
                 )
             )
             #report.message = f"Error while fetching EC2 instance metadata: {str(e)}"

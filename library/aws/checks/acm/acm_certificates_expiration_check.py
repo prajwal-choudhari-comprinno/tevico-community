@@ -89,7 +89,7 @@ class acm_certificates_expiration_check(Check):
                 # No certificates found, mark the check as passed
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.SKIPPED,
                         summary="No ACM certificates found."
                     )
@@ -102,10 +102,10 @@ class acm_certificates_expiration_check(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.SKIPPED,
                     summary="ACM listing error.",
-                    exception=e
+                    exception=str(e)
                 )
             )
             report.status = CheckStatus.FAILED

@@ -1,7 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -20,9 +20,21 @@ class rds_instance_backup_enabled(Check):
                 
                 if backup_retention_period == 0:
                     report.status = CheckStatus.FAILED
-                    report.resource_ids_status[instance_name] = False
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_name),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
                 else:
-                    report.resource_ids_status[instance_name] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_name),
+                            status=CheckStatus.PASSED,
+                            summary=''
+                        )
+                    )
             
         except Exception as e:
             report.status = CheckStatus.FAILED
