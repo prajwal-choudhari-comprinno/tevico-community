@@ -1,6 +1,7 @@
 from datetime import datetime
 from re import A
 from typing import Any, Dict, List, Optional, Union, ClassVar
+from click import Option
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from tevico.engine.core.enums import FrameworkDimension
@@ -106,8 +107,8 @@ class CheckStatus(Enum):
     ERRORED = 'errored'
 
 class CheckException(BaseModel):
-    code: str | None
-    message: str | None
+    code: Optional[str] = None
+    message: Optional[str] = None
 
 class ResourceStatus(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
