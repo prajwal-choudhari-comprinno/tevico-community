@@ -1,106 +1,97 @@
 """
-AUTHOR: deepak-puri-comprinno
+AUTHOR: Deepak Puri
 EMAIL: deepak.puri@comprinno.net
 DATE: 2025-01-09
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
+from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
+
 
 class acm_certificates_transparency_logs_enabled(Check):
 
     def execute(self, connection: boto3.Session) -> CheckReport:
+        client = connection.client("acm")
 
-        # Initialize report and certificates list
+        # Initialize check report
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
         report.resource_ids_status = []
 
         try:
-            # Initialize ACM client
-            client = connection.client('acm')
-            certificates_found = False
+            # Custom pagination approach
+            certificates = []
+            next_token = None
 
-            try:
-                # List all ACM certificates using pagination
-                paginator = client.get_paginator('list_certificates')
-                for page in paginator.paginate():
-                    certificates = page.get('CertificateSummaryList', [])
+            while True:
+                response = client.list_certificates(NextToken=next_token) if next_token else client.list_certificates()
+                certificates.extend(response.get("CertificateSummaryList", []))
+                next_token = response.get("NextToken")
 
-                    if certificates:
-                        certificates_found = True
+                if not next_token:
+                    break
 
-                    # Process each certificate
-                    for cert in certificates:
-                        cert_arn = cert.get('CertificateArn')
-
-                        try:
-                            # Get detailed certificate information
-                            cert_details = client.describe_certificate(CertificateArn=cert_arn)
-                            transparency_logging = cert_details.get('Certificate', {}).get('Options', {}).get('CertificateTransparencyLoggingPreference', 'ENABLED')
-
-                            if transparency_logging != 'ENABLED':
-                                report.resource_ids_status.append(
-                                    ResourceStatus(
-                                        resource=AwsResource(arn=cert_arn),
-                                        status=CheckStatus.FAILED,
-                                        summary="Certificate " + cert_arn + " has transparency logging disabled. "
-                                    )
-                                )                                
-                                report.status = CheckStatus.FAILED
-                            else:
-                                report.resource_ids_status.append(
-                                    ResourceStatus(
-                                        resource=AwsResource(arn=cert_arn),
-                                        status=CheckStatus.FAILED,
-                                        summary="Certificate " + cert_arn + " has transparency logging enabled. "
-                                    )
-                                )                                
-
-                        except Exception as e:
-                            # Handle errors in getting certificate details
-                            report.resource_ids_status.append(
-                                ResourceStatus(
-                                    resource=AwsResource(arn=cert_arn),
-                                    status=CheckStatus.FAILED,
-                                    summary="Error describing " + cert_arn + "."
-                                )
-                            )                                                            
-                            report.status = CheckStatus.FAILED
-
-            except Exception as e:
-                # Handle errors in listing certificates
+            # If no certificates exist
+            if not certificates:
+                report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
                         resource=GeneralResource(name=""),
-                        status=CheckStatus.SKIPPED,
-                        summary="ACM listing error.",
-                        exception=str(e)
-                    )
-                )
-                report.status = CheckStatus.FAILED
-
-            if not certificates_found:
-                # No certificates found, mark the check as passed
-                report.resource_ids_status.append(
-                    ResourceStatus(
-                        resource=GeneralResource(name=""),
-                        status=CheckStatus.SKIPPED,
+                        status=CheckStatus.NOT_APPLICABLE,
                         summary="No ACM certificates found."
                     )
-                )                
+                )
+                return report
+
+            # Process each certificate
+            for cert in certificates:
+                cert_arn = cert.get("CertificateArn")
+
+                try:
+                    # Get detailed certificate information
+                    cert_details = client.describe_certificate(CertificateArn=cert_arn)
+                    transparency_logging = cert_details.get("Certificate", {}).get("Options", {}).get("CertificateTransparencyLoggingPreference", "ENABLED")
+
+                    if transparency_logging != "ENABLED":
+                        summary = f"Certificate {cert_arn} has transparency logging disabled."
+                        status = CheckStatus.FAILED
+                    else:
+                        summary = f"Certificate {cert_arn} has transparency logging enabled."
+                        status = CheckStatus.PASSED
+
+                    # Append result
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=cert_arn),
+                            status=status,
+                            summary=summary
+                        )
+                    )
+
+                    # Mark check as failed if any certificate has logging disabled
+                    if status == CheckStatus.FAILED:
+                        report.status = CheckStatus.FAILED
+
+                except Exception as e:
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=cert_arn),
+                            status=CheckStatus.UNKNOWN,
+                            summary=f"Error describing certificate {cert_arn}.",
+                            exception=str(e)
+                        )
+                    )
+                    report.status = CheckStatus.FAILED
 
         except Exception as e:
-            # Handle any unexpected errors
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
-                    summary="Unexpected error.",
+                    summary="Error fetching ACM certificates.",
                     exception=str(e)
                 )
-            )                
-            report.status = CheckStatus.FAILED
-
+            )
         return report
