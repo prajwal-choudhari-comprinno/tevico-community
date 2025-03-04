@@ -1,57 +1,105 @@
 """
 AUTHOR: Deepak Puri
 EMAIL: deepak.puri@comprinno.net
-DATE: 2024-10-09
+DATE: 2025-01-14
 """
 
+from os import name
 import boto3
-from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, ResourceStatus
+from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
+
 
 class ec2_network_acl_allow_ingress_tcp_port_22(Check):
 
     def execute(self, connection: boto3.Session) -> CheckReport:
+        client = connection.client("ec2")
+
+        # Initialize the report
         report = CheckReport(name=__name__)
-        client = connection.client('ec2')
-        sts_client = connection.client('sts')
-        account_number = sts_client.get_caller_identity()['Account']
-        acls = client.describe_network_acls()['NetworkAcls']
-        
-        tcp_protocol = "6"
-        check_port = 22
-        report.status = CheckStatus.PASSED   
+        report.status = CheckStatus.PASSED
         report.resource_ids_status = []
 
-        for acl in acls:
-            acl_id = acl['NetworkAclId']
-            acl_arn = acl.get('NetworkAclArn', f"arn:aws:ec2:{client.meta.region_name}:{account_number}:network-acl/{acl_id}")
-            resource = AwsResource(arn=acl_arn)
-            acl_allows_ingress = False
-            
-            for entry in acl['Entries']:
-                if entry['Egress']:  
-                    continue
-                if entry['CidrBlock'] != '0.0.0.0/0' or entry['RuleAction'] != "allow": 
-                    continue
-                if entry['Protocol'] != tcp_protocol and entry['Protocol'] != '-1': 
-                    continue
+        try:
+            # Get the account ID
+            sts_client = connection.client("sts")
+            account_id = sts_client.get_caller_identity()["Account"]
 
-                port_range = entry.get('PortRange')
-                if port_range and port_range['From'] <= check_port <= port_range['To']:
-                    acl_allows_ingress = True
+            # Get the AWS region
+            region = connection.region_name
+
+            # Pagination to get all network ACLs
+            acls = []
+            next_token = None
+
+            while True:
+                response = client.describe_network_acls(NextToken=next_token) if next_token else client.describe_network_acls()
+                acls.extend(response.get("NetworkAcls", []))
+                next_token = response.get("NextToken")
+
+                if not next_token:
                     break
-                if entry['Protocol'] == '-1': 
-                    acl_allows_ingress = True
-                    break
-            
+
+            # If no ACLs exist
+            if not acls:
+                report.status = CheckStatus.NOT_APPLICABLE
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No Network ACLs found in the account."
+                    )
+                )
+                return report
+
+            # Define the TCP protocol and port to check
+            tcp_protocol = "6"
+            check_port = 22
+
+            # Check each network ACL for rules allowing ingress on port 22
+            for acl in acls:
+                acl_id = acl["NetworkAclId"]
+                acl_arn = f"arn:aws:ec2:{region}:{account_id}:network-acl/{acl_id}"
+                acl_allows_ingress = False
+
+                for entry in acl["Entries"]:
+                    if entry["Egress"]:  # Skip egress rules
+                        continue
+
+                    if entry.get("CidrBlock") == "0.0.0.0/0" and entry.get("RuleAction") == "allow":
+                        if entry.get("Protocol") in [tcp_protocol, "-1"]:  # Check TCP protocol or all protocols
+                            port_range = entry.get("PortRange")
+                            if not port_range or (port_range["From"] <= check_port <= port_range["To"]):
+                                acl_allows_ingress = True
+                                break
+
+                # Record the result for this ACL
+                if acl_allows_ingress:
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=acl_arn),
+                            status=CheckStatus.FAILED,
+                            summary=f"NACL {acl_id} allows ingress on port 22 from 0.0.0.0/0."
+                        )
+                    )
+                    report.status = CheckStatus.FAILED
+                else:
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=acl_arn),
+                            status=CheckStatus.PASSED,
+                            summary=f"NACL {acl_id} does not allow ingress on port 22 from 0.0.0.0/0."
+                        )
+                    )
+
+        except Exception as e:
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=resource,
-                    status=CheckStatus.FAILED if acl_allows_ingress else CheckStatus.PASSED,
-                    summary=f"Network ACL {acl_id} allows ingress on TCP port 22." if acl_allows_ingress else f"Network ACL {acl_id} does not allow ingress on TCP port 22."
+                    resource=GeneralResource(name=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error fetching Network ACLs: {str(e)}",
+                    exception=str(e)
                 )
             )
-            if acl_allows_ingress:
-                report.status = CheckStatus.FAILED
-
         return report
