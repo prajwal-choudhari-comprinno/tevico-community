@@ -1,99 +1,75 @@
 """
-AUTHOR: RONIT CHAUHAN 
-DATE: 2024-10-11
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-14
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
+from botocore.exceptions import BotoCoreError, ClientError
+from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
+
 class iam_attached_policy_admin_privileges_found(Check):
+
     def execute(self, connection: boto3.Session) -> CheckReport:
+        client = connection.client('iam')
         report = CheckReport(name=__name__)
-        
+        report.status = CheckStatus.PASSED
         report.resource_ids_status = []
 
-        # Initialize the IAM client
-        iam_client = connection.client('iam')
-        # print("[INFO] Initialized IAM client.")
+        ADMIN_POLICIES = {"AdministratorAccess"}  # List of known admin policies
 
-        # Fetch all users and their attached policies
-        users = iam_client.list_users()['Users']
-        # print(f"[INFO] Retrieved {len(users)} IAM users.")
-        
-        findings = []
+        def check_policies(entity_name, entity_type, list_policies_func):
+            """Helper function to check attached policies for a user, group, or role"""
+            resource = AwsResource(arn=f"arn:aws:iam::account-id:{entity_type}/{entity_name}")
+            response = list_policies_func(entity_name)
+            attached_policies = response.get('AttachedPolicies', [])
 
-        for user in users:
-            user_name = user['UserName']
-            # print(f"[INFO] Processing IAM user: {user_name}")
-            
-            policies = iam_client.list_attached_user_policies(UserName=user_name)['AttachedPolicies']
-            # print(f"[INFO] {user_name} has {len(policies)} attached policies.")
-
-            for policy in policies:
-                policy_arn = policy['PolicyArn']
-                policy_details = iam_client.get_policy(PolicyArn=policy_arn)
-                policy_name = policy_details['Policy']['PolicyName']
-                # print(f"[INFO] Fetching details for policy: {policy_name} (ARN: {policy_arn})")
-                
-                if not policy_arn.startswith('arn:aws:iam::aws:policy/'):
-                    continue
-
-                # print(f"[INFO] Policy {policy_name} is an AWS-managed policy.")
-                    
-                # Specifically check for AdministratorAccess policy
-                if policy_name == 'AdministratorAccess':
-                    # print(f"[WARNING] User {user_name} has AdministratorAccess policy attached, which grants full admin privileges.")
+            for policy in attached_policies:
+                if policy['PolicyName'] in ADMIN_POLICIES:
                     report.resource_ids_status.append(
                         ResourceStatus(
+                            resource=resource,
                             status=CheckStatus.FAILED,
-                            resource=GeneralResource(name=user_name),
-                            summary=f"User {user_name} has attached AWS-managed AdministratorAccess policy with full administrative privileges."
+                            summary=f"{entity_type.capitalize()} '{entity_name}' has attached admin policy '{policy['PolicyName']}'."
                         )
                     )
-                    continue
-                    
-                # Check for full administrative privileges (*:*)
-                policy_version = iam_client.get_policy_version(
-                    PolicyArn=policy_arn,
-                    VersionId=policy_details['Policy']['DefaultVersionId']
+                    report.status = CheckStatus.FAILED
+                    return
+
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=resource,
+                    status=CheckStatus.PASSED,
+                    summary=f"{entity_type.capitalize()} '{entity_name}' does not have admin privileges."
                 )
-                policy_document = policy_version['PolicyVersion']['Document']
+            )
+
+        try:
+            # Check IAM Users
+            for user in client.list_users().get('Users', []):
+                check_policies(user['UserName'], 'user', lambda name: client.list_attached_user_policies(UserName=name))
+
+
+            # Check IAM Roles
+            for role in client.list_roles().get('Roles', []):
+                check_policies(role['RoleName'], 'role', lambda name: client.list_attached_role_policies(RoleName=name))
                 
-                if 'Statement' not in policy_document:
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            status=CheckStatus.PASSED,
-                            resource=GeneralResource(name=user_name),
-                            summary=f"User {user_name} has no policy with admin privileges."
-                        )
-                    )
-                    continue
-                
-                for statement in policy_document['Statement']:
-                    if statement.get('Effect') == 'Allow' and '*:*' in statement.get('Action', []):
-                        # print(f"[WARNING] Policy {policy_name} grants full administrative privileges (*:*) to user {user_name}.")
-                        # findings.append()
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                status=CheckStatus.FAILED,
-                                resource=GeneralResource(name=user_name),
-                                summary=f"User {user_name} has attached AWS-managed policy {policy_name} with full administrative privileges."
-                            )
-                        )
-                        break  # Stop after detecting full admin privileges
-                    else:
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                status=CheckStatus.PASSED,
-                                resource=GeneralResource(name=user_name),
-                                summary=f"User {user_name} has no policy with admin privileges."
-                            )
-                        )
+            # Check IAM Groups
+            for group in client.list_groups().get('Groups', []):
+                check_policies(group['GroupName'], 'group', lambda name: client.list_attached_group_policies(GroupName=name))
+
+        except (BotoCoreError, ClientError) as e:
+            report.status = CheckStatus.ERRORED
+            report.report_metadata = {"error": str(e)}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name=""),
+                    status=CheckStatus.ERRORED,
+                    summary="Error occurred while checking attached admin policies.",
+                    exception=str(e)
+                )
+            )
 
         return report
-
-
-# The check will pass if no users have attached AWS-managed policies that grant full administrative privileges (*: * or AdministratorAccess).
-
-# It will fail if any user has an attached AWS-managed policy that grants full administrative privileges, such as the AdministratorAccess policy or any policy with *: * actions.
