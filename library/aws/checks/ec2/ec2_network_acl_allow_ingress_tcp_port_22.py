@@ -93,7 +93,7 @@ class ec2_network_acl_allow_ingress_tcp_port_22(Check):
                     )
 
         except Exception as e:
-            report.status = CheckStatus.UNKNOWN
+            report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
