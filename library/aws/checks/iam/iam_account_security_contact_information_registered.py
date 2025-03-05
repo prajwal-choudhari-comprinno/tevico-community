@@ -23,46 +23,38 @@ class iam_account_security_contact_information_registered(Check):
 
         # Initialize the AWS Account client
         account_client = connection.client('account')
-
+        # security_contact = account_client.get_alternate_contact(AlternateContactType='SECURITY')
+        # print(security_contact)
         try:
             security_contact = account_client.get_alternate_contact(AlternateContactType='SECURITY')
+            
+            contact_info = security_contact['AlternateContact']
 
-            if 'AlternateContact' in security_contact and security_contact['AlternateContact']:
-                contact_info = security_contact['AlternateContact']
+            # Validate required fields
+            required_fields = ['Name', 'Title', 'EmailAddress', 'PhoneNumber']
+            missing_fields = [field for field in required_fields if not contact_info.get(field)]
 
-                # Validate required fields
-                required_fields = ['Name', 'Title', 'EmailAddress', 'PhoneNumber']
-                missing_fields = [field for field in required_fields if not contact_info.get(field)]
-
-                if not missing_fields:
-                    report.status = CheckStatus.PASSED
-                    summary = (f"Security contact is registered. "
-                               f"Name: {contact_info['Name']}, "
-                               f"Title: {contact_info['Title']}, "
-                               f"Email: {contact_info['EmailAddress']}, "
-                               f"Phone: {contact_info['PhoneNumber']}.")
-                else:
-                    report.status = CheckStatus.FAILED
-                    summary = (f"Security contact is registered but missing fields: "
-                               f"{', '.join(missing_fields)}.")
-
-                report.resource_ids_status.append(
-                    ResourceStatus(
-                        resource=GeneralResource(name='SECURITY_CONTACT'),
-                        status=report.status,
-                        summary=summary
-                    )
-                )
-
+            if not missing_fields:
+                report.status = CheckStatus.PASSED
+                summary = (f"Security contact is registered. "
+                            f"Name: {contact_info['Name']}, "
+                            f"Title: {contact_info['Title']}, "
+                            f"Email: {contact_info['EmailAddress']}, "
+                            f"Phone: {contact_info['PhoneNumber']}.")
             else:
                 report.status = CheckStatus.FAILED
-                report.resource_ids_status.append(
-                    ResourceStatus(
-                        resource=GeneralResource(name='SECURITY_CONTACT'),
-                        status=CheckStatus.FAILED,
-                        summary='No security contact is set for this AWS account.'
-                    )
+                summary = (f"Security contact is registered but missing fields: "
+                            f"{', '.join(missing_fields)}.")
+
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name='SECURITY_CONTACT'),
+                    status=report.status,
+                    summary=summary
                 )
+            )
+
+    
 
         except account_client.exceptions.ResourceNotFoundException:
             # Raised if no security contact is set
