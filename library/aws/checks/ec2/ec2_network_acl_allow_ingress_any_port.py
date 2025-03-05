@@ -92,11 +92,11 @@ class ec2_network_acl_allow_ingress_any_port(Check):
                     )
 
         except Exception as e:
-            report.status = CheckStatus.FAILED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
-                    status=CheckStatus.FAILED,
+                    status=CheckStatus.UNKNOWN,
                     summary=f"Error fetching Network ACLs: {str(e)}",
                     exception=str(e)
                 )
