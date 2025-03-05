@@ -23,8 +23,11 @@ class iam_attached_policy_admin_privileges_found(Check):
         def check_policies(entity_name, entity_type, list_policies_func):
             """Helper function to check attached policies for a user, group, or role"""
             resource = AwsResource(arn=f"arn:aws:iam::account-id:{entity_type}/{entity_name}")
-            response = list_policies_func(entity_name)
-            attached_policies = response.get('AttachedPolicies', [])
+            paginator = list_policies_func()
+
+            attached_policies = []
+            for page in paginator:
+                attached_policies.extend(page.get('AttachedPolicies', []))
 
             for policy in attached_policies:
                 if policy['PolicyName'] in ADMIN_POLICIES:
@@ -48,17 +51,22 @@ class iam_attached_policy_admin_privileges_found(Check):
 
         try:
             # Check IAM Users
-            for user in client.list_users().get('Users', []):
-                check_policies(user['UserName'], 'user', lambda name: client.list_attached_user_policies(UserName=name))
-
+            paginator = client.get_paginator('list_users')
+            for page in paginator.paginate():
+                for user in page.get('Users', []):
+                    check_policies(user['UserName'], 'user', lambda: client.get_paginator('list_attached_user_policies').paginate(UserName=user['UserName']))
 
             # Check IAM Roles
-            for role in client.list_roles().get('Roles', []):
-                check_policies(role['RoleName'], 'role', lambda name: client.list_attached_role_policies(RoleName=name))
+            paginator = client.get_paginator('list_roles')
+            for page in paginator.paginate():
+                for role in page.get('Roles', []):
+                    check_policies(role['RoleName'], 'role', lambda: client.get_paginator('list_attached_role_policies').paginate(RoleName=role['RoleName']))
                 
             # Check IAM Groups
-            for group in client.list_groups().get('Groups', []):
-                check_policies(group['GroupName'], 'group', lambda name: client.list_attached_group_policies(GroupName=name))
+            paginator = client.get_paginator('list_groups')
+            for page in paginator.paginate():
+                for group in page.get('Groups', []):
+                    check_policies(group['GroupName'], 'group', lambda: client.get_paginator('list_attached_group_policies').paginate(GroupName=group['GroupName']))
 
         except (BotoCoreError, ClientError) as e:
             report.status = CheckStatus.ERRORED
