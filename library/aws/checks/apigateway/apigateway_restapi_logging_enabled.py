@@ -46,7 +46,7 @@ class apigateway_restapi_logging_enabled(Check):
                         # If no stages are present, mark as failed
                         report.resource_ids_status.append(
                             ResourceStatus(
-                                resource=AwsResource(arn=f"arn:aws:apigateway:{region}::restapis/{api_id}"),
+                                resource=AwsResource(arn=f"arn:aws:apigateway:{region}::/restapis/{api_id}"),
                                 status=CheckStatus.FAILED,
                                 summary=f"API {api_name} has no stages.",
                             )
@@ -56,7 +56,7 @@ class apigateway_restapi_logging_enabled(Check):
 
                     for stage in stages:
                         stage_name = stage.get("stageName")
-                        resource_arn = f"arn:aws:apigateway:{region}::restapis/{api_id}"
+                        resource_arn = f"arn:aws:apigateway:{region}::/restapis/{api_id}"
 
                         # Check method settings for logging
                         method_settings = stage.get("methodSettings", {})
@@ -84,7 +84,7 @@ class apigateway_restapi_logging_enabled(Check):
                 except Exception as e:
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=AwsResource(arn=f"arn:aws:apigateway:{region}::restapis/{api_id}"),
+                            resource=AwsResource(arn=f"arn:aws:apigateway:{region}::/restapis/{api_id}"),
                             status=CheckStatus.UNKNOWN,
                             summary=f"Error fetching stages for API {api_name}: {str(e)}",
                             exception=str(e)
