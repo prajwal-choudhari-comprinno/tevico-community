@@ -45,7 +45,7 @@ class apigateway_rest_api_client_certificate_enabled(Check):
 
                     for stage in stages:
                         stage_name = stage.get("stageName", "unknown")
-                        resource_arn = f"arn:aws:apigateway:{region}::restapis/{api_id}"
+                        resource_arn = f"arn:aws:apigateway:{region}::/restapis/{api_id}"
 
                         # Check if client certificate is enabled
                         has_cert = stage.get("clientCertificateId") is not None
@@ -70,7 +70,7 @@ class apigateway_rest_api_client_certificate_enabled(Check):
                 except Exception as e:
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=AwsResource(arn=f"arn:aws:apigateway:{region}::restapis/{api_id}"),
+                            resource=AwsResource(arn=f"arn:aws:apigateway:{region}::/restapis/{api_id}"),
                             status=CheckStatus.UNKNOWN,
                             summary=f"Error fetching stages for API {api_name}.",
                             exception=str(e),
