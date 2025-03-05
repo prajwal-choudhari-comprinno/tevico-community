@@ -14,15 +14,33 @@ class iam_attached_policy_admin_privileges_found(Check):
 
     def execute(self, connection: boto3.Session) -> CheckReport:
         client = connection.client('iam')
+        sts_client = connection.client('sts')
+        
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
         report.resource_ids_status = []
 
-        ADMIN_POLICIES = {"AdministratorAccess"}  # List of known admin policies
+        # Include both AdministratorAccess and PowerUserAccess policies
+        ADMIN_POLICIES = {"AdministratorAccess", "PowerUserAccess"}
+
+        try:
+            account_id = sts_client.get_caller_identity()["Account"]  # Get AWS Account ID
+        except (BotoCoreError, ClientError) as e:
+            report.status = CheckStatus.ERRORED
+            report.report_metadata = {"error": "Failed to retrieve AWS account ID."}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name="AWS Account"),
+                    status=CheckStatus.ERRORED,
+                    summary="Failed to retrieve AWS account ID.",
+                    exception=str(e)
+                )
+            )
+            return report  # Exit early since we cannot construct ARNs
 
         def check_policies(entity_name, entity_type, list_policies_func):
             """Helper function to check attached policies for a user, group, or role"""
-            resource = AwsResource(arn=f"arn:aws:iam::account-id:{entity_type}/{entity_name}")
+            resource = AwsResource(arn=f"arn:aws:iam::{account_id}:{entity_type}/{entity_name}")
             paginator = list_policies_func()
 
             attached_policies = []
@@ -35,7 +53,7 @@ class iam_attached_policy_admin_privileges_found(Check):
                         ResourceStatus(
                             resource=resource,
                             status=CheckStatus.FAILED,
-                            summary=f"{entity_type.capitalize()} '{entity_name}' has attached admin policy '{policy['PolicyName']}'."
+                            summary=f"{entity_type.capitalize()} '{entity_name}' has attached high-privilege policy '{policy['PolicyName']}'."
                         )
                     )
                     report.status = CheckStatus.FAILED
@@ -45,7 +63,7 @@ class iam_attached_policy_admin_privileges_found(Check):
                 ResourceStatus(
                     resource=resource,
                     status=CheckStatus.PASSED,
-                    summary=f"{entity_type.capitalize()} '{entity_name}' does not have admin privileges."
+                    summary=f"{entity_type.capitalize()} '{entity_name}' does not have admin or power user privileges."
                 )
             )
 
@@ -73,7 +91,7 @@ class iam_attached_policy_admin_privileges_found(Check):
             report.report_metadata = {"error": str(e)}
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name=""),
+                    resource=GeneralResource(name="AWS IAM"),
                     status=CheckStatus.ERRORED,
                     summary="Error occurred while checking attached admin policies.",
                     exception=str(e)
