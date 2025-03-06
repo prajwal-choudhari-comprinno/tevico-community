@@ -1,72 +1,59 @@
 """
-AUTHOR: Supriyo Bhakat <supriyo.bhakat@comprinno.net>
-DATE: 2024-10-10
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-14
 """
 
-
 import boto3
-
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
+from botocore.exceptions import BotoCoreError, ClientError
+from tevico.engine.entities.report.check_model import (
+    CheckReport, CheckStatus, GeneralResource, ResourceStatus
+)
 from tevico.engine.entities.check.check import Check
 
+
 class iam_no_root_access_keys(Check):
+
     def execute(self, connection: boto3.Session) -> CheckReport:
+        client = connection.client("iam")
         report = CheckReport(name=__name__)
-        client = connection.client('iam')
+        report.resource_ids_status = []
 
         try:
-            response = client.list_access_keys()
-            has_active_root_keys = any(
-                access_key['Status'] == 'Active' for access_key in response['AccessKeyMetadata']
-            )
+            # Get Account Summary to check if root has access keys
+            summary = client.get_account_summary()
+            print(summary)
+            root_access_keys = summary.get("SummaryMap", {}).get("AccountAccessKeysPresent", 0)
 
-            if has_active_root_keys:
+            if root_access_keys > 0:
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(name='root_account'),
+                        resource=GeneralResource(name="Root Account"),
                         status=CheckStatus.FAILED,
-                        summary='',
+                        summary="Root account has active access keys. It is recommended to remove them immediately."
                     )
                 )
             else:
+                report.status = CheckStatus.PASSED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(name='root_account'),
+                        resource=GeneralResource(name="Root Account"),
                         status=CheckStatus.PASSED,
-                        summary='',
+                        summary="Root account has no active access keys."
                     )
                 )
 
-            iam_users = client.list_users()['Users']
-
-            for user in iam_users:
-                user_name = user['UserName']
-                response = client.list_access_keys(UserName=user_name)
-
-                has_active_iam_keys = any(
-                    access_key['Status'] == 'Active' for access_key in response['AccessKeyMetadata']
+        except (BotoCoreError, ClientError) as e:
+            report.status = CheckStatus.ERRORED
+            report.report_metadata = {"error": str(e)}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name="Root Account"),
+                    status=CheckStatus.ERRORED,
+                    summary="Error retrieving root access key status.",
+                    exception=str(e)
                 )
-
-                if has_active_iam_keys:
-                    report.status = CheckStatus.FAILED
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=user_name),
-                            status=CheckStatus.FAILED,
-                            summary=''
-                        )
-                    )
-                else:
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=user_name),
-                            status=CheckStatus.PASSED,
-                            summary=''
-                        )
-                    )
-
-        except Exception:
-            report.status = CheckStatus.FAILED
+            )
 
         return report
