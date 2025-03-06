@@ -54,9 +54,6 @@ function updateMetadataElements({ meta, report, status }) {
             element.textContent = value || '-';
         }
         if (element && id === "status_text") {
-            const statusValue = status ? 'Passed' : 'Failed';
-            const badgeClass = status ? 'bg-softer-success' : 'bg-softer-danger';
-            element.innerHTML = `<span class="badge ${badgeClass}">${statusValue}</span>`;
             switch (value) {
                 case 'passed':
                     element.innerHTML = `<span class="badge bg-softer-success">Passed</span>`;
