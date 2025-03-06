@@ -142,11 +142,17 @@ function createTableBody(resource_ids_status, headers) {
         headers.forEach(header => {
             const td = document.createElement('td');
             td.innerHTML = getCellContent(header.key, { resource: arn || name || '-', status, index, summary, exception: exception || '' });
+            td.style.minWidth = '40%';
+            td.style.textWrap = 'wrap';
 
             if (header.key === '#') {
                 td.className = 'row-index';
                 td.style.width = '15px';
                 td.style.minWidth = '15px';
+            }
+
+            if (header.key === 'status') {
+                td.style.width = '10%';
             }
 
             row.appendChild(td);
