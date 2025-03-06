@@ -54,9 +54,6 @@ function updateMetadataElements({ meta, report, status }) {
             element.textContent = value || '-';
         }
         if (element && id === "status_text") {
-            const statusValue = status ? 'Passed' : 'Failed';
-            const badgeClass = status ? 'bg-softer-success' : 'bg-softer-danger';
-            element.innerHTML = `<span class="badge ${badgeClass}">${statusValue}</span>`;
             switch (value) {
                 case 'passed':
                     element.innerHTML = `<span class="badge bg-softer-success">Passed</span>`;
@@ -72,6 +69,9 @@ function updateMetadataElements({ meta, report, status }) {
                     break;
                 case 'unknown':
                     element.innerHTML = `<span class="badge bg-softer-secondary">Unknown</span>`;
+                    break;
+                case 'errored':
+                    element.innerHTML = `<span class="badge bg-softer-danger">Errored</span>`;
                     break;
                 default:
                     element.textContent = '-';
@@ -136,17 +136,23 @@ function createTableBody(resource_ids_status, headers) {
     tbody.className = 'table-tbody';
 
     resource_ids_status.forEach((item, index) => {
-        const { exception = "", resource: { arn = "-" }, status, summary = "" } = item;
+        const { exception = "", resource: { arn, name }, status, summary = "" } = item;
         const row = document.createElement('tr');
 
         headers.forEach(header => {
             const td = document.createElement('td');
-            td.innerHTML = getCellContent(header.key, { resource: arn, status, index, summary, exception: exception || '' });
+            td.innerHTML = getCellContent(header.key, { resource: arn || name || '-', status, index, summary, exception: exception || '' });
+            td.style.minWidth = '40%';
+            td.style.textWrap = 'wrap';
 
             if (header.key === '#') {
                 td.className = 'row-index';
                 td.style.width = '15px';
                 td.style.minWidth = '15px';
+            }
+
+            if (header.key === 'status') {
+                td.style.width = '10%';
             }
 
             row.appendChild(td);
@@ -183,11 +189,13 @@ function formatStatus(status) {
         case 'failed':
             return `<span class="badge bg-softer-danger">Failed</span>`;
         case 'skipped':
-            return `<span class="badge bg-softer-warning">Skipped</span>`;
+            return `<span class="badge bg-soft-info">Skipped</span>`;
         case 'not_applicable':
             return `<span class="badge bg-softer-info">Not Applicable</span>`;
         case 'unknown':
-            return `<span class="badge bg-softer-secondary">unknown</span>`;
+            return `<span class="badge bg-softer-warning">Unknown</span>`;
+        case 'errored':
+            return `<span class="badge bg-soft-danger">Errored</span>`;
         default:
             return `<span>-</span>`;
     }
