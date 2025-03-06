@@ -70,6 +70,9 @@ function updateMetadataElements({ meta, report, status }) {
                 case 'unknown':
                     element.innerHTML = `<span class="badge bg-softer-secondary">Unknown</span>`;
                     break;
+                case 'errored':
+                    element.innerHTML = `<span class="badge bg-softer-danger">Errored</span>`;
+                    break;
                 default:
                     element.textContent = '-';
             }
