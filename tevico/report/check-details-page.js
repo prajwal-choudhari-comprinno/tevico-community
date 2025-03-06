@@ -183,11 +183,13 @@ function formatStatus(status) {
         case 'failed':
             return `<span class="badge bg-softer-danger">Failed</span>`;
         case 'skipped':
-            return `<span class="badge bg-softer-warning">Skipped</span>`;
+            return `<span class="badge bg-soft-info">Skipped</span>`;
         case 'not_applicable':
             return `<span class="badge bg-softer-info">Not Applicable</span>`;
         case 'unknown':
-            return `<span class="badge bg-softer-secondary">unknown</span>`;
+            return `<span class="badge bg-softer-warning">Unknown</span>`;
+        case 'errored':
+            return `<span class="badge bg-soft-danger">Errored</span>`;
         default:
             return `<span>-</span>`;
     }
