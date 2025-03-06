@@ -136,12 +136,12 @@ function createTableBody(resource_ids_status, headers) {
     tbody.className = 'table-tbody';
 
     resource_ids_status.forEach((item, index) => {
-        const { exception = "", resource: { arn = "-" }, status, summary = "" } = item;
+        const { exception = "", resource: { arn, name }, status, summary = "" } = item;
         const row = document.createElement('tr');
 
         headers.forEach(header => {
             const td = document.createElement('td');
-            td.innerHTML = getCellContent(header.key, { resource: arn, status, index, summary, exception: exception || '' });
+            td.innerHTML = getCellContent(header.key, { resource: arn || name || '-', status, index, summary, exception: exception || '' });
 
             if (header.key === '#') {
                 td.className = 'row-index';
