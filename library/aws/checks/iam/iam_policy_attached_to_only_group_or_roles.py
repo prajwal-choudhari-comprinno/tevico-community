@@ -87,5 +87,5 @@ class iam_policy_attached_to_only_group_or_roles(Check):
                 )
             )
 
-        report.status = overall_status  # Set final report status
+        #report.status = overall_status  # Set final report status
         return report
