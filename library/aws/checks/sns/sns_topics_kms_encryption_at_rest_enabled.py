@@ -7,7 +7,7 @@ DATE: 2024-11-11
 import re
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -27,13 +27,31 @@ class sns_topics_kms_encryption_at_rest_enabled(Check):
                 kms_key_id = topic_attributes.get('KmsMasterKeyId', None)
 
                 if kms_key_id:
-                    report.resource_ids_status[topic_arn] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=topic_arn),
+                            status=CheckStatus.PASSED,
+                            summary=''
+                        )
+                    )
                 else:
-                    report.resource_ids_status[topic_arn] = False
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=topic_arn),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
                     report.status = CheckStatus.FAILED
 
             except sns_client.exceptions.NotFoundException:
-                report.resource_ids_status[topic_arn] = False
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=topic_arn),
+                        status=CheckStatus.FAILED,
+                        summary=''
+                    )
+                )
                 report.status = CheckStatus.FAILED
 
         return report

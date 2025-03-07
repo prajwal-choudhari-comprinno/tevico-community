@@ -7,10 +7,13 @@ DATE: 2024-11-17
 import boto3
 import tempfile
 import os
+import json
+import requests
+from botocore.exceptions import ClientError
+from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
+from tevico.engine.entities.check.check import Check
 from detect_secrets.core.secrets_collection import SecretsCollection
 from detect_secrets.settings import transient_settings
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
-from tevico.engine.entities.check.check import Check
 
 
 class lambda_function_no_secrets_in_code(Check):
@@ -18,48 +21,70 @@ class lambda_function_no_secrets_in_code(Check):
         client = connection.client('lambda')
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
+        report.resource_ids_status = []
 
-        # List all Lambda functions
         paginator = client.get_paginator('list_functions')
-        for page in paginator.paginate():
-            functions = page.get('Functions', [])
-            for function in functions:
-                function_name = function['FunctionName']
 
-                # Get the function code configuration
-                try:
-                    response = client.get_function(FunctionName=function_name)
-                    code_url = response['Code']['Location']
+        try:
+            for page in paginator.paginate():
+                functions = page.get('Functions', [])
 
-                    # Download the function code
-                    code = self.download_code_from_url(code_url)
+                for function in functions:
+                    function_name = function['FunctionName']
+                    function_arn = function['FunctionArn']
 
-                    # Scan code for potential secrets
-                    secrets_found = self.detect_secrets_scan(data=code)
-                    if secrets_found:
-                        report.resource_ids_status[function_name] = False
+                    try:
+                        response = client.get_function(FunctionName=function_name)
+                        code_url = response['Code']['Location']
+
+                        # Download function code
+                        code = self.download_code_from_url(code_url)
+
+                        # Scan code for potential secrets
+                        secrets_found = self.detect_secrets_scan(code)
+
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=AwsResource(arn=function_arn),
+                                status=CheckStatus.FAILED if secrets_found else CheckStatus.PASSED,
+                                summary=f"Secrets {'found' if secrets_found else 'not found'} in {function_name}."
+                            )
+                        )
+
+                        if secrets_found:
+                            report.status = CheckStatus.FAILED  # If any function fails, the overall status is FAILED
+
+                    except Exception as e:
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(name=""),
+                                status=CheckStatus.FAILED,
+                                summary=f"Error scanning {function_name}: {str(e)}"
+                            )
+                        )
                         report.status = CheckStatus.FAILED
-                    else:
-                        report.resource_ids_status[function_name] = True
 
-                except client.exceptions.ResourceNotFoundException:
-                    report.resource_ids_status[function_name] = False
-                    report.status = CheckStatus.FAILED
-                except Exception as e:
-                    report.resource_ids_status[function_name] = False
-                    report.status = CheckStatus.FAILED
+        except Exception as e:
+            report.status = CheckStatus.FAILED
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Unexpected error: {str(e)}"
+                )
+            )
 
         return report
 
-    def detect_secrets_scan(self, data: str = None, file=None, excluded_secrets: list[str] = None) -> list[dict[str, str]]:
+    def detect_secrets_scan(self, data: str) -> bool:
         """
-        Scans the data or file for secrets using the detect-secrets library.
+        Scans the provided Lambda function code for secrets using detect-secrets.
+        Returns True if secrets are found, otherwise False.
         """
         try:
-            if not file:
-                temp_data_file = tempfile.NamedTemporaryFile(delete=False)
-                temp_data_file.write(bytes(data, encoding="raw_unicode_escape"))
-                temp_data_file.close()
+            with tempfile.NamedTemporaryFile(delete=False, mode="w", encoding="utf-8") as temp_data_file:
+                temp_data_file.write(data)
+                temp_file_path = temp_data_file.name
 
             secrets = SecretsCollection()
 
@@ -97,42 +122,25 @@ class lambda_function_no_secrets_in_code(Check):
                     {"path": "detect_secrets.filters.heuristic.is_potential_secret"},
                 ],
             }
-            if excluded_secrets and len(excluded_secrets) > 0:
-                settings["filters_used"].append(
-                    {
-                        "path": "detect_secrets.filters.regex.should_exclude_line",
-                        "pattern": excluded_secrets,
-                    }
-                )
+
             with transient_settings(settings):
-                if file:
-                    secrets.scan_file(file)
-                else:
-                    secrets.scan_file(temp_data_file.name)
+                secrets.scan_file(temp_file_path)
 
-            if not file:
-                os.remove(temp_data_file.name)
-
+            os.remove(temp_file_path)
             detect_secrets_output = secrets.json()
+            return bool(detect_secrets_output.get("results"))
 
-            if detect_secrets_output:
-                if file:
-                    return detect_secrets_output[file]
-                else:
-                    return detect_secrets_output[temp_data_file.name]
-            else:
-                return None
-        except Exception as e:
-            return None
+        except Exception:
+            return False
 
     def download_code_from_url(self, url: str) -> str:
         """
         Downloads the Lambda function code from the provided URL.
+        Returns the code as a string.
         """
-        import requests
-
-        response = requests.get(url)
-        if response.status_code == 200:
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
             return response.text
-        else:
-            raise Exception(f"Failed to download Lambda code. Status code: {response.status_code}")
+        except requests.RequestException as e:
+            return ""

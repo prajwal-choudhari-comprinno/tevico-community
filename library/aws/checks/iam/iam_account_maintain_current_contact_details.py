@@ -1,95 +1,104 @@
 """
-AUTHOR: RONIT CHAUHAN 
-DATE: 2024-10-17
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-15
 """
 
 import boto3
-from typing import List, Dict, Any
-from datetime import datetime
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from botocore.exceptions import ClientError
+
+from tevico.engine.entities.report.check_model import (
+    CheckReport, CheckStatus, GeneralResource, ResourceStatus
+)
 from tevico.engine.entities.check.check import Check
+
 
 class iam_account_maintain_current_contact_details(Check):
 
     def execute(self, connection: boto3.Session) -> CheckReport:
-        report = CheckReport(name=__name__)
-        # print("Starting the account contact details check...")
-
-        # List of attributes to check
-        checks_to_perform: List[str] = [
-            'full_name', 'company_name', 'address', 'phone_number', 'website_url'
-        ]
+        """Checks if the AWS account maintains up-to-date primary contact details."""
         
-        # print("Attributes to check:", checks_to_perform)
+        report = CheckReport(name=__name__)
+        report.resource_ids_status = []
 
-        # Get the current account information from AWS
-        client = connection.client('account')
+        # Initialize the AWS Account client
+        account_client = connection.client('account')
 
         try:
-            # Fetch account contact details using the AWS Account API
-            # print("Fetching account contact information...")
-            contact_info = client.get_contact_information()
-            # print("Contact information fetched successfully.")
-            # print("Raw response:", contact_info)  # Debugging line
-            
-            # Extract relevant fields from the fetched information
-            account_details = {
-                'full_name': contact_info.get('ContactInformation', {}).get('FullName'),
-                'phone_number': contact_info.get('ContactInformation', {}).get('PhoneNumber'),
-                'company_name': contact_info.get('ContactInformation', {}).get('CompanyName'),
-                'address': ', '.join([
-                    contact_info.get('ContactInformation', {}).get('AddressLine1', ''),
-                    contact_info.get('ContactInformation', {}).get('AddressLine2', ''),
-                    contact_info.get('ContactInformation', {}).get('City', ''),
-                    contact_info.get('ContactInformation', {}).get('StateOrRegion', ''),
-                    contact_info.get('ContactInformation', {}).get('PostalCode', ''),
-                    contact_info.get('ContactInformation', {}).get('CountryCode', '')
-                ]).strip(', '),  # Concatenating address lines
-                'website_url': contact_info.get('ContactInformation', {}).get('WebsiteUrl')  # Assuming there's a Website URL
-            }
+            contact_info = account_client.get_contact_information()
 
-            # print("Account details retrieved:", account_details)
+            if 'ContactInformation' in contact_info and contact_info['ContactInformation']:
+                contact_details = contact_info['ContactInformation']
 
-            # Verify if all required fields are filled
-            all_checks_passed = True
-            for check in checks_to_perform:
-                if not account_details.get(check):
-                    # print(f"Check failed: '{check}' is missing or empty.")
-                    all_checks_passed = False
-                    report.resource_ids_status[check] = False
+                # Required fields
+                required_fields = ['FullName', 'AddressLine1', 'PhoneNumber']
+                missing_fields = [field for field in required_fields if not contact_details.get(field)]
+
+                # Optional fields
+                company_name = contact_details.get('CompanyName', 'N/A')
+                website_url = contact_details.get('WebsiteUrl', 'N/A')
+
+                if not missing_fields:
+                    report.status = CheckStatus.PASSED
+                    summary = (f"Primary contact details are up-to-date. "
+                               f"Name: [{contact_details['FullName']}], "
+                               f"Address: [{contact_details['AddressLine1']}], "
+                               f"Phone: [{contact_details['PhoneNumber']}], "
+                               f"Company: [{company_name}], "
+                               f"Website: [{website_url}].")
                 else:
-                    # print(f"Check passed: '{check}' is present.")
-                    report.resource_ids_status[check] = True
+                    report.status = CheckStatus.FAILED
+                    summary = (f"Primary contact details are missing fields: {', '.join(missing_fields)}. "
+                               f"Company: {company_name}, Website: {website_url}.")
 
-            # Set the final report status based on whether all checks passed
-            if all_checks_passed:
-                report.status = CheckStatus.PASSED
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name='PRIMARY_CONTACT'),
+                        status=report.status,
+                        summary=summary
+                    )
+                )
+
             else:
                 report.status = CheckStatus.FAILED
-            
-            if report.status:
-                # print("All checks passed successfully.")
-                pass
-            else:
-                # print("Some checks failed.")
-                pass
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name='PRIMARY_CONTACT'),
+                        status=CheckStatus.FAILED,
+                        summary='Primary contact information is NOT set for this AWS account.'
+                    )
+                )
 
-        except client.exceptions.NoSuchEntityException:
-            # Handle the case where contact information cannot be found
+        except account_client.exceptions.ResourceNotFoundException:
             report.status = CheckStatus.FAILED
-            report.report_metadata = {"error": "No contact information found for this account"}
-            # print("Error: No contact information found for this account.")
-        
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name='PRIMARY_CONTACT'),
+                    status=CheckStatus.FAILED,
+                    summary='Primary contact information is NOT set for this AWS account.'
+                )
+            )
+
+        except ClientError as e:
+            report.status = CheckStatus.FAILED
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name='PRIMARY_CONTACT'),
+                    status=CheckStatus.FAILED,
+                    summary='Failed to retrieve primary contact details due to an AWS ClientError.',
+                    exception=str(e)
+                )
+            )
+
         except Exception as e:
-            # Handle any other exceptions
             report.status = CheckStatus.FAILED
-            report.report_metadata = {"error": str(e)}
-            # print(f"An unexpected error occurred: {e}")
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name='PRIMARY_CONTACT'),
+                    status=CheckStatus.FAILED,
+                    summary='An unexpected error occurred while retrieving primary contact details.',
+                    exception=str(e)
+                )
+            )
 
-        # print("Check execution completed.")
         return report
-    
-
-# The check will return **True (passed)** if all required fields (`full_name`, `company_name`, `address`, `phone_number`, and `website_url`) are present and not empty.
-  
-# The check will return **False (failed)** if any of these fields are missing or empty, or if an error occurs while fetching the contact information.

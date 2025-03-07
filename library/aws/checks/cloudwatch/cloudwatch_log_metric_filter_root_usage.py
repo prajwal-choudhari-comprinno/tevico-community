@@ -5,8 +5,10 @@ DATE: 2025-01-13
 """
 
 import boto3
+import logging
+import re
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -19,7 +21,7 @@ class cloudwatch_log_metric_filter_root_usage(Check):
         
         # Initialize report status as 'Passed' unless no filter/alarm is found
         report.status = CheckStatus.PASSED
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         # Define the custom pattern for root account usage
         pattern = r"\$\.userIdentity\.type\s*=\s*.?Root.+\$\.userIdentity\.invokedBy NOT EXISTS.+\$\.eventType\s*!=\s*.?AwsServiceEvent.?"
@@ -39,6 +41,7 @@ class cloudwatch_log_metric_filter_root_usage(Check):
             # Check for metric filters and alarms in each log group
             for log_group in log_groups:
                 log_group_name = log_group['logGroupName']
+                log_group_arn = log_group['arn']
 
                 # Check for metric filters
                 filters_response = client.describe_metric_filters(logGroupName=log_group_name)
@@ -68,27 +71,48 @@ class cloudwatch_log_metric_filter_root_usage(Check):
 
                     if alarm_found:
                         # Log group has the required filter and alarm
-                        report.resource_ids_status[
-                            f"{log_group_name} (Filter: {filter_name}, Alarm: {alarm_name})"
-                        ] = True
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=AwsResource(arn=log_group_arn),
+                                status=CheckStatus.PASSED,
+                                summary=f"{log_group_name} (Filter: {filter_name}, Alarm: {alarm_name})"
+                            )
+                        )
                     else:
                         # Filter exists but no alarm is found
                         report.status = CheckStatus.FAILED
-                        report.resource_ids_status[
-                            f"{log_group_name} (Filter: {filter_name}, No Alarm Found)"
-                        ] = False
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=AwsResource(arn=log_group_arn),
+                                status=CheckStatus.FAILED,
+                                summary=f"{log_group_name} (Filter: {filter_name}, No Alarm Found)"
+                            )
+                        )
                 else:
                     # No filter found for the log group
                     report.status = CheckStatus.FAILED
 
             # If no log groups have filters and alarms, mark the report as failed
-            if not any(report.resource_ids_status.values()):
+            if not report.resource_ids_status:
                 report.status = CheckStatus.FAILED
-                report.resource_ids_status["No log group with the required filter and alarm found"] = False
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.FAILED,
+                        summary=f"No log group with the required filter and alarm found"
+                    )
+                )
 
         except Exception as e:
             logging.error(f"Error while checking log metric filters and alarms: {e}")
             report.status = CheckStatus.FAILED
-            report.resource_ids_status = {}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error while checking log metric filters and alarms",
+                    exception=str(e)
+                )
+            )            
 
         return report

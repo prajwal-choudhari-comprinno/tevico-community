@@ -10,7 +10,7 @@ import re
 
 from requests import PreparedRequest, get
 
-from tevico.engine.entities.report.check_model import CheckReport, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -23,8 +23,8 @@ class cloudwatch_log_metric_filter_security_group_changes(Check):
         report = CheckReport(name=__name__)
         
         # Initialize report status as 'Passed' unless we find a missing filter
-        report.status = ResourceStatus.PASSED
-        report.resource_ids_status = {}
+        report.status = CheckStatus.PASSED
+        report.resource_ids_status = []
 
         # Define the custom pattern for multiple security group change events
         pattern = r"\$\.eventName\s*=\s*.?AuthorizeSecurityGroupIngress.+\$\.eventName\s*=\s*.?AuthorizeSecurityGroupEgress.+\$\.eventName\s*=\s*.?RevokeSecurityGroupIngress.+\$\.eventName\s*=\s*.?RevokeSecurityGroupEgress.+\$\.eventName\s*=\s*.?CreateSecurityGroup.+\$\.eventName\s*=\s*.?DeleteSecurityGroup.?"
@@ -49,6 +49,7 @@ class cloudwatch_log_metric_filter_security_group_changes(Check):
             # Check for Metric Filters for security group changes in each log group
             for log_group in log_groups:
                 log_group_name = log_group['logGroupName']
+                log_group_arn = log_group['arn']
                 
                 # Fetch metric filters for the log group
                 filters = client.describe_metric_filters(logGroupName=log_group_name)
@@ -63,17 +64,36 @@ class cloudwatch_log_metric_filter_security_group_changes(Check):
 
                 if matching_filters:
                     # If a matching filter is found, update the report status and details
-                    report.resource_ids_status[f"{log_group_name} has Metric Filters for Security Group Changes: [{', '.join(matching_filters)}]"] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=log_group_arn),
+                            status=CheckStatus.PASSED,
+                            summary=f"{log_group_name} has Metric Filters for Security Group Changes: [{', '.join(matching_filters)}]"
+                        )
+                    )
                     any_matching_filter_found = True
                 
             # If no matching filter was found in any log group, set the report as failed
             if not any_matching_filter_found:
-                report.status = ResourceStatus.FAILED
-                report.resource_ids_status["No matching filters found for Security Group Changes in any log group"] = False
+                report.status = CheckStatus.FAILED
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.FAILED,
+                        summary=f"No matching filters found for Security Group Changes in any log group"
+                    )
+                )
 
         except Exception as e:
             logging.error(f"Error while fetching CloudWatch logs and metric filters: {e}")
-            report.status = ResourceStatus.FAILED
-            report.resource_ids_status = {}
+            report.status = CheckStatus.FAILED
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error while fetching CloudWatch logs and metric filters",
+                    exception=str(e)
+                )
+            )
 
         return report

@@ -340,10 +340,34 @@ function createDynamicTable({ reportsData }) {
                     break;
                 case 'status':
                     td.className = `sort-${header.key}`;
-                    const statusValue = item.passed ? 'Passed' : 'Failed';
-                    const badgeClass = item.passed ? 'bg-softer-success' : 'bg-softer-danger';
-                    td.setAttribute('data-status', statusValue);
-                    td.innerHTML = `<span class="badge ${badgeClass}">${statusValue}</span>`;
+                    switch (item.status) {
+                        case 'passed':
+                            td.setAttribute('data-status', 'Passed');
+                            td.innerHTML = `<span class="badge bg-softer-success">Passed</span>`;
+                            break;
+                        case 'failed':
+                            td.setAttribute('data-status', 'Failed');
+                            td.innerHTML = `<span class="badge bg-softer-danger">Failed</span>`;
+                            break;
+                        case 'skipped':
+                            td.setAttribute('data-status', 'Skipped');
+                            td.innerHTML = `<span class="badge bg-soft-info">Skipped</span>`;
+                            break;
+                        case 'not_applicable':
+                            td.setAttribute('data-status', 'Not Applicable');
+                            td.innerHTML = `<span class="badge bg-softer-info">Not Applicable</span>`;
+                            break;
+                        case 'unknown':
+                            td.setAttribute('data-status', 'Unknown');
+                            td.innerHTML = `<span class="badge bg-softer-warning">Unknown</span>`;
+                            break;
+                        case 'errored':
+                            td.setAttribute('data-status', 'Errored');
+                            td.innerHTML = `<span class="badge bg-soft-danger">Errored</span>`;
+                            break;
+                        default:
+                            td.innerHTML = `<span>-</span>`;
+                    }
                     break;
                 case '#':
                     td.className = 'row-index';
@@ -499,7 +523,7 @@ const populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
     dropdownMenu.innerHTML = '';
 
     if (dropdownId === 'statusDropdown') {
-        const statusValues = ['Passed', 'Failed'];
+        const statusValues = ['Passed', 'Failed', 'Skipped', 'Not Applicable', 'Unknown', 'Errored'];
         statusValues.forEach(value => {
             dropdownMenu.appendChild(createDropdownItem(value, dropdownId, filterType));
         });

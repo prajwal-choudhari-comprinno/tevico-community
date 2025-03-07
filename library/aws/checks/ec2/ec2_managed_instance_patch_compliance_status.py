@@ -30,7 +30,7 @@ class ec2_managed_instance_patch_compliance_status(Check):
                         report.status = CheckStatus.FAILED
                         report.resource_ids_status.append(
                             ResourceStatus(
-                                resource=GeneralResource(resource=instance_id), # This should be AwsResource
+                                resource=GeneralResource(name=instance_id), # This should be AwsResource
                                 status=CheckStatus.FAILED,
                                 summary=f"Instance {instance_id} is not compliant"
                             )
@@ -38,7 +38,7 @@ class ec2_managed_instance_patch_compliance_status(Check):
                     else:
                         report.resource_ids_status.append(
                             ResourceStatus(
-                                resource=GeneralResource(resource=instance_id), # This should be AwsResource
+                                resource=GeneralResource(name=instance_id), # This should be AwsResource
                                 status=CheckStatus.PASSED,
                                 summary=f"Instance {instance_id} is compliant"
                             )
@@ -47,10 +47,10 @@ class ec2_managed_instance_patch_compliance_status(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=instance_id), # This should be AwsResource
+                        resource=GeneralResource(name=instance_id), # This should be AwsResource
                         status=CheckStatus.FAILED,
                         summary=f"Failed to get patch compliance status for instance {instance_id}",
-                        exception=e
+                        exception=str(e)
                     )
                 )
 

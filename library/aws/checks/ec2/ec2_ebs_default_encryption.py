@@ -5,7 +5,7 @@ DATE: 10-10-2024
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -19,7 +19,7 @@ class ec2_ebs_default_encryption(Check):
 
         # Initialize report status
         report.status = CheckStatus.PASSED  # Assume passed unless default encryption is not enabled
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         try:
             # Fetch EBS default encryption status
@@ -28,13 +28,24 @@ class ec2_ebs_default_encryption(Check):
       
             default_encryption_enabled = res.get('EbsEncryptionByDefault', False)
 
-            report.resource_ids_status['Default EBS Encryption'] = default_encryption_enabled
-
             if not default_encryption_enabled:
-                report.status = CheckStatus.FAILED  # If default encryption is not enabled, mark as failed
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.FAILED,
+                        summary=f"Default EBS Encryption Disabled"
+                    )
+                )
 
         except Exception as e:
             report.status = CheckStatus.FAILED
-            report.resource_ids_status = {}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error while checking EBS default encryption",
+                    exception=str(e)
+                )
+            )
 
         return report

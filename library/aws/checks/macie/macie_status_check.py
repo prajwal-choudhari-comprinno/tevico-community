@@ -7,7 +7,6 @@ DATE: 2024-11-16
 import boto3
 from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
 from tevico.engine.entities.check.check import Check
-from botocore.exceptions import EndpointConnectionError
 
 class macie_status_check(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
@@ -20,7 +19,7 @@ class macie_status_check(Check):
                 report.status = CheckStatus.PASSED
             else:
                 report.status = CheckStatus.FAILED
-        except (client.exceptions.AccessDeniedException, EndpointConnectionError):
+        except Exception as e:
             report.status = CheckStatus.FAILED
 
         return report

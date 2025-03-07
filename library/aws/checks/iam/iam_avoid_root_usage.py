@@ -6,7 +6,7 @@ DATE: 2024-10-10
 import boto3
 from datetime import datetime, timezone
 from dateutil import parser
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 # Define maximum number of days allowed for root access
@@ -16,6 +16,8 @@ class iam_avoid_root_usage(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
         client = connection.client('iam')
+        
+        report.resource_ids_status = []
 
         try:
             # Generate the credential report
@@ -47,14 +49,32 @@ class iam_avoid_root_usage(Check):
 
                         # Evaluate against maximum access days
                         if days_since_accessed <= maximum_access_days:
-                            report.resource_ids_status['RootAccount'] = True  # Root usage detected
+                            report.resource_ids_status.append(
+                                ResourceStatus(
+                                    resource=GeneralResource(name='RootAccount'),
+                                    status=CheckStatus.FAILED,
+                                    summary='Root account was recently accessed.'
+                                )
+                            )
                             report.status = CheckStatus.FAILED
                         else:
-                            report.resource_ids_status['RootAccount'] = False  # No root usage detected
+                            report.resource_ids_status.append(
+                                ResourceStatus(
+                                    resource=GeneralResource(name='RootAccount'),
+                                    status=CheckStatus.PASSED,
+                                    summary=f'Root account was last accessed {days_since_accessed} days ago.'
+                                )
+                            )
                             report.status = CheckStatus.PASSED
                     else:
 
-                        report.resource_ids_status['RootAccount'] = False  # No root usage detected
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(name='RootAccount'),
+                                status=CheckStatus.PASSED,
+                                summary=f'Root account was not recently accessed.'
+                            )
+                        )
                         report.status = CheckStatus.PASSED
 
                     break  # We only care about the root account, so stop after processing
@@ -62,6 +82,14 @@ class iam_avoid_root_usage(Check):
         except Exception as e:
 
             report.status = CheckStatus.FAILED
-            report.resource_ids_status['RootAccount'] = False  # Assume no usage detected in case of error
+            
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name='RootAccount'),
+                    status=CheckStatus.ERRORED,
+                    summary='Error processing iam_avoid_root_usage check',
+                    exception=str(e)
+                )
+            )
 
         return report

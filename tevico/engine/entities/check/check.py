@@ -23,6 +23,8 @@ class Check(ABC):
         check_report.framework = framework
         check_report.section = section
         
+        # print(f'id = {check_report.check_metadata.check_id}')
+        
         # Set the check status based on resource_ids_status
         if check_report.has_failed_resources():
             check_report.status = CheckStatus.FAILED

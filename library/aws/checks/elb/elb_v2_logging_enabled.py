@@ -5,7 +5,7 @@ DATE: 2025-01-24
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -15,7 +15,7 @@ class elb_v2_logging_enabled(Check):
         # Initialize the report
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
-        report.resource_ids_status = {}
+        report.resource_ids_status = []
 
         # Initialize the ELBv2 client
         client = connection.client('elbv2')
@@ -36,6 +36,7 @@ class elb_v2_logging_enabled(Check):
             # Iterate over all load balancers and check logging status
             for lb in load_balancers:
                 lb_name = lb['LoadBalancerName']  # Extract ALB name
+                lb_arn = lb['LoadBalancerArn']
 
                 # Get ELBv2 attributes to check logging
                 attributes = client.describe_load_balancer_attributes(LoadBalancerArn=lb['LoadBalancerArn'])['Attributes']
@@ -48,14 +49,33 @@ class elb_v2_logging_enabled(Check):
 
                 # Record the result for this load balancer using ALB name
                 if logging_enabled:
-                    report.resource_ids_status[f"{lb_name} has logging enabled."] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=lb_arn),
+                            status=CheckStatus.PASSED,
+                            summary=f"{lb_name} has logging enabled."
+                        )
+                    )
                 else:
-                    report.resource_ids_status[f"{lb_name} has logging not enabled."] = False
                     report.status = CheckStatus.FAILED
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=lb_arn),
+                            status=CheckStatus.FAILED,
+                            summary=f"{lb_name} has logging not enabled."
+                        )
+                    )
 
         except Exception as e:
             # Handle unexpected errors
-            report.resource_ids_status[f"Unexpected error: {str(e)}"] = False
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name=""),
+                    status=CheckStatus.FAILED,
+                    summary=f"Error fetching load balancers.",
+                    exception=str(e)
+                )
+            )
             report.status = CheckStatus.FAILED
 
         return report

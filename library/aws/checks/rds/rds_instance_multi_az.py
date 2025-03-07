@@ -1,6 +1,6 @@
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -20,9 +20,21 @@ class rds_instance_multi_az(Check):
                 
                 if not multi_az:
                     report.status = CheckStatus.FAILED
-                    report.resource_ids_status[instance_id] = False
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_id),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
                 else:
-                    report.resource_ids_status[instance_id] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_id),
+                            status=CheckStatus.PASSED,
+                            summary=''
+                        )
+                    )
                     
         except Exception as e:
             report.status = CheckStatus.FAILED

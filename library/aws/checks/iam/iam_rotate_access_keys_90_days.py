@@ -1,49 +1,105 @@
 """
-AUTHOR: Mohd Asif <mohd.asif@comprinno.net>
-DATE: 2024-10-10
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-14
 """
 
-
 import boto3
-from datetime import datetime, timedelta, timezone
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+import datetime
+
+from tevico.engine.entities.report.check_model import AwsResource, CheckException, CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
+
 class iam_rotate_access_keys_90_days(Check):
-    def execute(self, connection: boto3.Session) -> CheckReport:
+
+    def execute(self, connection: boto3.Session, maximum_key_age: int = 90) -> CheckReport:
+        client = connection.client('iam')
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
-        client = connection.client('iam')
+        report.resource_ids_status = []
+        
+        resource = GeneralResource(name='')
+        arn = ''
 
         try:
-            # Get the current date and time as an aware datetime object
-            current_time = datetime.now(timezone.utc)
-            # Define the 90-day threshold
-            ninety_days_ago = current_time - timedelta(days=90)
+            users = client.list_users().get('Users', [])
 
-            # List all IAM users
-            users = client.list_users()['Users']
+            if not users:
+                report.status = CheckStatus.SKIPPED
+                report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=""),
+                            status=CheckStatus.SKIPPED,
+                            summary=f"No IAM users found."
+                        )
+                    )
+                return report
+
             for user in users:
                 username = user['UserName']
-                # List access keys for each user
-                access_keys = client.list_access_keys(UserName=username)['AccessKeyMetadata']
-                
+                arn = user['Arn']
+                resource = AwsResource(arn=arn)
+
+                response = client.list_access_keys(UserName=username)
+                access_keys = response.get('AccessKeyMetadata', [])
+
+                if not access_keys:
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=resource,
+                            status=CheckStatus.SKIPPED,
+                            summary=f"No access keys found."
+                        )
+                    )
+                    continue
+
                 for key in access_keys:
-                    create_date = key['CreateDate']  # AWS returns this as a timezone-aware datetime
+                    key_id = key['AccessKeyId']
+                    status = key['Status']
+                    create_date = key['CreateDate']
+
+                    # Calculate key age
+                    days_since_created = (datetime.datetime.now(tz=datetime.timezone.utc) - create_date).days
                     
-                    # Compare access key creation date to the 90-day threshold
-                    if key['Status'] == 'Active' and create_date < ninety_days_ago:
-
-                        report.resource_ids_status[username] = True
-                    else:
-
-                        report.resource_ids_status[username] = False
+                    if status == 'Inactive':
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=resource,
+                                status=CheckStatus.PASSED,
+                                summary=f"Access Key {key_id} is inactive."
+                            )
+                        )
+                    elif days_since_created > maximum_key_age:
+                        # Key is outdated
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=resource,
+                                status=CheckStatus.FAILED,
+                                summary=f"Access Key {key_id} is {status} but older than {maximum_key_age} days ({days_since_created} days old)."
+                            )
+                        )
                         report.status = CheckStatus.FAILED
+                    else:
+                        # Key is compliant
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=resource,
+                                status=CheckStatus.PASSED,
+                                summary=f"Access Key {key_id} is {status} and compliant ({days_since_created} days old)."
+                            )
+                        )
 
-            # Check if any users have access keys older than 90 days
         except Exception as e:
-
-            report.status = CheckStatus.FAILED
-        
+            report.status = CheckStatus.ERRORED
+            report.report_metadata = {"error": str(e)}
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name=arn),
+                    status=CheckStatus.ERRORED,
+                    summary=f"Error occurred while checking access key rotation",
+                    exception=str(e)
+                )
+            )
+            
         return report
-
