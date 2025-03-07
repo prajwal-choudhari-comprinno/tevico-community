@@ -68,10 +68,10 @@ function updateMetadataElements({ meta, report, status }) {
                     element.innerHTML = `<span class="badge bg-softer-info">Not Applicable</span>`;
                     break;
                 case 'unknown':
-                    element.innerHTML = `<span class="badge bg-softer-secondary">Unknown</span>`;
+                    element.innerHTML = `<span class="badge bg-softer-warning">Unknown</span>`;
                     break;
                 case 'errored':
-                    element.innerHTML = `<span class="badge bg-softer-danger">Errored</span>`;
+                    element.innerHTML = `<span class="badge bg-soft-danger">Errored</span>`;
                     break;
                 default:
                     element.textContent = '-';
