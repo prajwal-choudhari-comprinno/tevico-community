@@ -1,3 +1,9 @@
+"""
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-15
+"""
+
 import boto3
 from datetime import datetime, timezone
 from dateutil import parser
@@ -21,15 +27,23 @@ class iam_avoid_root_usage(Check):
             response = client.get_credential_report()["Content"]
             decoded_report = response.decode("utf-8").splitlines()
 
-            # Parse CSV-like credential report
-            for row in decoded_report[1:]:
+            # Extract header dynamically
+            headers = decoded_report[0].split(',')
+            rows = decoded_report[1:]
+
+            # Get column indexes safely
+            password_last_used_idx = headers.index("password_last_used") if "password_last_used" in headers else None
+            access_key_1_last_used_idx = headers.index("access_key_1_last_used") if "access_key_1_last_used" in headers else None
+            access_key_2_last_used_idx = headers.index("access_key_2_last_used") if "access_key_2_last_used" in headers else None
+
+            for row in rows:
                 user_info = row.split(',')
 
                 if user_info[0] == "<root_account>":
-                    # Extract last access timestamps
-                    password_last_used = user_info[4]
-                    access_key_1_last_used = user_info[6]
-                    access_key_2_last_used = user_info[9]
+                    # Get values safely using indexes
+                    password_last_used = user_info[password_last_used_idx].strip() if password_last_used_idx is not None else "no_information"
+                    access_key_1_last_used = user_info[access_key_1_last_used_idx].strip() if access_key_1_last_used_idx is not None else "no_information"
+                    access_key_2_last_used = user_info[access_key_2_last_used_idx].strip() if access_key_2_last_used_idx is not None else "no_information"
 
                     last_accessed = None
                     timestamp_values = [password_last_used, access_key_1_last_used, access_key_2_last_used]
