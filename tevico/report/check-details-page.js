@@ -62,7 +62,7 @@ function updateMetadataElements({ meta, report, status }) {
                     element.innerHTML = `<span class="badge bg-softer-danger">Failed</span>`;
                     break;
                 case 'skipped':
-                    element.innerHTML = `<span class="badge bg-softer-warning">Skipped</span>`;
+                    element.innerHTML = `<span class="badge bg-soft-info">Skipped</span>`;
                     break;
                 case 'not_applicable':
                     element.innerHTML = `<span class="badge bg-softer-info">Not Applicable</span>`;
