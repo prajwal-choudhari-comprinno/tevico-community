@@ -10,30 +10,29 @@ import datetime
 from tevico.engine.entities.report.check_model import AwsResource, CheckException, CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
+# Set maximum key age to 90 days (fixed)
+MAX_KEY_AGE = 90
 
 class iam_rotate_access_keys_90_days(Check):
 
-    def execute(self, connection: boto3.Session, maximum_key_age: int = 90) -> CheckReport:
+    def execute(self, connection: boto3.Session) -> CheckReport:
         client = connection.client('iam')
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
         report.resource_ids_status = []
         
-        resource = GeneralResource(name='')
-        arn = ''
-
         try:
             users = client.list_users().get('Users', [])
 
             if not users:
                 report.status = CheckStatus.SKIPPED
                 report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=""),
-                            status=CheckStatus.SKIPPED,
-                            summary=f"No IAM users found."
-                        )
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.SKIPPED,
+                        summary="No IAM users found."
                     )
+                )
                 return report
 
             for user in users:
@@ -41,15 +40,18 @@ class iam_rotate_access_keys_90_days(Check):
                 arn = user['Arn']
                 resource = AwsResource(arn=arn)
 
-                response = client.list_access_keys(UserName=username)
-                access_keys = response.get('AccessKeyMetadata', [])
+                paginator = client.get_paginator('list_access_keys')
+                access_keys = []
+                
+                for page in paginator.paginate(UserName=username):
+                    access_keys.extend(page.get('AccessKeyMetadata', []))
 
                 if not access_keys:
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=resource,
                             status=CheckStatus.SKIPPED,
-                            summary=f"No access keys found."
+                            summary=f"No access keys found for user {username}."
                         )
                     )
                     continue
@@ -57,10 +59,13 @@ class iam_rotate_access_keys_90_days(Check):
                 for key in access_keys:
                     key_id = key['AccessKeyId']
                     status = key['Status']
-                    create_date = key['CreateDate']
+                    create_date = key.get('CreateDate')
 
-                    # Calculate key age
-                    days_since_created = (datetime.datetime.now(tz=datetime.timezone.utc) - create_date).days
+                    if not create_date:
+                        continue  # Skip if CreateDate is missing
+
+                    # Ensure time zone consistency
+                    days_since_created = (datetime.datetime.now(datetime.timezone.utc) - create_date).days
                     
                     if status == 'Inactive':
                         report.resource_ids_status.append(
@@ -70,13 +75,13 @@ class iam_rotate_access_keys_90_days(Check):
                                 summary=f"Access Key {key_id} is inactive."
                             )
                         )
-                    elif days_since_created > maximum_key_age:
+                    elif days_since_created > MAX_KEY_AGE:
                         # Key is outdated
                         report.resource_ids_status.append(
                             ResourceStatus(
                                 resource=resource,
                                 status=CheckStatus.FAILED,
-                                summary=f"Access Key {key_id} is {status} but older than {maximum_key_age} days ({days_since_created} days old)."
+                                summary=f"Access Key {key_id} is {status} but older than {MAX_KEY_AGE} days ({days_since_created} days old)."
                             )
                         )
                         report.status = CheckStatus.FAILED
@@ -91,13 +96,13 @@ class iam_rotate_access_keys_90_days(Check):
                         )
 
         except Exception as e:
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN  # Set status to UNKNOWN on API failure
             report.report_metadata = {"error": str(e)}
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name=arn),
-                    status=CheckStatus.ERRORED,
-                    summary=f"Error occurred while checking access key rotation",
+                    resource=GeneralResource(name="IAM"),
+                    status=CheckStatus.UNKNOWN,
+                    summary="Error occurred while checking access key rotation.",
                     exception=str(e)
                 )
             )
