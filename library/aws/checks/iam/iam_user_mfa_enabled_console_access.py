@@ -5,7 +5,7 @@ DATE: 2025-01-14
 """
 
 import boto3
-
+import botocore.exceptions
 from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, ResourceStatus, GeneralResource
 from tevico.engine.entities.check.check import Check
 
@@ -24,12 +24,12 @@ class iam_user_mfa_enabled_console_access(Check):
             if not users:
                 report.status = CheckStatus.SKIPPED
                 report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=""),
-                            status=CheckStatus.SKIPPED,
-                            summary=f"No IAM users found."
-                        )
+                    ResourceStatus(
+                        resource=GeneralResource(name="AWS IAM"),
+                        status=CheckStatus.SKIPPED,
+                        summary="No IAM users found."
                     )
+                )
                 return report
 
             for user in users:
@@ -37,34 +37,43 @@ class iam_user_mfa_enabled_console_access(Check):
                 arn = user['Arn']
                 resource = AwsResource(arn=arn)
 
-                # Check if the user has console access
+                # Step 1: Check if the user has console access
                 try:
                     client.get_login_profile(UserName=username)
-                    
                 except client.exceptions.NoSuchEntityException:
-                    # User doesn't have console access, skip MFA check
+                    # User does not have console access, skip MFA check
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=resource,
                             status=CheckStatus.SKIPPED,
-                            summary="User {username} does not have console access."
+                            summary=f"User {username} does not have console access."
                         )
                     )
                     continue
-                except Exception as e:
-                    report.report_metadata = {"error": str(e)}
+                except botocore.exceptions.ClientError as e:
+                    if "ThrottlingException" in str(e):
+                        report.status = CheckStatus.UNKNOWN
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=resource,
+                                status=CheckStatus.UNKNOWN,
+                                summary="AWS API throttling occurred while checking console access.",
+                                exception=str(e)
+                            )
+                        )
+                        continue  # Skip user and continue processing others
+                    report.status = CheckStatus.ERRORED
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=resource,
                             status=CheckStatus.ERRORED,
-                            summary=f"Error checking console access.",
+                            summary="Error checking console access.",
                             exception=str(e)
                         )
                     )
-                    report.status = CheckStatus.ERRORED
                     continue
 
-                # Check if MFA is enabled for console-access users
+                # Step 2: Check if MFA is enabled for console-access users
                 try:
                     mfa_response = client.list_mfa_devices(UserName=username)
                     mfa_devices = mfa_response.get('MFADevices', [])
@@ -74,39 +83,48 @@ class iam_user_mfa_enabled_console_access(Check):
                             ResourceStatus(
                                 resource=resource,
                                 status=CheckStatus.PASSED,
-                                summary="Console access is enabled with MFA configured."
+                                summary=f"Console access is enabled for {username} with MFA configured."
                             )
                         )
                     else:
+                        report.status = CheckStatus.FAILED
                         report.resource_ids_status.append(
                             ResourceStatus(
                                 resource=resource,
                                 status=CheckStatus.FAILED,
-                                summary="Console access is enabled, but MFA is not configured."
+                                summary=f"Console access is enabled for {username}, but MFA is not configured."
                             )
                         )
-                        report.status = CheckStatus.FAILED
 
-                except Exception as e:
-                    report.report_metadata = {"error": str(e)}
+                except botocore.exceptions.ClientError as e:
+                    if "ThrottlingException" in str(e):
+                        report.status = CheckStatus.UNKNOWN
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=resource,
+                                status=CheckStatus.UNKNOWN,
+                                summary="AWS API throttling occurred while checking MFA configuration.",
+                                exception=str(e)
+                            )
+                        )
+                        continue
+                    report.status = CheckStatus.ERRORED
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=resource,
                             status=CheckStatus.ERRORED,
-                            summary=f"Error checking MFA configuration.",
+                            summary="Error checking MFA configuration.",
                             exception=str(e)
                         )
                     )
-                    report.status = CheckStatus.ERRORED
 
         except Exception as e:
-            report.status = CheckStatus.ERRORED
-            report.report_metadata = {"error": str(e)}
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=resource,
-                    status=CheckStatus.ERRORED,
-                    summary=f"Error while checking MFA for IAM users",
+                    resource=GeneralResource(name="AWS IAM"),
+                    status=CheckStatus.UNKNOWN,
+                    summary="Error while checking MFA for IAM users.",
                     exception=str(e)
                 )
             )
