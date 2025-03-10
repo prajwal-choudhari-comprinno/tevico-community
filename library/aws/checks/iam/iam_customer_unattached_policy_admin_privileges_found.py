@@ -18,19 +18,19 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
         sts_client = connection.client('sts')
 
         report = CheckReport(name=__name__)
-        report.status = CheckStatus.PASSED
+        report.status = CheckStatus.PASSED  # Default to PASSED
         report.resource_ids_status = []
         found_admin_policy = False  # Flag to track if any admin policies were found
 
         try:
             account_id = sts_client.get_caller_identity()["Account"]  # Get AWS Account ID
         except (BotoCoreError, ClientError) as e:
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN  # Set to UNKNOWN instead of ERRORED
             report.report_metadata = {"error": "Failed to retrieve AWS account ID."}
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="AWS Account"),
-                    status=CheckStatus.ERRORED,
+                    status=CheckStatus.UNKNOWN,
                     summary="Failed to retrieve AWS account ID.",
                     exception=str(e)
                 )
@@ -46,7 +46,8 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
                 if (
                     statement.get('Effect') == 'Allow' and
                     statement.get('Action') == '*' and
-                    statement.get('Resource') == '*'
+                    statement.get('Resource') == '*' and
+                    not statement.get('Condition')  # Ensure no conditions restrict access
                 ):
                     return True
             return False
@@ -58,13 +59,9 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
                     policy_arn = policy['Arn']
                     policy_name = policy['PolicyName']
 
-                    # Skip AWS-managed policies
-                    if policy_arn.startswith("arn:aws:iam::aws:policy/"):
-                        continue
-
                     # Check if the policy is attached
                     entities = client.list_entities_for_policy(PolicyArn=policy_arn)
-                    if entities['PolicyGroups'] or entities['PolicyUsers'] or entities['PolicyRoles']:
+                    if any(entities.get(key) for key in ['PolicyGroups', 'PolicyUsers', 'PolicyRoles']):
                         continue  # Policy is attached, skip it
 
                     # Fetch the policy document
@@ -88,34 +85,34 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
                         report.resource_ids_status.append(
                             ResourceStatus(
                                 resource=AwsResource(arn=policy_arn),
-                                status=CheckStatus.ERRORED,
+                                status=CheckStatus.UNKNOWN,  # API failure should be UNKNOWN
                                 summary=f"Failed to retrieve policy details for '{policy_name}'.",
                                 exception=str(e)
                             )
                         )
-                        report.status = CheckStatus.ERRORED
+                        report.status = CheckStatus.UNKNOWN  # Mark overall check as UNKNOWN if any policy retrieval fails
 
         except (BotoCoreError, ClientError) as e:
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN  # Set to UNKNOWN for API failure
             report.report_metadata = {"error": str(e)}
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="AWS IAM"),
-                    status=CheckStatus.ERRORED,
+                    status=CheckStatus.UNKNOWN,
                     summary="Error occurred while checking unattached customer-managed admin policies.",
                     exception=str(e)
                 )
             )
             return report  # Exit early due to API failure
 
-        # If no admin policies were found, mark as SKIPPED
+        # If no admin policies were found, mark as PASSED
         if not found_admin_policy:
-            report.status = CheckStatus.SKIPPED
+            report.status = CheckStatus.PASSED
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="AWS IAM"),
-                    status=CheckStatus.SKIPPED,
-                    summary="No unattached customer-managed policies with admin privileges found."
+                    status=CheckStatus.PASSED,
+                    summary="No unattached customer-managed policies grant admin privileges."
                 )
             )
 
