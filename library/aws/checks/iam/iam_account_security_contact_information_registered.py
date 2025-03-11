@@ -5,7 +5,7 @@ DATE: 2025-01-14
 """
 
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, BotoCoreError
 
 from tevico.engine.entities.report.check_model import (
     CheckReport, CheckStatus, GeneralResource, ResourceStatus
@@ -23,14 +23,16 @@ class iam_account_security_contact_information_registered(Check):
 
         # Initialize the AWS Account client
         account_client = connection.client('account')
-        # security_contact = account_client.get_alternate_contact(AlternateContactType='SECURITY')
-        # print(security_contact)
+
         try:
             security_contact = account_client.get_alternate_contact(AlternateContactType='SECURITY')
-            
-            contact_info = security_contact['AlternateContact']
 
-            # Validate required fields
+            if 'AlternateContact' not in security_contact:
+                raise account_client.exceptions.ResourceNotFoundException(
+                    {"Error": {"Code": "ResourceNotFoundException"}}, "get_alternate_contact"
+                )
+
+            contact_info = security_contact['AlternateContact']
             required_fields = ['Name', 'Title', 'EmailAddress', 'PhoneNumber']
             missing_fields = [field for field in required_fields if not contact_info.get(field)]
 
@@ -54,8 +56,6 @@ class iam_account_security_contact_information_registered(Check):
                 )
             )
 
-    
-
         except account_client.exceptions.ResourceNotFoundException:
             # Raised if no security contact is set
             report.status = CheckStatus.FAILED
@@ -67,26 +67,32 @@ class iam_account_security_contact_information_registered(Check):
                 )
             )
 
-        except ClientError as e:
-            report.status = CheckStatus.FAILED
+        except (ClientError, BotoCoreError) as e:
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name='SECURITY_CONTACT'),
-                    status=CheckStatus.FAILED,
-                    summary='Failed to retrieve security contact due to AWS ClientError.',
+                    status=CheckStatus.UNKNOWN,
+                    summary='Failed to retrieve security contact due to an AWS API error.',
                     exception=str(e)
                 )
             )
 
         except Exception as e:
-            report.status = CheckStatus.FAILED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name='SECURITY_CONTACT'),
-                    status=CheckStatus.FAILED,
+                    status=CheckStatus.UNKNOWN,
                     summary='An unexpected error occurred while retrieving security contact information.',
                     exception=str(e)
                 )
             )
 
         return report
+
+
+
+
+
+
