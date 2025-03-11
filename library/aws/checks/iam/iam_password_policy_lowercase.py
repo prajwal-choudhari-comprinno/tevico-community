@@ -44,26 +44,26 @@ class iam_password_policy_lowercase(Check):
                     ResourceStatus(
                         resource=GeneralResource(name="Password Policy"),
                         status=CheckStatus.FAILED,
-                        summary="The IAM password policy does not enforces the use of at least one lowercase letter."
+                        summary="The IAM password policy does not enforce the use of at least one lowercase letter."
                     )
                 )
 
         except client.exceptions.NoSuchEntityException:
-            report.status = CheckStatus.SKIPPED
+            report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="Password Policy"),
-                    status=CheckStatus.SKIPPED,
-                    summary="Default IAM password policy is currently configured."
+                    status=CheckStatus.FAILED,
+                    summary="No custom IAM password policy is configured. It is recommended to define one."
                 )
             )
 
         except (BotoCoreError, ClientError) as e:
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="Password Policy"),
-                    status=CheckStatus.ERRORED,
+                    status=CheckStatus.UNKNOWN,
                     summary="An error occurred while retrieving the IAM password policy.",
                     exception=str(e)
                 )
