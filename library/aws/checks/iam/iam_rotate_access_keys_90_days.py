@@ -40,10 +40,10 @@ class iam_rotate_access_keys_90_days(Check):
                 return report  # Exit early if we can't get users
 
             if not users:
-                report.status = CheckStatus.SKIPPED
+                report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(name=""),
+                        resource=GeneralResource(name="IAM"),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No IAM users found."
                     )
