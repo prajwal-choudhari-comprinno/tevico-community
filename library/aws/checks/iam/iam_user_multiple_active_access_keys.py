@@ -1,9 +1,3 @@
-"""
-AUTHOR: Sheikh Aafaq Rashid
-EMAIL: aafaq.rashid@comprinno.net
-DATE: 2025-01-14
-"""
-
 import boto3
 import botocore.exceptions
 from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, ResourceStatus, GeneralResource
@@ -20,22 +14,11 @@ class iam_user_multiple_active_access_keys(Check):
 
         try:
             client = connection.client("iam")
-
-            # Step 1: Retrieve IAM Users
-            try:
-                users = client.list_users().get("Users", [])
-            except botocore.exceptions.ClientError as e:
-                report.status = CheckStatus.UNKNOWN
-                report.report_metadata = {"error": str(e)}
-                report.resource_ids_status.append(
-                    ResourceStatus(
-                        resource=resource,
-                        status=CheckStatus.UNKNOWN,
-                        summary="AWS API error occurred while listing IAM users.",
-                        exception=str(e)
-                    )
-                )
-                return report  # Stop execution if API call fails
+            paginator = client.get_paginator("list_users")
+            
+            users = []
+            for page in paginator.paginate():
+                users.extend(page.get("Users", []))
 
             # Handle no IAM users scenario
             if not users:
@@ -56,12 +39,14 @@ class iam_user_multiple_active_access_keys(Check):
                 arn = user["Arn"]  # IAM User ARN for proper resource tracking
                 resource = AwsResource(arn=arn)
 
-                # Step 2: Retrieve Access Keys for the User
+                # Step 2: Retrieve Access Keys for the User with Pagination
                 try:
-                    access_keys = client.list_access_keys(UserName=username)["AccessKeyMetadata"]
+                    key_paginator = client.get_paginator("list_access_keys")
+                    access_keys = []
+                    for key_page in key_paginator.paginate(UserName=username):
+                        access_keys.extend(key_page.get("AccessKeyMetadata", []))
                 except botocore.exceptions.ClientError as e:
                     report.status = CheckStatus.UNKNOWN
-                    report.report_metadata = {"error": str(e)}
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=resource,
