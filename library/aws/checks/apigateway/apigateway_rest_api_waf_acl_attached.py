@@ -1,86 +1,104 @@
 """
 AUTHOR: deepak-puri-comprinno
 EMAIL: deepak.puri@comprinno.net
-DATE: 2024-11-13
+DATE: 2025-01-13
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
+
 class apigateway_rest_api_waf_acl_attached(Check):
+
     def execute(self, connection: boto3.Session) -> CheckReport:
+        # Initialize the API Gateway client and check report
+        apigw_client = connection.client("apigateway")
+        region = connection.region_name
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
         report.resource_ids_status = []
-        
+
         try:
-            apigw_client = connection.client('apigateway')
-            wafv2_client = connection.client('wafv2')
-            region = connection.client('sts').get_caller_identity().get('Arn').split(':')[3]
-            
-            paginator = apigw_client.get_paginator('get_rest_apis')
-            for page in paginator.paginate():
-                for api in page.get('items', []):
-                    api_id = api['id']
-                    api_name = api.get('name', 'Unnamed API')
-                    api_arn = f"arn:aws:apigateway:{region}::/restapis/{api_id}"
-                    resource = AwsResource(arn=api_arn)
-                    
-                    try:
-                        stages_response = apigw_client.get_stages(restApiId=api_id)
-                        api_has_waf = False
-                        
-                        for stage in stages_response.get('item', []):
-                            stage_name = stage['stageName']
-                            stage_arn = f"{api_arn}/stages/{stage_name}"
-                            
-                            try:
-                                wafv2_response = wafv2_client.get_web_acl_for_resource(ResourceArn=stage_arn)
-                                if wafv2_response.get('WebACL'):
-                                    api_has_waf = True
-                                    break
-                            except wafv2_client.exceptions.WAFNonexistentItemException:
-                                continue
-                            except wafv2_client.exceptions.WAFInvalidParameterException:
-                                continue
-                            except Exception as e:
-                                report.resource_ids_status.append(
-                                    ResourceStatus(
-                                        resource=resource,
-                                        status=CheckStatus.FAILED,
-                                        summary=f"Error checking WAF for stage {stage_name}: {str(e)}"
-                                    )
-                                )
-                                report.status = CheckStatus.FAILED
-                                
+            # Fetch all REST APIs with pagination
+            apis = []
+            next_token = None
+
+            while True:
+                response = apigw_client.get_rest_apis(position=next_token) if next_token else apigw_client.get_rest_apis()
+                apis.extend(response.get("items", []))
+                next_token = response.get("position")
+
+                if not next_token:
+                    break
+
+            # Check each API and its stages for WAF ACL attachment
+            for api in apis:
+                api_id = api["id"]
+                api_name = api.get("name", "Unnamed API")
+                api_arn = f"arn:aws:apigateway:{region}::/restapis/{api_id}"
+
+                try:
+                    # Fetch stages for the current API
+                    stages = apigw_client.get_stages(restApiId=api_id).get("item", [])
+
+                    if not stages:
                         report.resource_ids_status.append(
                             ResourceStatus(
-                                resource=resource,
-                                status=CheckStatus.PASSED if api_has_waf else CheckStatus.FAILED,
-                                summary=f"WAF ACL {'attached' if api_has_waf else 'not attached'} to API {api_name}."
-                            )
-                        )
-                        if not api_has_waf:
-                            report.status = CheckStatus.FAILED
-                    except Exception as e:
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                resource=resource,
+                                resource=AwsResource(arn=api_arn),
                                 status=CheckStatus.FAILED,
-                                summary=f"Error retrieving stages for API {api_name}: {str(e)}"
+                                summary=f"API {api_name} has no stages."
                             )
                         )
                         report.status = CheckStatus.FAILED
-                        
+                        continue
+
+                    api_has_waf = False
+
+                    for stage in stages:
+                        stage_name = stage["stageName"]
+                        resource_arn = api_arn
+                        web_acl_id = stage.get("webAclArn")
+
+                        if web_acl_id:
+                            api_has_waf = True
+                            summary = f"WAF is attached to stage {stage_name} of API {api_name}."
+                            status = CheckStatus.PASSED
+                        else:
+                            summary = f"No WAF attached to stage {stage_name} of API {api_name}."
+                            status = CheckStatus.FAILED
+                            report.status = CheckStatus.FAILED
+
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=AwsResource(arn=resource_arn),
+                                status=status,
+                                summary=summary,
+                            )
+                        )
+
+                    if not api_has_waf:
+                        report.status = CheckStatus.FAILED
+
+                except Exception as e:
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=api_arn),
+                            status=CheckStatus.UNKNOWN,
+                            summary=f"Error fetching stages for API {api_name}.",
+                            exception=str(e),
+                        )
+                    )
+                    report.status = CheckStatus.UNKNOWN
+
         except Exception as e:
-            report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
-                    status=CheckStatus.FAILED,
-                    summary=f"Error accessing API Gateway REST APIs: {str(e)}"
+                    status=CheckStatus.UNKNOWN,
+                    summary="API Gateway listing error occurred.",
+                    exception=str(e),
                 )
             )
-        
+            report.status = CheckStatus.UNKNOWN
         return report
