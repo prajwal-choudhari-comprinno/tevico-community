@@ -1,3 +1,10 @@
+"""
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-15
+"""
+
+from time import time
 import boto3
 import botocore.exceptions
 from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
@@ -10,10 +17,15 @@ class iam_root_mfa_enabled(Check):
         report.resource_ids_status = []
 
         try:
-            # Step 1: Generate the credential report
-            response = client.generate_credential_report()
-            if response["State"] != "COMPLETE":
-                raise ValueError("Credential report generation is not complete.")
+            # Wait for the credential report to be ready
+            for _ in range(10):  # Retry up to 10 times (approx 30 seconds max wait time)
+                response = client.generate_credential_report()
+                state = response["State"]
+                if state == "COMPLETE":
+                    break
+                time.sleep(3)  # Wait before retrying
+            else:
+                raise Exception("Credential report generation timed out.")
 
             # Step 2: Retrieve the credential report
             response = client.get_credential_report()["Content"]
