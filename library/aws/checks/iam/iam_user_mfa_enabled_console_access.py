@@ -19,14 +19,17 @@ class iam_user_mfa_enabled_console_access(Check):
         report.resource_ids_status = []
 
         try:
-            users = client.list_users().get('Users', [])
+            paginator = client.get_paginator('list_users')
+            users = []
+            for page in paginator.paginate():
+                users.extend(page.get('Users', []))
 
             if not users:
-                report.status = CheckStatus.SKIPPED
+                report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
                         resource=GeneralResource(name="AWS IAM"),
-                        status=CheckStatus.SKIPPED,
+                        status=CheckStatus.NOT_APPLICABLE,
                         summary="No IAM users found."
                     )
                 )
@@ -45,7 +48,7 @@ class iam_user_mfa_enabled_console_access(Check):
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=resource,
-                            status=CheckStatus.SKIPPED,
+                            status=CheckStatus.NOT_APPLICABLE,
                             summary=f"User {username} does not have console access."
                         )
                     )
@@ -62,11 +65,11 @@ class iam_user_mfa_enabled_console_access(Check):
                             )
                         )
                         continue  # Skip user and continue processing others
-                    report.status = CheckStatus.ERRORED
+                    report.status = CheckStatus.UNKNOWN
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=resource,
-                            status=CheckStatus.ERRORED,
+                            status=CheckStatus.UNKNOWN,
                             summary="Error checking console access.",
                             exception=str(e)
                         )
@@ -75,8 +78,10 @@ class iam_user_mfa_enabled_console_access(Check):
 
                 # Step 2: Check if MFA is enabled for console-access users
                 try:
-                    mfa_response = client.list_mfa_devices(UserName=username)
-                    mfa_devices = mfa_response.get('MFADevices', [])
+                    paginator = client.get_paginator('list_mfa_devices')
+                    mfa_devices = []
+                    for page in paginator.paginate(UserName=username):
+                        mfa_devices.extend(page.get('MFADevices', []))
 
                     if mfa_devices:
                         report.resource_ids_status.append(
@@ -108,11 +113,11 @@ class iam_user_mfa_enabled_console_access(Check):
                             )
                         )
                         continue
-                    report.status = CheckStatus.ERRORED
+                    report.status = CheckStatus.UNKNOWN
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=resource,
-                            status=CheckStatus.ERRORED,
+                            status=CheckStatus.UNKNOWN,
                             summary="Error checking MFA configuration.",
                             exception=str(e)
                         )
