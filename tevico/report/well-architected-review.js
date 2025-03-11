@@ -37,13 +37,16 @@ const renderDOM = ({ warDetails, reportsData }) => {
                 statusHtml = `<span class="badge bg-softer-danger">Failed</span>`;
                 break;
             case 'skipped':
-                statusHtml = `<span class="badge bg-softer-warning">Skipped</span>`;
+                statusHtml = `<span class="badge bg-soft-info">Skipped</span>`;
                 break;
             case 'not_applicable':
                 statusHtml = `<span class="badge bg-softer-info">Not Applicable</span>`;
                 break;
             case 'unknown':
-                statusHtml = `<span class="badge bg-softer-secondary">Unknown</span>`;
+                statusHtml = `<span class="badge bg-softer-warning">Unknown</span>`;
+                break;
+            case 'errored':
+                statusHtml = `<span class="badge bg-soft-danger">Errored</span>`;
                 break;
             default:
                 statusHtml = '-';
