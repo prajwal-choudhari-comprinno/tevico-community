@@ -42,10 +42,10 @@ class apigateway_rest_api_client_certificate_enabled(Check):
                     # Fetch stages for the current API
                     stages_response = client.get_stages(restApiId=api_id)
                     stages = stages_response.get("item", [])
+                    resource_arn = f"arn:aws:apigateway:{region}::/restapis/{api_id}"
 
                     for stage in stages:
                         stage_name = stage.get("stageName", "unknown")
-                        resource_arn = f"arn:aws:apigateway:{region}::/restapis/{api_id}"
 
                         # Check if client certificate is enabled
                         has_cert = stage.get("clientCertificateId") is not None
