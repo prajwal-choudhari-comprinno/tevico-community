@@ -25,7 +25,7 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
         try:
             account_id = sts_client.get_caller_identity()["Account"]  # Get AWS Account ID
         except (BotoCoreError, ClientError) as e:
-            report.status = CheckStatus.UNKNOWN  # Set to UNKNOWN instead of ERRORED
+            report.status = CheckStatus.UNKNOWN
             report.report_metadata = {"error": "Failed to retrieve AWS account ID."}
             report.resource_ids_status.append(
                 ResourceStatus(
@@ -35,7 +35,7 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
                     exception=str(e)
                 )
             )
-            return report  # Exit early since we cannot construct ARNs
+            return report  # Exit early if we can't get the account ID
 
         def has_admin_privileges(policy_document):
             """Check if the policy document grants admin privileges."""
@@ -59,10 +59,16 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
                     policy_arn = policy['Arn']
                     policy_name = policy['PolicyName']
 
-                    # Check if the policy is attached
-                    entities = client.list_entities_for_policy(PolicyArn=policy_arn)
-                    if any(entities.get(key) for key in ['PolicyGroups', 'PolicyUsers', 'PolicyRoles']):
-                        continue  # Policy is attached, skip it
+                    # Check if the policy is attached using pagination
+                    entities_paginator = client.get_paginator('list_entities_for_policy')
+                    attached = False
+                    for entities_page in entities_paginator.paginate(PolicyArn=policy_arn):
+                        if any(entities_page.get(key) for key in ['PolicyGroups', 'PolicyUsers', 'PolicyRoles']):
+                            attached = True
+                            break  # Exit loop early if policy is attached
+
+                    if attached:
+                        continue  # Skip attached policies
 
                     # Fetch the policy document
                     try:
@@ -70,7 +76,7 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
                         policy_document = client.get_policy_version(PolicyArn=policy_arn, VersionId=policy_version)['PolicyVersion']['Document']
 
                         if has_admin_privileges(policy_document):
-                            found_admin_policy = True  # Set flag to true
+                            found_admin_policy = True
                             resource = AwsResource(arn=policy_arn)
                             report.resource_ids_status.append(
                                 ResourceStatus(
@@ -85,7 +91,7 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
                         report.resource_ids_status.append(
                             ResourceStatus(
                                 resource=AwsResource(arn=policy_arn),
-                                status=CheckStatus.UNKNOWN,  # API failure should be UNKNOWN
+                                status=CheckStatus.UNKNOWN,
                                 summary=f"Failed to retrieve policy details for '{policy_name}'.",
                                 exception=str(e)
                             )
@@ -93,7 +99,7 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
                         report.status = CheckStatus.UNKNOWN  # Mark overall check as UNKNOWN if any policy retrieval fails
 
         except (BotoCoreError, ClientError) as e:
-            report.status = CheckStatus.UNKNOWN  # Set to UNKNOWN for API failure
+            report.status = CheckStatus.UNKNOWN  # Handle API failure
             report.report_metadata = {"error": str(e)}
             report.resource_ids_status.append(
                 ResourceStatus(
