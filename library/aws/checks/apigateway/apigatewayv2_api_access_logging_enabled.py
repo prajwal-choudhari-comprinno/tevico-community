@@ -46,11 +46,11 @@ class apigatewayv2_api_access_logging_enabled(Check):
                         report.resource_ids_status.append(
                             ResourceStatus(
                                 resource=AwsResource(arn=api_arn),
-                                status=CheckStatus.FAILED,
+                                status=CheckStatus.NOT_APPLICABLE,
                                 summary=f"API {api_name} has no stages.",
                             )
                         )
-                        report.status = CheckStatus.FAILED
+                        report.status = CheckStatus.NOT_APPLICABLE
                         continue
 
                     for stage in stages:
