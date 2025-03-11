@@ -23,12 +23,12 @@ class iam_customer_attached_policy_admin_privileges_found(Check):
         try:
             account_id = sts_client.get_caller_identity()["Account"]  # Get AWS Account ID
         except (BotoCoreError, ClientError) as e:
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN
             report.report_metadata = {"error": "Failed to retrieve AWS account ID."}
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="AWS Account"),
-                    status=CheckStatus.ERRORED,
+                    status=CheckStatus.UNKNOWN,
                     summary="Failed to retrieve AWS account ID.",
                     exception=str(e)
                 )
@@ -70,7 +70,6 @@ class iam_customer_attached_policy_admin_privileges_found(Check):
                 try:
                     policy_version = client.get_policy(PolicyArn=policy_arn)['Policy']['DefaultVersionId']
                     policy_document = client.get_policy_version(PolicyArn=policy_arn, VersionId=policy_version)['PolicyVersion']['Document']
-                    print(policy_arn)
 
                     if has_admin_privileges(policy_document):
                         report.resource_ids_status.append(
@@ -87,12 +86,12 @@ class iam_customer_attached_policy_admin_privileges_found(Check):
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=resource,
-                            status=CheckStatus.ERRORED,
+                            status=CheckStatus.UNKNOWN,
                             summary=f"Failed to retrieve policy details for '{policy_name}'.",
                             exception=str(e)
                         )
                     )
-                    report.status = CheckStatus.ERRORED
+                    report.status = CheckStatus.UNKNOWN
 
             # If no admin privileges were found, mark it as passed
             report.resource_ids_status.append(
@@ -103,33 +102,53 @@ class iam_customer_attached_policy_admin_privileges_found(Check):
                 )
             )
 
+        # Check IAM Users
         try:
-            # Check IAM Users
             paginator = client.get_paginator('list_users')
             for page in paginator.paginate():
                 for user in page.get('Users', []):
                     check_policies(user['UserName'], 'user', lambda: client.get_paginator('list_attached_user_policies').paginate(UserName=user['UserName']))
+        except (BotoCoreError, ClientError) as e:
+            report.status = CheckStatus.UNKNOWN
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name="AWS IAM Users"),
+                    status=CheckStatus.UNKNOWN,
+                    summary="Error occurred while checking customer-managed admin policies for IAM users.",
+                    exception=str(e)
+                )
+            )
 
-            # Check IAM Roles
+        # Check IAM Roles
+        try:
             paginator = client.get_paginator('list_roles')
             for page in paginator.paginate():
                 for role in page.get('Roles', []):
                     check_policies(role['RoleName'], 'role', lambda: client.get_paginator('list_attached_role_policies').paginate(RoleName=role['RoleName']))
-
-            # # Check IAM Groups
-            # paginator = client.get_paginator('list_groups')
-            # for page in paginator.paginate():
-            #     for group in page.get('Groups', []):
-            #         check_policies(group['GroupName'], 'group', lambda: client.get_paginator('list_attached_group_policies').paginate(GroupName=group['GroupName']))
-
         except (BotoCoreError, ClientError) as e:
-            report.status = CheckStatus.ERRORED
-            report.report_metadata = {"error": str(e)}
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name="AWS IAM"),
-                    status=CheckStatus.ERRORED,
-                    summary="Error occurred while checking customer-managed admin policies.",
+                    resource=GeneralResource(name="AWS IAM Roles"),
+                    status=CheckStatus.UNKNOWN,
+                    summary="Error occurred while checking customer-managed admin policies for IAM roles.",
+                    exception=str(e)
+                )
+            )
+
+        # Check IAM Groups
+        try:
+            paginator = client.get_paginator('list_groups')
+            for page in paginator.paginate():
+                for group in page.get('Groups', []):
+                    check_policies(group['GroupName'], 'group', lambda: client.get_paginator('list_attached_group_policies').paginate(GroupName=group['GroupName']))
+        except (BotoCoreError, ClientError) as e:
+            report.status = CheckStatus.UNKNOWN
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name="AWS IAM Groups"),
+                    status=CheckStatus.UNKNOWN,
+                    summary="Error occurred while checking customer-managed admin policies for IAM groups.",
                     exception=str(e)
                 )
             )
