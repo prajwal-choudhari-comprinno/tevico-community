@@ -1,9 +1,4 @@
-"""
-AUTHOR: Sheikh Aafaq Rashid
-EMAIL: aafaq.rashid@comprinno.net
-DATE: 2025-01-15
-"""
-
+import time
 import boto3
 from datetime import datetime, timezone
 from dateutil import parser
@@ -22,8 +17,17 @@ class iam_avoid_root_usage(Check):
         report.resource_ids_status = []
 
         try:
-            # Generate and retrieve the credential report
-            client.generate_credential_report()
+            # Wait for the credential report to be ready
+            for _ in range(5):  # Retry up to 10 times (approx 30 seconds max wait time)
+                response = client.generate_credential_report()
+                state = response["State"]
+                if state == "COMPLETE":
+                    break
+                time.sleep(3)  # Wait before retrying
+            else:
+                raise Exception("Credential report generation timed out.")
+
+            # Retrieve the credential report
             response = client.get_credential_report()["Content"]
             decoded_report = response.decode("utf-8").splitlines()
 
@@ -81,7 +85,7 @@ class iam_avoid_root_usage(Check):
                     )
                     break  # Stop processing after the root account
 
-        except (BotoCoreError, ClientError) as e:
+        except (BotoCoreError, ClientError, Exception) as e:
             # Set status to UNKNOWN when API call fails
             report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
