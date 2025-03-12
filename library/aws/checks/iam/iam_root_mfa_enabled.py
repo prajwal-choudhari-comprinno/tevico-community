@@ -18,10 +18,10 @@ class iam_root_mfa_enabled(Check):
 
         try:
             # Wait for the credential report to be ready
-            for _ in range(1):  # Retry up to 10 times (approx 30 seconds max wait time)
+            for _ in range(10):  # Retry up to 10 times (approx 30 seconds max wait time)
                 response = client.generate_credential_report()
                 state = response["State"]
-                if state == "T":
+                if state == "COMPLETE":
                     break
                 time.sleep(3)  # Wait before retrying
             else:
