@@ -33,30 +33,34 @@ class apigateway_restapi_logging_enabled(Check):
                 if not next_token:
                     break
 
+            #Flag to track if any API Gateway has stages
+            has_stages = False
+
             # Check each API and its stages for logging configuration
             for api in apis:
                 api_id = api.get("id")
                 api_name = api.get("name", "Unnamed API")
+                resource_arn = f"arn:aws:apigateway:{region}::/restapis/{api_id}"
 
                 try:
                     # Fetch stages for the current API
                     stages = client.get_stages(restApiId=api_id).get("item", [])
-
+                    
                     if not stages:
                         # If no stages are present, mark as failed
                         report.resource_ids_status.append(
                             ResourceStatus(
-                                resource=AwsResource(arn=f"arn:aws:apigateway:{region}::/restapis/{api_id}"),
-                                status=CheckStatus.FAILED,
+                                resource=AwsResource(arn=resource_arn),
+                                status=CheckStatus.SKIPPED,
                                 summary=f"API {api_name} has no stages.",
                             )
                         )
-                        report.status = CheckStatus.FAILED
                         continue
+
+                    has_stages = True
 
                     for stage in stages:
                         stage_name = stage.get("stageName")
-                        resource_arn = f"arn:aws:apigateway:{region}::/restapis/{api_id}"
 
                         # Check method settings for logging
                         method_settings = stage.get("methodSettings", {})
@@ -84,13 +88,17 @@ class apigateway_restapi_logging_enabled(Check):
                 except Exception as e:
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=AwsResource(arn=f"arn:aws:apigateway:{region}::/restapis/{api_id}"),
+                            resource=AwsResource(arn=resource_arn),
                             status=CheckStatus.UNKNOWN,
                             summary=f"Error fetching stages for API {api_name}: {str(e)}",
                             exception=str(e)
                         )
                     )
                     report.status = CheckStatus.UNKNOWN
+            
+            # If no stages are present in any API, mark as skipped
+            if not has_stages:
+                report.status = CheckStatus.SKIPPED
 
         except Exception as e:
             # Handle API listing errors
