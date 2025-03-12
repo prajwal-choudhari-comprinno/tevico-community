@@ -28,11 +28,11 @@ class iam_user_multiple_active_access_keys(Check):
 
             # Handle no IAM users scenario
             if not users:
-                report.status = CheckStatus.SKIPPED
+                report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
                         resource=resource,
-                        status=CheckStatus.SKIPPED,
+                        status=CheckStatus.NOT_APPLICABLE,
                         summary="No IAM users found."
                     )
                 )
