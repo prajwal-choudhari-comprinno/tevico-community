@@ -53,7 +53,7 @@ class cloudwatch_log_metric_filter_root_usage(Check):
                     if re.search(pattern, metric_filter.get('filterPattern', '')):
                         filter_found = True
                         filter_name = metric_filter['filterName']
-                        print(filter_name)
+                        # print(filter_name)
                         break
 
                 # If a filter is found, check for associated alarms
