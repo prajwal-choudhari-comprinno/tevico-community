@@ -43,7 +43,14 @@ class iam_policy_attached_to_only_group_or_roles(Check):
                                 user_arn = user_info["User"]["Arn"]
                                 user_arns.append(user_arn)
                             except (BotoCoreError, ClientError) as e:
-                                user_arns.append(f"Error fetching ARN for {user['UserName']}: {str(e)}")
+                                report.resource_ids_status.append(
+                                    ResourceStatus(
+                                        resource=GeneralResource(name=f"IAMUser:{user['UserName']}"),
+                                        status=CheckStatus.UNKNOWN,
+                                        summary=f"Failed to retrieve ARN for user {user['UserName']}.",
+                                        exception=str(e)
+                                    )
+                                )
 
                         summary = (
                             f"IAM policy '{policy_name}' is attached directly to users. "
