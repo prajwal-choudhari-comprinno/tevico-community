@@ -51,7 +51,7 @@ class iam_password_policy_reuse_24(Check):
                 ResourceStatus(
                     resource=GeneralResource(name="password_policy"),
                     status=CheckStatus.FAILED,
-                    summary="No password policy found. It is recommended to enforce password reuse prevention for at least the last 1-24 passwords."
+                    summary="No password policy found. It is recommended to enforce password reuse prevention for the last 1 to 24 passwords."
                 )
             )
 
