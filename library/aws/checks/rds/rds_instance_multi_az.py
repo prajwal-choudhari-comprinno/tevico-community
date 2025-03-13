@@ -1,43 +1,92 @@
-import boto3
+"""
+AUTHOR: deepak-puri-comprinno
+EMAIL: deepak.puri@comprinno.net
+DATE: 2025-03-13
+"""
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
+import boto3
+from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
 class rds_instance_multi_az(Check):
-
     def execute(self, connection: boto3.Session) -> CheckReport:
+        # Initialize report
         report = CheckReport(name=__name__)
-        
+        report.status = CheckStatus.PASSED  # Default to PASSED
+        report.resource_ids_status = []
+
         try:
-            client = connection.client('rds')
-            response = client.describe_db_instances()
-            report.status = CheckStatus.PASSED 
-            
-            for instance in response['DBInstances']:
-                instance_id = instance['DBInstanceIdentifier']
-                multi_az = instance['MultiAZ']
-                
-                if not multi_az:
-                    report.status = CheckStatus.FAILED
+            client = connection.client("rds")
+
+            # Pagination for listing all RDS instances
+            instances = []
+            next_token = None
+
+            while True:
+                response = client.describe_db_instances(Marker=next_token) if next_token else client.describe_db_instances()
+                instances.extend(response.get("DBInstances", []))
+                next_token = response.get("Marker")
+
+                if not next_token:
+                    break
+
+            # If no RDS instances exist, mark as NOT_APPLICABLE
+            if not instances:
+                report.status = CheckStatus.NOT_APPLICABLE
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No RDS instances found.",
+                    )
+                )
+                return report
+
+            # Check each RDS instance for Multi-AZ deployment
+            for instance in instances:
+                instance_name = instance["DBInstanceIdentifier"]
+                instance_arn = instance["DBInstanceArn"]
+                try:
+                    multi_az = instance.get("MultiAZ", False)
+
+                    if multi_az:
+                        summary = f"Multi-AZ is enabled for RDS instance {instance_name}."
+                        status = CheckStatus.PASSED
+                    else:
+                        summary = f"Multi-AZ is NOT enabled for RDS instance {instance_name}."
+                        status = CheckStatus.FAILED
+                        report.status = CheckStatus.FAILED  # At least one instance is non-compliant
+
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=GeneralResource(name=instance_id),
-                            status=CheckStatus.FAILED,
-                            summary=''
+                            resource=AwsResource(arn=instance_arn),
+                            status=status,
+                            summary=summary,
                         )
                     )
-                else:
+                except Exception as e:
+                    # Handle AWS client errors
+                    report.status = CheckStatus.UNKNOWN
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=GeneralResource(name=instance_id),
-                            status=CheckStatus.PASSED,
-                            summary=''
+                            resource=AwsResource(arn=instance_arn),
+                            status=CheckStatus.UNKNOWN,
+                            summary=f"Error retrieving Multi-AZ status for {instance_name}: {str(e)}",
+                            exception=str(e)
                         )
                     )
-                    
+
         except Exception as e:
-            report.status = CheckStatus.FAILED
-            return report
+            # Handle AWS client errors
+            report.status = CheckStatus.UNKNOWN
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name=""),
+                    status=CheckStatus.UNKNOWN,
+                    summary="Error retrieving RDS instance details.",
+                    exception=str(e),
+                )
+            )
 
         return report
