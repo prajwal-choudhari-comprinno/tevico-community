@@ -19,6 +19,13 @@ To run the project simply copy the following code and run it in your CloudShell.
 curl https://raw.githubusercontent.com/comprinnotech/tevico-community/refs/heads/main/run.sh?ts=$(date +%s) | bash
 ```
 
+To run a specific branch from your terminal you can pass in the branch name as the parameter. Here the following code uses
+`dev` branch as an example. You can simply replace the `dev` branch with the name of the branch that you would like to run.
+
+```bash
+curl https://raw.githubusercontent.com/comprinnotech/tevico-community/refs/heads/main/run.sh?ts=$(date +%s) | bash -s dev
+```
+
 ## CLI Examples
 
 Following CLI params will help you to get an idea about the project and its capabilitites.
