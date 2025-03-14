@@ -46,18 +46,18 @@ class iam_password_policy_minimum_length_14(Check):
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name='password_policy'),
-                    status=CheckStatus.NOT_APPLICABLE,
+                    status=CheckStatus.FAILED,
                     summary="No password policy found. It is recommended to enforce a strong password policy."
                 )
             )
 
         except (BotoCoreError, ClientError) as e:
             # Handle AWS API errors
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name='password_policy'),
-                    status=CheckStatus.ERRORED,
+                    status=CheckStatus.UNKNOWN,
                     summary="Error occurred while fetching the password policy.",
                     exception=str(e)
                 )
@@ -65,11 +65,11 @@ class iam_password_policy_minimum_length_14(Check):
 
         except Exception as e:
             # Catch-all for unexpected errors
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name='password_policy'),
-                    status=CheckStatus.ERRORED,
+                    status=CheckStatus.UNKNOWN,
                     summary="Unhandled exception occurred while checking the password policy.",
                     exception=str(e)
                 )
