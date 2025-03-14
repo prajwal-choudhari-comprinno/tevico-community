@@ -144,11 +144,13 @@ class CheckReport(BaseModel):
     report_metadata: Optional[Dict[str, Any]] = None
     created_on: datetime = datetime.now()
 
-    def has_failed_resources(self):
-        # return any(resource.status == CheckStatus.FAILED for resource in self.resource_ids_status)
-        for resource in self.resource_ids_status:
-            # print(resource)
-            if resource.status == CheckStatus.FAILED:
-                return True
-        return False
+    def set_report_status(self):
+        failed_statuses = {CheckStatus.FAILED, CheckStatus.ERRORED, CheckStatus.UNKNOWN}
+
+        if len(self.resource_ids_status) < 1 and self.status == None:
+            self.status = CheckStatus.UNKNOWN
+        elif any(resource.status in failed_statuses for resource in self.resource_ids_status):
+            self.status = CheckStatus.FAILED
+        else:
+            self.status = CheckStatus.PASSED
 

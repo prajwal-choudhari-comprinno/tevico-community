@@ -26,8 +26,8 @@ class Check(ABC):
         # print(f'id = {check_report.check_metadata.check_id}')
         
         # Set the check status based on resource_ids_status
-        if check_report.has_failed_resources():
-            check_report.status = CheckStatus.FAILED
+        check_report.set_report_status()
+
         return check_report
     
     @abstractmethod
