@@ -1,4 +1,5 @@
 import boto3
+import time
 from botocore.exceptions import BotoCoreError, ClientError
 from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
@@ -11,12 +12,25 @@ class iam_no_root_access_keys(Check):
         report.resource_ids_status = []
 
         try:
-            # Generate and retrieve the credential report
-            client.generate_credential_report()
+            
+            # Wait for the credential report to be ready
+            for _ in range(10):  # Retry up to 10 times (approx 30 seconds max wait time)
+                response = client.generate_credential_report()
+                state = response["State"]
+                if state == "COMPLETE":
+                    break
+                time.sleep(3)  # Wait before retrying
+            else:
+                raise ValueError("Credential report generation timed out.")
+
+            # Step 2: Retrieve the credential report
             response = client.get_credential_report()["Content"]
             decoded_report = response.decode("utf-8").splitlines()
 
-            # Extract header and find indexes dynamically
+            # Step 3: Validate and parse the credential report
+            if len(decoded_report) < 2:
+                raise ValueError("Credential report is empty or invalid.")
+
             headers = decoded_report[0].split(',')
             rows = decoded_report[1:]
 
