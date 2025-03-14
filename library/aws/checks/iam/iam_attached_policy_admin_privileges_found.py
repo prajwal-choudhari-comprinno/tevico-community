@@ -109,21 +109,21 @@ class iam_attached_policy_admin_privileges_found(Check):
                             )
                         )
             
-            # # Check IAM Groups
-            # paginator = client.get_paginator('list_groups')
-            # for page in paginator.paginate():
-            #     for group in page.get('Groups', []):
-            #         try:
-            #             check_policies(group['GroupName'], 'group', lambda: client.get_paginator('list_attached_group_policies').paginate(GroupName=group['GroupName']))
-            #         except (BotoCoreError, ClientError) as e:
-            #             report.resource_ids_status.append(
-            #                 ResourceStatus(
-            #                     resource=GeneralResource(name=f"Group: {group['GroupName']}"),
-            #                     status=CheckStatus.UNKNOWN,
-            #                     summary=f"Error checking policies for group '{group['GroupName']}'.",
-            #                     exception=str(e)
-            #                 )
-            #             )
+            # Check IAM Groups
+            paginator = client.get_paginator('list_groups')
+            for page in paginator.paginate():
+                for group in page.get('Groups', []):
+                    try:
+                        check_policies(group['GroupName'], 'group', lambda: client.get_paginator('list_attached_group_policies').paginate(GroupName=group['GroupName']))
+                    except (BotoCoreError, ClientError) as e:
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(name=f"Group: {group['GroupName']}"),
+                                status=CheckStatus.UNKNOWN,
+                                summary=f"Error checking policies for group '{group['GroupName']}'.",
+                                exception=str(e)
+                            )
+                        )
 
         except (BotoCoreError, ClientError) as e:
             report.status = CheckStatus.UNKNOWN
