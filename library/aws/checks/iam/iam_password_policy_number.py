@@ -58,7 +58,7 @@ class iam_password_policy_number(Check):
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="password_policy"),
-                    status=CheckStatus.ERRORED,
+                    status=CheckStatus.UNKNOWN,
                     summary="Error occurred while fetching the password policy.",
                     exception=str(e)
                 )
@@ -70,7 +70,7 @@ class iam_password_policy_number(Check):
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="password_policy"),
-                    status=CheckStatus.ERRORED,
+                    status=CheckStatus.UNKNOWN,
                     summary="Unhandled exception occurred while checking the password policy.",
                     exception=str(e)
                 )
