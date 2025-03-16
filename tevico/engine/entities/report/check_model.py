@@ -105,30 +105,6 @@ class CheckStatus(Enum):
     # If the check errored out
     ERRORED = 'errored'
 
-import boto3
-
-def check_sso_assignments(identity_store_id, account_id, permission_set_arn):
-    sso_admin = boto3.client('sso-admin')
-    
-    try:
-        # List account assignments
-        response = sso_admin.list_account_assignments(
-            InstanceArn='arn:aws:sso:::instance/ssoins-xxxxx',  # Replace with your instance ARN
-            AccountId=account_id,
-            PermissionSetArn=permission_set_arn
-        )
-        
-        assignments = response['AccountAssignments']
-        for assignment in assignments:
-            principal_id = assignment['PrincipalId']
-            principal_type = assignment['PrincipalType']
-            
-            print(f"Principal ID: {principal_id}")
-            print(f"Principal Type: {principal_type}")
-            
-    except Exception as e:
-        print(f"Error checking SSO assignments: {str(e)}")
-
 class ResourceStatus(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     # The resource key represents the resource ID
