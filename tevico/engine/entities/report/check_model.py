@@ -61,7 +61,7 @@ class AwsResource(BaseModel):
     def validate_arn(cls, v):
         # Split the ARN by colon and check if it has 6 or 7 parts
         parts = v.split(':')
-        if not(5 < len(parts) <= 7) or (parts[0] != 'arn'):
+        if len(parts) not in (6, 7) or parts[0] != 'arn':
             # If the ARN is not in the correct format, raise an error
             raise ValueError(f"Invalid ARN format: {v}")
         return v
@@ -100,7 +100,7 @@ class CheckStatus(Enum):
     NOT_APPLICABLE = 'not_applicable'
     
     # If the AWS API call fails for unknown reasons
-    UNKNOWN = 'unknown'    ›
+    UNKNOWN = 'unknown'
     
     # If the check errored out
     ERRORED = 'errored'
