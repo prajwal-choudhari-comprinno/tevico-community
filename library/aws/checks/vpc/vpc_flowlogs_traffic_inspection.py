@@ -6,7 +6,7 @@ DATE: 2024-11-13
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -28,9 +28,21 @@ class vpc_flowlogs_traffic_inspection(Check):
                     break
             
             if flow_logs_enabled:
-                report.resource_ids_status[vpc_id] = True
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=vpc_id),
+                        status=CheckStatus.PASSED,
+                        summary=''
+                    )
+                )
             else:
                 report.status = CheckStatus.FAILED
-                report.resource_ids_status[vpc_id] = False
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=vpc_id),
+                        status=CheckStatus.FAILED,
+                        summary=''
+                    )
+                )
         
         return report

@@ -71,7 +71,7 @@ class dynamodb_tables_pitr_enabled(Check):
                                 resource=resource,
                                 status=CheckStatus.FAILED,
                                 summary=f"Error checking PITR for {table_name}: {str(e)}",
-                                exception=e
+                                exception=str(e)
                             )
                         )
                         report.status = CheckStatus.FAILED
@@ -80,7 +80,7 @@ class dynamodb_tables_pitr_enabled(Check):
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No DynamoDB tables found in the account."
                     )
@@ -90,10 +90,10 @@ class dynamodb_tables_pitr_enabled(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error listing DynamoDB tables: {str(e)}",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

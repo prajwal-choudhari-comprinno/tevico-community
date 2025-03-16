@@ -77,7 +77,7 @@ class dynamodb_tables_kms_cmk_encryption_enabled(Check):
                                 resource=resource,
                                 status=CheckStatus.FAILED,
                                 summary=f"Error processing DynamoDB table {table_name}: {str(e)}",
-                                exception=e
+                                exception=str(e)
                             )
                         )
                         report.status = CheckStatus.FAILED
@@ -86,7 +86,7 @@ class dynamodb_tables_kms_cmk_encryption_enabled(Check):
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No DynamoDB tables found."
                     )
@@ -95,10 +95,10 @@ class dynamodb_tables_kms_cmk_encryption_enabled(Check):
         except Exception as e:
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"DynamoDB table listing error occurred: {str(e)}",
-                    exception=e
+                    exception=str(e)
                 )
             )
             report.status = CheckStatus.FAILED

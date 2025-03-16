@@ -61,7 +61,7 @@ class cloudtrail_multiregion_enabled(Check):
                     resource=AwsResource(arn=trail_arn),
                     status=CheckStatus.PASSED,
                     summary=f"Error while retrieving CloudTrail trails.",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

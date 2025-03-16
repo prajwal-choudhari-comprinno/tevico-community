@@ -6,7 +6,7 @@ DATE: 2024-11-11
 
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -24,12 +24,30 @@ class securityhub_enabled(Check):
             
             try:
                 hub_status = regional_securityhub_client.describe_hub()
-                report.resource_ids_status[region_name] = True
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=region_name),
+                        status=CheckStatus.PASSED,
+                        summary=''
+                    )
+                )
             except regional_securityhub_client.exceptions.ResourceNotFoundException:
-                report.resource_ids_status[region_name] = False
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=region_name),
+                        status=CheckStatus.FAILED,
+                        summary=''
+                    )
+                )
                 report.status = CheckStatus.FAILED
             except regional_securityhub_client.exceptions.InvalidAccessException:
-                report.resource_ids_status[region_name] = False
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=region_name),
+                        status=CheckStatus.FAILED,
+                        summary=''
+                    )
+                )
                 report.status = CheckStatus.FAILED
 
         return report

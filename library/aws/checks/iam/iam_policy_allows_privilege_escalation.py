@@ -4,7 +4,7 @@ DATE: 2024-10-10
 """
 
 import boto3
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 class iam_policy_allows_privilege_escalation(Check):
@@ -61,13 +61,25 @@ class iam_policy_allows_privilege_escalation(Check):
                 inline_policies = client.list_user_policies(UserName=username)['PolicyNames']
                 
                 if check_policies(attached_policies):
-                    report.resource_ids_status[username] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=username),
+                            status=CheckStatus.PASSED,
+                            summary=''
+                        )
+                    )
                 else:
-                    report.resource_ids_status[username] = False
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=username),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
 
             # Set overall check status
             # report.status = not any(report.resource_ids_status.values())
-            if not resource_ids_status:
+            if not report.resource_ids_status:
                 report.status = CheckStatus.FAILED
             else:
                 report.status = CheckStatus.PASSED

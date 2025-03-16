@@ -30,7 +30,7 @@ class route53_domains_privacy_protection_enabled(Check):
             if domain_detail.get('AdminPrivacy'):
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.PASSED,
                         summary=f"{domain_name} has AdminPrivacy set to True"
                     )
@@ -38,7 +38,7 @@ class route53_domains_privacy_protection_enabled(Check):
             else:
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.FAILED,
                         summary=f"{domain_name} has AdminPrivacy set to False"
                     )

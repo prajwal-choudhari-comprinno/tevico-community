@@ -75,7 +75,7 @@ class lambda_function_not_publicly_accessible(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Unexpected error: {str(e)}"
                 )

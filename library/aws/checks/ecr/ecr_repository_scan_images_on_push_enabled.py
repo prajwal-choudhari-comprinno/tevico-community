@@ -58,7 +58,7 @@ class ecr_repository_scan_images_on_push_enabled(Check):
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No ECR repositories found."
                     )
@@ -67,7 +67,7 @@ class ecr_repository_scan_images_on_push_enabled(Check):
         except Exception as e:
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error fetching ECR repositories: {str(e)}"
                 )

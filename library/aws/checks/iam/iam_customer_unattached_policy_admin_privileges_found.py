@@ -84,7 +84,7 @@ class iam_customer_unattached_policy_admin_privileges_found(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error accessing IAM: {str(e)}"
                 )

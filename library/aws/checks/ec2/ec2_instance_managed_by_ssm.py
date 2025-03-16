@@ -39,7 +39,7 @@ class ec2_instance_managed_by_ssm(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No instances available."
                     )
@@ -48,7 +48,13 @@ class ec2_instance_managed_by_ssm(Check):
 
         for instance in instances:
             instance_id = instance['InstanceId']
-            report.resource_ids_status[instance_id] = True  # Assume managed initially
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name=instance_id),
+                    status=CheckStatus.PASSED,
+                    summary=''
+                )
+            )
 
             # Check if the instance is managed by SSM
             try:
@@ -60,7 +66,7 @@ class ec2_instance_managed_by_ssm(Check):
                     report.status = CheckStatus.FAILED
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=GeneralResource(resource=""),
+                            resource=GeneralResource(name=""),
                             status=CheckStatus.FAILED,
                             summary=f"EC2 instance {instance_id} is not managed by SSM."
                         )
@@ -69,7 +75,7 @@ class ec2_instance_managed_by_ssm(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.FAILED,
                         summary=f"Error in getting instance details."
                     )

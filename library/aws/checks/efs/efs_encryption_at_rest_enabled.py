@@ -39,7 +39,7 @@ class efs_encryption_at_rest_enabled(Check):
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No EFS file systems found."
                     )
@@ -72,7 +72,7 @@ class efs_encryption_at_rest_enabled(Check):
         except Exception as e:
             # Handle unexpected errors
             error_status = ResourceStatus(
-                resource=GeneralResource(resource=""),
+                resource=GeneralResource(name=""),
                 status=CheckStatus.FAILED,
                 summary=f"Unexpected error: {str(e)}"
             )

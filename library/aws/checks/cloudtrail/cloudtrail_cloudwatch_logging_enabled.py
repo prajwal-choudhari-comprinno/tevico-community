@@ -57,10 +57,10 @@ class cloudtrail_cloudwatch_logging_enabled(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error while retrieving CloudTrail trails",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

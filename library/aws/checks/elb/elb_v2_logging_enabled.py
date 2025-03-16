@@ -70,10 +70,10 @@ class elb_v2_logging_enabled(Check):
             # Handle unexpected errors
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error fetching load balancers.",
-                    exception=e
+                    exception=str(e)
                 )
             )
             report.status = CheckStatus.FAILED

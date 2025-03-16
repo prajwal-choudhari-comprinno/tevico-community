@@ -76,7 +76,7 @@ class cloudwatch_log_metric_filter_unauthorized_api_calls(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.FAILED,
                         summary=f"No matching filters found for Unauthorized API Calls in any log group"
                     )
@@ -87,10 +87,10 @@ class cloudwatch_log_metric_filter_unauthorized_api_calls(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error while fetching CloudWatch logs and metric filters",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

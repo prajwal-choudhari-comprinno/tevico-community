@@ -27,7 +27,7 @@ class ecr_repository_scan_vulnerabilities_in_latest_image(Check):
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No ECR repositories found."
                     )
@@ -126,7 +126,7 @@ class ecr_repository_scan_vulnerabilities_in_latest_image(Check):
         except Exception as e:
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error listing ECR repositories: {str(e)}"
                 )

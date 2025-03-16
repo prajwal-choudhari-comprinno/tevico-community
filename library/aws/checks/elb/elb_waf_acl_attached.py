@@ -65,7 +65,7 @@ class elb_waf_acl_attached(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource="ELB"),
+                    resource=GeneralResource(name="ELB"),
                     status=CheckStatus.FAILED,
                     summary=f"Error retrieving load balancers: {str(e)}"
                 )

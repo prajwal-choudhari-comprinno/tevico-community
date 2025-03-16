@@ -26,7 +26,7 @@ class cloudtrail_enabled(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.SKIPPED,
                         summary=f"No CloudTrail found"
                     )
@@ -68,7 +68,7 @@ class cloudtrail_enabled(Check):
                     resource=AwsResource(arn=trail_arn),
                     status=CheckStatus.FAILED,
                     summary=f"Error while checking CloudTrail status",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

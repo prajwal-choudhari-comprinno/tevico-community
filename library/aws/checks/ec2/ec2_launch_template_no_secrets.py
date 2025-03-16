@@ -27,10 +27,10 @@ class ec2_launch_template_no_secrets(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error in fetching Launch Templates.",
-                    exception=e
+                    exception=str(e)
                 )
             )
             return report
@@ -39,7 +39,7 @@ class ec2_launch_template_no_secrets(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.NOT_APPLICABLE,
                     summary=f"No Launch Templates"
                 )
@@ -60,10 +60,10 @@ class ec2_launch_template_no_secrets(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.FAILED,
                         summary=f"Error fetching template versions for {template_name}:",
-                        exception=e
+                        exception=str(e)
                     )
                 )
                 #report.message = f"Error fetching template versions for {template_name}: {str(e)}"
@@ -81,10 +81,10 @@ class ec2_launch_template_no_secrets(Check):
                         report.status = CheckStatus.FAILED
                         report.resource_ids_status.append(
                             ResourceStatus(
-                                resource=GeneralResource(resource=""),
+                                resource=GeneralResource(name=""),
                                 status=CheckStatus.FAILED,
                                 summary=f"Error decoding user data for {template_name} version {version_number}:",
-                                exception=e
+                                exception=str(e)
                             )
                         )
                         #report.message = f"Error decoding user data for {template_name} version {version_number}: {str(e)}"
@@ -95,7 +95,7 @@ class ec2_launch_template_no_secrets(Check):
                         report.status = CheckStatus.FAILED
                         report.resource_ids_status.append(
                             ResourceStatus(
-                                resource=GeneralResource(resource=""),
+                                resource=GeneralResource(name=""),
                                 status=CheckStatus.FAILED,
                                 summary=f"Launch Template {template_name} version {version_number} contains sensitive data in user data."
                             )

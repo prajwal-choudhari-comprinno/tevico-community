@@ -1,6 +1,6 @@
 import boto3
 
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
@@ -19,11 +19,23 @@ class rds_instance_enhanced_monitoring_enabled(Check):
                 enhanced_monitoring = instance.get('EnhancedMonitoringResourceArn')
                 
                 if enhanced_monitoring:
-                    report.resource_ids_status[instance_name] = True
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_name),
+                            status=CheckStatus.PASSED,
+                            summary=''
+                        )
+                    )
                 else:
                     report.status = CheckStatus.FAILED
-                    report.resource_ids_status[instance_name] = False
-                    
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=instance_name),
+                            status=CheckStatus.FAILED,
+                            summary=''
+                        )
+                    )
+
         except Exception as e:
             report.status = CheckStatus.FAILED
             return report

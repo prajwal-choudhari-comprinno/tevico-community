@@ -31,7 +31,7 @@ class ec2_ebs_default_encryption(Check):
             if not default_encryption_enabled:
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(resource=""),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.FAILED,
                         summary=f"Default EBS Encryption Disabled"
                     )
@@ -41,10 +41,10 @@ class ec2_ebs_default_encryption(Check):
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(resource=""),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
                     summary=f"Error while checking EBS default encryption",
-                    exception=e
+                    exception=str(e)
                 )
             )
 

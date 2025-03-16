@@ -351,7 +351,7 @@ function createDynamicTable({ reportsData }) {
                             break;
                         case 'skipped':
                             td.setAttribute('data-status', 'Skipped');
-                            td.innerHTML = `<span class="badge bg-softer-warning">Skipped</span>`;
+                            td.innerHTML = `<span class="badge bg-soft-info">Skipped</span>`;
                             break;
                         case 'not_applicable':
                             td.setAttribute('data-status', 'Not Applicable');
@@ -359,7 +359,11 @@ function createDynamicTable({ reportsData }) {
                             break;
                         case 'unknown':
                             td.setAttribute('data-status', 'Unknown');
-                            td.innerHTML = `<span class="badge bg-softer-secondary">unknown</span>`;
+                            td.innerHTML = `<span class="badge bg-softer-warning">Unknown</span>`;
+                            break;
+                        case 'errored':
+                            td.setAttribute('data-status', 'Errored');
+                            td.innerHTML = `<span class="badge bg-soft-danger">Errored</span>`;
                             break;
                         default:
                             td.innerHTML = `<span>-</span>`;
@@ -519,7 +523,7 @@ const populateDropdown = (data, dropdownId, valueAccessor, filterType) => {
     dropdownMenu.innerHTML = '';
 
     if (dropdownId === 'statusDropdown') {
-        const statusValues = ['Passed', 'Failed'];
+        const statusValues = ['Passed', 'Failed', 'Skipped', 'Not Applicable', 'Unknown', 'Errored'];
         statusValues.forEach(value => {
             dropdownMenu.appendChild(createDropdownItem(value, dropdownId, filterType));
         });

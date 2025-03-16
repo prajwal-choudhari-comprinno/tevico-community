@@ -1,6 +1,5 @@
 from datetime import datetime
-from re import A
-from typing import Any, Dict, List, Optional, Union, ClassVar
+from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from tevico.engine.core.enums import FrameworkDimension
@@ -75,14 +74,14 @@ class AwsResource(BaseModel):
         return super().model_dump(mode=mode)
 
 class GeneralResource(BaseModel):
-    resource: str = Field(..., description='Name of the resource')
+    name: str = Field(..., description='Name of the resource')
     
     def __str__(self):
-        return self.resource
+        return self.name
     
     def model_dump(self, mode: str = 'json'):
         if mode == 'json':
-            return self.resource
+            return self.name
         return super().model_dump(mode=mode)
 
 
@@ -105,6 +104,12 @@ class CheckStatus(Enum):
     # If the check errored out
     ERRORED = 'errored'
 
+
+class CheckException(BaseModel):
+    code: Optional[str] = None
+    message: Optional[str] = None
+
+
 class ResourceStatus(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     # The resource key represents the resource ID
@@ -120,7 +125,7 @@ class ResourceStatus(BaseModel):
     summary: Optional[str] = Field(..., description='Summary of the check status')
     
     # The error exception associated with the status
-    exception: Optional[Exception] = None
+    exception: Optional[str] = None
 
     @field_validator('summary', mode='before')
     def validate_summary(cls, v, values):
@@ -141,11 +146,13 @@ class CheckReport(BaseModel):
     report_metadata: Optional[Dict[str, Any]] = None
     created_on: datetime = datetime.now()
 
-    def has_failed_resources(self):
-        # return any(resource.status == CheckStatus.FAILED for resource in self.resource_ids_status)
-        for resource in self.resource_ids_status:
-            #print(resource)
-            if resource.status == CheckStatus.FAILED:
-                return True
-        return False
+    def set_report_status(self):
+        failed_statuses = {CheckStatus.FAILED, CheckStatus.ERRORED, CheckStatus.UNKNOWN}
+
+        if len(self.resource_ids_status) < 1 and self.status == None:
+            self.status = CheckStatus.UNKNOWN
+        elif any(resource.status in failed_statuses for resource in self.resource_ids_status):
+            self.status = CheckStatus.FAILED
+        else:
+            self.status = CheckStatus.PASSED
 
