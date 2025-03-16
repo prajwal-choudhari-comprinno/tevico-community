@@ -59,9 +59,9 @@ class AwsResource(BaseModel):
     
     @field_validator('arn')
     def validate_arn(cls, v):
-        # Split the ARN by colon and check if it has 6 parts
+        # Split the ARN by colon and check if it has 6 or 7 parts
         parts = v.split(':')
-        if len(parts) != 6 or parts[0] != 'arn':
+        if not(5 < len(parts) <= 7) or (parts[0] != 'arn'):
             # If the ARN is not in the correct format, raise an error
             raise ValueError(f"Invalid ARN format: {v}")
         return v
@@ -100,11 +100,34 @@ class CheckStatus(Enum):
     NOT_APPLICABLE = 'not_applicable'
     
     # If the AWS API call fails for unknown reasons
-    UNKNOWN = 'unknown'
+    UNKNOWN = 'unknown'    ›
     
     # If the check errored out
     ERRORED = 'errored'
 
+import boto3
+
+def check_sso_assignments(identity_store_id, account_id, permission_set_arn):
+    sso_admin = boto3.client('sso-admin')
+    
+    try:
+        # List account assignments
+        response = sso_admin.list_account_assignments(
+            InstanceArn='arn:aws:sso:::instance/ssoins-xxxxx',  # Replace with your instance ARN
+            AccountId=account_id,
+            PermissionSetArn=permission_set_arn
+        )
+        
+        assignments = response['AccountAssignments']
+        for assignment in assignments:
+            principal_id = assignment['PrincipalId']
+            principal_type = assignment['PrincipalType']
+            
+            print(f"Principal ID: {principal_id}")
+            print(f"Principal Type: {principal_type}")
+            
+    except Exception as e:
+        print(f"Error checking SSO assignments: {str(e)}")
 
 class ResourceStatus(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
