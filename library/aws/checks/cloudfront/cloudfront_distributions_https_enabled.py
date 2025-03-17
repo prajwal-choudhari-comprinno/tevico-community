@@ -40,7 +40,6 @@ class cloudfront_distributions_https_enabled(Check):
                 if not next_marker:
                     break
 
-            https_missing = False
 
             for distribution in distributions:
                 distribution_id = distribution['Id']
