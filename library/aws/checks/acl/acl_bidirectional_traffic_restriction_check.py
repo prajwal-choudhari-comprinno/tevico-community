@@ -106,7 +106,7 @@ class acl_bidirectional_traffic_restriction_check(Check):
                     exception=str(e)
                 )
             )
-        print(report)
+        # print(report)
         return report
 
     def _has_permissive_rules(self, rules):
