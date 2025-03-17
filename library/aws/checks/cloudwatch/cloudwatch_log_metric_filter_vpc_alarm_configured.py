@@ -89,7 +89,7 @@ class cloudwatch_log_metric_filter_vpc_alarm_configured(Check):
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
-                    status=CheckStatus.FAILED,
+                    status=CheckStatus.UNKNOWN,
                     summary=f"Error while fetching CloudWatch logs and metric filters",
                     exception=str(e)
                 )
