@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: ec2_ebs_snapshot_encrypted
-CheckTitle: Check if EBS snapshots are encrypted.
+CheckTitle: Ensure EBS snapshots are encrypted.
 CheckType:
   - Data Protection
 ServiceName: ec2
@@ -8,7 +8,7 @@ SubServiceName: snapshot
 ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 Severity: medium
 ResourceType: Other
-Description: Check if EBS snapshots are encrypted.
+Description: Ensure that EBS snapshots are encrypted.
 Risk: Data encryption at rest prevents data visibility in the event of its unauthorized access or theft.
 RelatedUrl: https://tevi.co
 Remediation:
