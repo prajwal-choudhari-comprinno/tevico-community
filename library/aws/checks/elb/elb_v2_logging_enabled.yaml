@@ -1,13 +1,13 @@
 Provider: aws
 CheckID: elb_v2_logging_enabled
-CheckTitle: Ensure Access Logging is Enabled for ELBv2 (ALB/NLB)
+CheckTitle: Ensure Access Logging is enabled for ELBv2 (ALB/NLB/GWLB)
 CheckType: [Detective Control]
 ServiceName: elb
 SubServiceName: ""
 ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 Severity: high
 ResourceType: AwsElbLoadBalancer
-Description: Ensure access logging is enabled for ELBv2 Application Load Balancers (ALB) and Network Load Balancers (NLB) to monitor and analyze traffic.
+Description: Ensure access logging is enabled for ELBv2 Application Load Balancers (ALB), Network Load Balancers (NLB) and Gateway Load Balancers (GWLB) to monitor and analyze traffic.
 Risk: Without access logging, visibility into request patterns and troubleshooting may be limited, impacting security and operational analysis.
 RelatedUrl: ""
 Remediation: 
