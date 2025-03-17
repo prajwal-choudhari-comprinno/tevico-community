@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: elb_ssl_listeners_enabled
-CheckTitle: Ensure Classic ELB Listeners Use SSL/HTTPS for Secure Connections
+CheckTitle: Ensure Classic ELB listeners use SSL/HTTPS for secure connections
 CheckType: [Data Protection]
 ServiceName: elb
 SubServiceName: ""
