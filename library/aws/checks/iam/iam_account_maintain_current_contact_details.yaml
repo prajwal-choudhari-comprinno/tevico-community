@@ -1,55 +1,34 @@
-########### PLEASE NOTE ###########
-# For better readability of the metadata file, kindly remove all the comments before using the template.
-###################################
-
-AUTHOR: RONIT CHAUHAN 
-DATE: 2024-10-17
-
 Provider: aws
 
 CheckID: iam_account_maintain_current_contact_details
 
-# Short title/description of the check
-CheckTitle: Verify AWS Account Contact Details
+CheckTitle: Verify AWS Account contact details
 
-# Check Type
 CheckType: [contact_information_check]
 
-# Service Name. Eg: cloudformation, ec2, s3, etc.
 ServiceName: account
 
-# Sub Service Name. Eg: ec2_instance, s3_bucket, etc.
 SubServiceName: contact_details
 
-# Resource Template
 ResourceIdTemplate: arn:aws:account::account-id:*
 
-# Severity of the check. Allowed values: critical, high, medium, low
 Severity: medium
 
-# Resource Type. Eg: AwsCloudFormationStack, AwsEC2Instance, AwsS3Bucket, etc.
 ResourceType: AwsAccount
 
-# Description of the check
 Description: Checks whether the AWS account has all required contact details updated.
 
-# Explanation of the risk associated with the check
 Risk: Incomplete or outdated contact information may hinder communication during critical account issues or security incidents.
 
-# Related URL for the check
 RelatedUrl: https://tevi.co
 
 # Help section on how to fix the issue
 Remediation:
   Code:
     CLI: |
-      # Use the AWS Management Console to update your contact details:
-      # 1. Sign in to the AWS Management Console
-      # 2. Go to the Billing & Cost Management Dashboard
-      # 3. Select your AWS account name and then My Account
-      # 4. Click Edit next to Contact Information
-      # 5. Enter your updated contact information
-      # 6. Click Update to save the changes
+      aws account put-contact-information --account-id 123456789012 \
+--contact-information '{"AddressLine1": "123 Any Street", "City": "Seattle", "CompanyName": "Example Corp, Inc.", "CountryCode": "US", "DistrictOrCounty": "King", 
+"FullName": "Saanvi Sarkar", "PhoneNumber": "+15555550100", "PostalCode": "98101", "StateOrRegion": "WA", "WebsiteUrl": "https://www.examplecorp.com"}'
 
     NativeIaC: |
       # Ensure your infrastructure as code is updated with the correct account information.
@@ -62,19 +41,13 @@ Remediation:
 
   Recommendation:
     Text: |
-      Enable automated backup for production data. Define a retention period and
-      periodically test backup restoration. A Disaster Recovery process should be
-      in place to govern Data Protection approach.
-    Url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
+      Update the primary contact information associated with your account, including your contact's full name, company name, mailing address, telephone number, and website address. Edit the primary account contact differently, depending on whether or not the accounts are standalone, or part of an organization
+    Url: https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-update-contact-primary.html
 
-# Categories for the check. Eg: forensics-ready, security, etc.
 Categories: [infrastructure_protection, security]
 
-# Dependencies on other checks
 DependsOn: []
 
-# Related checks
 RelatedTo: []
 
-# Side notes
 Notes: Infrastructure Protection
