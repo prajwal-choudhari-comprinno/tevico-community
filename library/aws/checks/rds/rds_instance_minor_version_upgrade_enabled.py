@@ -83,7 +83,7 @@ class rds_instance_minor_version_upgrade_enabled(Check):
             report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name="RDS Instances"),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
                     summary=f"Error retrieving RDS instance details:{str(e)}",
                     exception=str(e)
