@@ -54,7 +54,7 @@ class iam_password_policy_number(Check):
 
         except (BotoCoreError, ClientError) as e:
             # Handle AWS API errors
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="password_policy"),
@@ -66,7 +66,7 @@ class iam_password_policy_number(Check):
 
         except Exception as e:
             # Catch-all for unexpected errors
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="password_policy"),
