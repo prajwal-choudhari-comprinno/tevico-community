@@ -23,7 +23,7 @@ class iam_password_policy_reuse_24(Check):
             account_password_policy = client.get_account_password_policy()
             password_policy = account_password_policy['PasswordPolicy']
 
-            # Check if passwords cannot be reused for at least 24 changes
+            # Check that the password policy enforces reuse prevention for at least 1 and at most 24 previous passwords
             password_reuse_prevention = password_policy.get('PasswordReusePrevention', 0)
 
             if password_reuse_prevention == 0:
@@ -57,11 +57,11 @@ class iam_password_policy_reuse_24(Check):
 
         except (BotoCoreError, ClientError) as e:
             # Handle AWS API errors
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="password_policy"),
-                    status=CheckStatus.ERRORED,
+                    status=CheckStatus.UNKNOWN,
                     summary="Error occurred while fetching the password policy.",
                     exception=str(e)
                 )
@@ -69,11 +69,11 @@ class iam_password_policy_reuse_24(Check):
 
         except Exception as e:
             # Catch-all for unexpected errors
-            report.status = CheckStatus.ERRORED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="password_policy"),
-                    status=CheckStatus.ERRORED,
+                    status=CheckStatus.UNKNOWN,
                     summary="Unhandled exception occurred while checking the password policy.",
                     exception=str(e)
                 )
