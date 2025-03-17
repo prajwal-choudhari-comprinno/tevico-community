@@ -47,6 +47,16 @@ class iam_attached_policy_admin_privileges_found(Check):
                 for page in paginator:
                     attached_policies.extend(page.get('AttachedPolicies', []))
 
+                if not attached_policies:
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=resource,
+                            status=CheckStatus.NOT_APPLICABLE,
+                            summary=f"{entity_type.capitalize()} '{entity_name}' has no attached policies."
+                        )
+                    )
+                    return
+
                 for policy in attached_policies:
                     if policy['PolicyName'] in ADMIN_POLICIES:
                         report.resource_ids_status.append(
@@ -76,11 +86,14 @@ class iam_attached_policy_admin_privileges_found(Check):
                     )
                 )
 
+        entities_checked = 0
+        
         try:
             # Check IAM Users
             paginator = client.get_paginator('list_users')
             for page in paginator.paginate():
                 for user in page.get('Users', []):
+                    entities_checked += 1
                     try:
                         check_policies(user['UserName'], 'user', lambda: client.get_paginator('list_attached_user_policies').paginate(UserName=user['UserName']))
                     except (BotoCoreError, ClientError) as e:
@@ -97,6 +110,7 @@ class iam_attached_policy_admin_privileges_found(Check):
             paginator = client.get_paginator('list_roles')
             for page in paginator.paginate():
                 for role in page.get('Roles', []):
+                    entities_checked += 1
                     try:
                         check_policies(role['RoleName'], 'role', lambda: client.get_paginator('list_attached_role_policies').paginate(RoleName=role['RoleName']))
                     except (BotoCoreError, ClientError) as e:
@@ -113,6 +127,7 @@ class iam_attached_policy_admin_privileges_found(Check):
             paginator = client.get_paginator('list_groups')
             for page in paginator.paginate():
                 for group in page.get('Groups', []):
+                    entities_checked += 1
                     try:
                         check_policies(group['GroupName'], 'group', lambda: client.get_paginator('list_attached_group_policies').paginate(GroupName=group['GroupName']))
                     except (BotoCoreError, ClientError) as e:
@@ -124,6 +139,16 @@ class iam_attached_policy_admin_privileges_found(Check):
                                 exception=str(e)
                             )
                         )
+
+            if entities_checked == 0:
+                report.status = CheckStatus.NOT_APPLICABLE
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name="IAMEntities"),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No IAM users, roles, or groups found in the account."
+                    )
+                )
 
         except (BotoCoreError, ClientError) as e:
             report.status = CheckStatus.UNKNOWN
