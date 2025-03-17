@@ -58,9 +58,9 @@ class AwsResource(BaseModel):
     
     @field_validator('arn')
     def validate_arn(cls, v):
-        # Split the ARN by colon and check if it has 6 parts
+        # Split the ARN by colon and check if it has 6 or 7 parts
         parts = v.split(':')
-        if len(parts) != 6 or parts[0] != 'arn':
+        if len(parts) not in (6, 7) or parts[0] != 'arn':
             # If the ARN is not in the correct format, raise an error
             raise ValueError(f"Invalid ARN format: {v}")
         return v
@@ -104,9 +104,11 @@ class CheckStatus(Enum):
     # If the check errored out
     ERRORED = 'errored'
 
+
 class CheckException(BaseModel):
     code: Optional[str] = None
     message: Optional[str] = None
+
 
 class ResourceStatus(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
