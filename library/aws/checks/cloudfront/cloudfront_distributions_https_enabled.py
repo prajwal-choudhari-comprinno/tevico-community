@@ -23,24 +23,25 @@ class cloudfront_distributions_https_enabled(Check):
                 response = client.list_distributions(Marker=next_marker) if next_marker else client.list_distributions()
                 distribution_list = response.get('DistributionList', {})
 
-                if not distribution_list.get('Items'):  # No distributions found
-                    report.status = CheckStatus.NOT_APPLICABLE
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name="CloudFront"),
-                            status=CheckStatus.NOT_APPLICABLE,
-                            summary="No CloudFront distributions found."
-                        )
-                    )
-                    return report
-
                 distributions.extend(distribution_list.get('Items', []))
                 next_marker = distribution_list.get('NextMarker')
 
                 if not next_marker:
                     break
 
+            # After all pagination is done, check if we have any distributions
+            if not distributions:
+                report.status = CheckStatus.NOT_APPLICABLE
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name="CloudFront"),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No CloudFront distributions found."
+                    )
+                )
+                return report  # Early exit since there are no distributions to check
 
+            # Process each distribution
             for distribution in distributions:
                 distribution_id = distribution['Id']
                 distribution_arn = distribution['ARN']
