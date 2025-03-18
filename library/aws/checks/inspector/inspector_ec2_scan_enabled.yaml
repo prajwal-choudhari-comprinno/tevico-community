@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: inspector_ec2_scan_enabled
-CheckTitle: Ensure Amazon Inspector EC2 Scanning is Enabled
+CheckTitle: Ensure Amazon Inspector EC2 scanning is enabled
 CheckType: [Vulnerability Management]
 ServiceName: inspector2
 SubServiceName: ""
