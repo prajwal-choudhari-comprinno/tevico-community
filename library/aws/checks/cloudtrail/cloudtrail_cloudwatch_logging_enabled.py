@@ -16,8 +16,17 @@ class cloudtrail_cloudwatch_logging_enabled(Check):
         report = CheckReport(name=__name__, status=CheckStatus.PASSED, resource_ids_status=[])
 
         try:
-            trails = client.describe_trails(includeShadowTrails=False).get('trailList', [])
-            
+            trails = []
+            next_token = None
+
+            while True:
+                response = client.describe_trails(includeShadowTrails=False, NextToken=next_token) if next_token else client.describe_trails(includeShadowTrails=False)
+                trails.extend(response.get('trailList', []))
+                next_token = response.get('NextToken')
+                
+                if not next_token:
+                    break
+
             if not trails:
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
