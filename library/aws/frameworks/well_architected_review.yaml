@@ -216,6 +216,7 @@ sections:
           - eks_cluster_logging_enabled
           - elb_v2_logging_enabled
           - rds_instance_integration_cloudwatch_logging_enabled
+          - rds_instance_enhanced_monitoring_enabled
           - vpc_flowlogs_enable_logging
           - vpc_flowlogs_analyze_logs
           - cloudtrail_s3_bucket_access_logging_enabled
