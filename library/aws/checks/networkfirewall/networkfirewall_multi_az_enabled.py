@@ -42,9 +42,9 @@ class networkfirewall_multi_az_enabled(Check):
                 return report
 
             # Check each firewall for Multi-AZ configuration
-            for firewall_info in firewalls:
+            for firewall in firewalls:
                 # Fetch firewall details
-                firewall_name = firewall_info["FirewallName"]
+                firewall_name = firewall["FirewallName"]
                 firewall_details = client.describe_firewall(FirewallName=firewall_name)
                 firewall_arn = firewall_details["Firewall"]["FirewallArn"]
 
