@@ -77,11 +77,11 @@ class cloudfront_access_logging_enabled(Check):
                     report.status = CheckStatus.UNKNOWN
 
         except Exception as e:
-            report.status = CheckStatus.FAILED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name="CloudFront"),
-                    status=CheckStatus.FAILED,
+                    resource=GeneralResource(name=""),
+                    status=CheckStatus.UNKNOWN,
                     summary="Error while fetching CloudFront distributions",
                     exception=str(e)
                 )
