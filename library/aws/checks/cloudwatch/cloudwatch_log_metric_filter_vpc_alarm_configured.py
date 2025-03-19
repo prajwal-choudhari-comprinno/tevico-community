@@ -84,13 +84,13 @@ class cloudwatch_log_metric_filter_vpc_alarm_configured(Check):
                 )                
 
         except Exception as e:
-            logging.error(f"Error while fetching CloudWatch logs and metric filters: {e}")
+            logging.error(f"Error while fetching CloudWatch logs and metric filters: {e} | check_name = {__name__}")
             report.status = CheckStatus.FAILED
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
-                    summary=f"Error while fetching CloudWatch logs and metric filters",
+                    summary=f"Error while fetching CloudWatch logs and metric filters: {e} | check_name = {__name__}",
                     exception=str(e)
                 )
             )
