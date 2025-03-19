@@ -5,15 +5,11 @@ DATE: 2025-01-09
 """
 
 import boto3
-import logging
 from tevico.engine.entities.report.check_model import (
     CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 )
 from tevico.engine.entities.check.check import Check
 
-# Configure logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 class cloudtrail_enabled(Check):
