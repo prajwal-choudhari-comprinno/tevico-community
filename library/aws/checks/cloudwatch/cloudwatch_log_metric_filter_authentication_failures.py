@@ -44,11 +44,10 @@ class cloudwatch_log_metric_filter_authentication_failures(Check):
                 return report  # Early exit since there are no log groups to check
 
             # Define the custom pattern for authentication failure (ConsoleLogin + Failed authentication)
-            pattern = r"\\$\\.eventName\\s*=\\s*.?ConsoleLogin.+\\$\\.errorMessage\\s*=\\s*.?Failed authentication.?"
-            
+            pattern = r"\$\.eventName\s*=\s*.?ConsoleLogin.+\$\.errorMessage\s*=\s*.?Failed authentication.?"            
             for log_group in log_groups:
                 log_group_name = log_group.get('logGroupName')
-                log_group_arn = log_group.get('arn')
+                log_group_arn = log_group.get('arn')[0:-2]
 
                 try:
                     metric_filters = logs_client.describe_metric_filters(logGroupName=log_group_name).get('metricFilters', [])
