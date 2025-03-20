@@ -47,8 +47,8 @@ class cloudwatch_log_metric_filter_policy_changes(Check):
 
             for log_group in log_groups:
                 log_group_name = log_group.get('logGroupName')
-                log_group_arn = log_group.get('arn')
-                print(log_group_arn)
+                log_group_arn = log_group.get('arn')[0:-2]
+               
 
                 try:
                     metric_filters = logs_client.describe_metric_filters(logGroupName=log_group_name).get('metricFilters', [])
