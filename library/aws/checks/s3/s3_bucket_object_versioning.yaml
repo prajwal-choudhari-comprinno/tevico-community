@@ -1,6 +1,6 @@
 Provider: "aws"
 CheckID: "s3_bucket_object_versioning"
-CheckTitle: "Check if S3 buckets have object versioning enabled"
+CheckTitle: "Ensure S3 buckets have object versioning enabled"
 CheckType:
   - "Data Protection"
 ServiceName: "s3"
@@ -8,7 +8,7 @@ SubServiceName: ""
 ResourceIdTemplate: "arn:partition:s3:::bucket_name"
 Severity: medium
 ResourceType: "AwsS3Bucket"
-Description: "Check if S3 buckets have object versioning enabled"
+Description: "Ensure S3 buckets have object versioning enabled"
 Risk: "With versioning, you can easily recover from both unintended user actions and application failures."
 RelatedUrl: ""
 Remediation:

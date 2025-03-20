@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: iam_policy_allows_privilege_escalation
-CheckTitle: Ensure No IAM Policies Allow Privilege Escalation
+CheckTitle: Ensure no IAM policies allow privilege escalation
 CheckType: []
 ServiceName: iam
 SubServiceName: ''
@@ -10,7 +10,7 @@ ResourceType: AwsIamUser
 Description: Ensure no IAM policies within the account allow privilege escalation. Privilege escalation occurs when a user can gain access to resources or perform actions beyond their intended permissions, which poses a significant security risk.
 
 Risk: >-
- Allowing privilege escalation through IAM policies can lead to unauthorized users obtaining higher-level privileges or full administrative access. This can result in data breaches, unauthorized resource usage, or complete control over the AWS environment. Restricting privilege escalation ensures the principle of least privilege is enforced, minimizing security vulnerabilities and potential misuse.
+  Allowing privilege escalation through IAM policies can lead to unauthorized users obtaining higher-level privileges or full administrative access. This can result in data breaches, unauthorized resource usage, or complete control over the AWS environment. Restricting privilege escalation ensures the principle of least privilege is enforced, minimizing security vulnerabilities and potential misuse.
 RelatedUrl: ''
 Remediation:
   Code:
@@ -20,10 +20,9 @@ Remediation:
     Terraform: ''
   Recommendation:
     Text: >-
-      Using IAM console navigate to Dashboard and expand Activate MFA on your
-      user's account.
+      No IAM policies within the account should allow privilege escalation
     Url: >-
-      https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_mfa
+      https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
 Categories: []
 DependsOn: []
 RelatedTo: []
