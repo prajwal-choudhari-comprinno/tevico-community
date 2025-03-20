@@ -1,13 +1,13 @@
 Provider: aws
 CheckID: rds_instance_backup_enabled
-CheckTitle: Check if RDS instances have backup enabled.
+CheckTitle: Ensure RDS instances have backup enabled.
 CheckType: []
 ServiceName: rds
 SubServiceName: ""
 ResourceIdTemplate: arn:aws:rds:region:account-id:db-instance
 Severity: medium
 ResourceType: AwsRdsDbInstance
-Description: Check if RDS instances have backup enabled.
+Description: Ensure RDS instances have backup enabled.
 Risk:
   If backup is not enabled, data is vulnerable. Human error or bad actors could
   erase or modify data.

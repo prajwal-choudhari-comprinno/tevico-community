@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: ssm_patch_manager_enabled
-CheckTitle: Ensure SSM Patch Manager is enabled on all instances
+CheckTitle: Ensure SSM Patch Manager is enabled on all managed instances
 CheckType: []
 ServiceName: ssm
 SubServiceName: ""

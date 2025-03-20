@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: vpc_security_group_port_restriction_check
-CheckTitle: Check if VPC Security Groups restrict access to specific ports.
+CheckTitle: Ensure VPC Security Groups restrict access to specific ports.
 CheckType: []
 ServiceName: ec2
 SubServiceName: ""

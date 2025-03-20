@@ -111,6 +111,7 @@ sections:
           - apigateway_rest_api_client_certificate_enabled
           - apigateway_waf_protection_enabled
           - cloudfront_distributions_https_enabled
+          - cloudfront_distributions_using_deprecated_ssl_protocols
           - ec2_network_acl_allow_ingress_any_port
           - ec2_network_acl_allow_ingress_tcp_port_22
           - ec2_security_group_default_restrict_traffic
@@ -181,6 +182,7 @@ sections:
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
           - networkfirewall_multi_az_enabled
+          - rds_instance_multi_az
           - dynamodb_tables_pitr_enabled
       - name: Recovery Planning
         description: |
@@ -214,6 +216,7 @@ sections:
           - eks_cluster_logging_enabled
           - elb_v2_logging_enabled
           - rds_instance_integration_cloudwatch_logging_enabled
+          - rds_instance_enhanced_monitoring_enabled
           - vpc_flowlogs_enable_logging
           - vpc_flowlogs_analyze_logs
           - cloudtrail_s3_bucket_access_logging_enabled
@@ -250,3 +253,4 @@ sections:
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
           - cloudformation_stacks_termination_protection_enabled
+          - rds_instance_deletion_protection

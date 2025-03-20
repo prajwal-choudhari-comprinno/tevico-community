@@ -1,13 +1,13 @@
 Provider: aws
 CheckID: lambda_function_not_publicly_accessible
-CheckTitle: Ensure Lambda function is not publicly accessible.
+CheckTitle: Ensure no Lambda function is publicly accessible.
 CheckType: [Infrastructure Protection]
 ServiceName: lambda
 SubServiceName: ""
 ResourceIdTemplate: arn:partition:lambda:region:account-id:function/function-name
 Severity: high
 ResourceType: AwsLambdaFunction
-Description: Ensures that Lambda functions are not publicly accessible to prevent unauthorized access.
+Description: Ensure that Lambda functions are not publicly accessible to prevent unauthorized access.
 Risk: Publicly accessible Lambda functions expose the environment to unauthorized access, potentially leading to data breaches and malicious activity.
 RelatedUrl: https://docs.aws.amazon.com/lambda/latest/dg/access-control-resource-based.html
 Remediation: 
