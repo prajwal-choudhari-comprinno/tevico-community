@@ -1,10 +1,11 @@
 """
 AUTHOR: Sheikh Aafaq Rashid
 EMAIL: aafaq.rashid@comprinno.net
-DATE: 2025-01-13
+DATE: 2025-01-10
 """
 
 import boto3
+import re
 from botocore.exceptions import BotoCoreError, ClientError
 
 from tevico.engine.entities.report.check_model import (
@@ -15,7 +16,7 @@ from tevico.engine.entities.check.check import Check
 
 class cloudwatch_log_metric_filter_authentication_failures(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
-        logs_client = connection.client("logs")
+        logs_client = connection.client('logs')
         report = CheckReport(name=__name__)
         report.resource_ids_status = []
 
@@ -25,9 +26,9 @@ class cloudwatch_log_metric_filter_authentication_failures(Check):
 
             while True:
                 response = logs_client.describe_log_groups(nextToken=next_token) if next_token else logs_client.describe_log_groups()
-                log_groups.extend(response.get("logGroups", []))
-                next_token = response.get("nextToken")
-                
+                log_groups.extend(response.get('logGroups', []))
+                next_token = response.get('nextToken')
+
                 if not next_token:
                     break
 
@@ -40,27 +41,30 @@ class cloudwatch_log_metric_filter_authentication_failures(Check):
                         summary="No CloudWatch log groups found."
                     )
                 )
-                return report
+                return report  # Early exit since there are no log groups to check
 
+            # Define the custom pattern for authentication failure (ConsoleLogin + Failed authentication)
+            pattern = r"\\$\\.eventName\\s*=\\s*.?ConsoleLogin.+\\$\\.errorMessage\\s*=\\s*.?Failed authentication.?"
+            
             for log_group in log_groups:
-                log_group_name = log_group["logGroupName"]
-                log_group_arn = log_group['arn']
-                
-                try:
-                    metric_filters = logs_client.describe_metric_filters(logGroupName=log_group_name)
-                    filters = metric_filters.get("metricFilters", [])
-                    
-                    auth_failure_filter = any(
-                        "authentication" in f["filterPattern"].lower() or "failed" in f["filterPattern"].lower()
-                        for f in filters
-                    )
+                log_group_name = log_group.get('logGroupName')
+                log_group_arn = log_group.get('arn')
 
-                    if auth_failure_filter:
+                try:
+                    metric_filters = logs_client.describe_metric_filters(logGroupName=log_group_name).get('metricFilters', [])
+                    matching_filters = []
+                    
+                    for filter in metric_filters:
+                        filter_pattern = filter.get("filterPattern", "")
+                        if re.search(pattern, filter_pattern):
+                            matching_filters.append(filter.get('filterName'))
+                    
+                    if matching_filters:
                         report.resource_ids_status.append(
                             ResourceStatus(
                                 resource=AwsResource(arn=log_group_arn),
                                 status=CheckStatus.PASSED,
-                                summary=f"CloudWatch log group {log_group_name} has a metric filter for authentication failures."
+                                summary=f"Log group {log_group_name} has authentication failure metric filters configured: {', '.join(matching_filters)}."
                             )
                         )
                     else:
@@ -69,7 +73,7 @@ class cloudwatch_log_metric_filter_authentication_failures(Check):
                             ResourceStatus(
                                 resource=AwsResource(arn=log_group_arn),
                                 status=CheckStatus.FAILED,
-                                summary=f"CloudWatch log group {log_group_name} does NOT have a metric filter for authentication failures."
+                                summary=f"Log group {log_group_name} does not have authentication failure metric filters configured."
                             )
                         )
                 except (BotoCoreError, ClientError) as e:
@@ -78,7 +82,7 @@ class cloudwatch_log_metric_filter_authentication_failures(Check):
                         ResourceStatus(
                             resource=AwsResource(arn=log_group_arn),
                             status=CheckStatus.UNKNOWN,
-                            summary=f"Error checking metric filters for log group {log_group_name}.",
+                            summary=f"Error retrieving metric filters for log group {log_group_name}.",
                             exception=str(e)
                         )
                     )
