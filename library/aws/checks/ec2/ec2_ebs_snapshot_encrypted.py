@@ -1,7 +1,9 @@
 """
 AUTHOR: Sheikh Aafaq Rashid
-DATE: 10-10-2024
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-10
 """
+
 
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
