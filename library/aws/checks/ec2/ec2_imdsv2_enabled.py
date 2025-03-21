@@ -1,79 +1,78 @@
 """
 AUTHOR: Sheikh Aafaq Rashid
-DATE: 10-10-2024
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-15
 """
 
 import boto3
-
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
+from botocore.exceptions import BotoCoreError, ClientError
+from tevico.engine.entities.report.check_model import (
+    CheckReport, CheckStatus, GeneralResource, ResourceStatus
+)
 from tevico.engine.entities.check.check import Check
 
 
 class ec2_imdsv2_enabled(Check):
-
     def execute(self, connection: boto3.Session) -> CheckReport:
-        # Initialize the EC2 client using the provided connection
         ec2_client = connection.client('ec2')
-
-        # Create a report object to store check results
         report = CheckReport(name=__name__)
-        report.status = CheckStatus.PASSED  # Default to True, will change if any instance is non-compliant
         report.resource_ids_status = []
+        has_non_compliant = False  # Track instances that fail the check
 
         try:
-            # Describe all EC2 instances
-            response = ec2_client.describe_instances()
-            reservations = response.get('Reservations', [])
-            
-            if not reservations:
-                report.status = CheckStatus.FAILED
+            paginator = ec2_client.get_paginator('describe_instances')
+
+            for page in paginator.paginate():
+                reservations = page.get('Reservations', [])
+
+                if not reservations:
+                    continue
+
+                for reservation in reservations:
+                    for instance in reservation.get('Instances', []):
+                        instance_id = instance['InstanceId']
+
+                        # Fetch Metadata Options
+                        metadata_options = instance.get('MetadataOptions', {})
+                        http_tokens = metadata_options.get('HttpTokens', 'optional')  # Default is 'optional'
+                        http_endpoint = metadata_options.get('HttpEndpoint', 'disabled')  # Default is 'disabled'
+
+                        # Determine compliance level
+                        if http_endpoint.lower() == 'disabled' or http_tokens.lower() == 'optional':
+                            status = CheckStatus.FAILED
+                            summary = f"EC2 instance {instance_id} does not enforce IMDSv2."
+                            has_non_compliant = True
+                        elif http_tokens == 'required':
+                            status = CheckStatus.PASSED
+                            summary = f"EC2 instance {instance_id} enforces IMDSv2."
+
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(name=instance_id),
+                                status=status,
+                                summary=summary
+                            )
+                        )
+
+            if not report.resource_ids_status:  # If no instances exist
                 report.resource_ids_status.append(
                     ResourceStatus(
                         resource=GeneralResource(name=""),
-                        status=CheckStatus.SKIPPED,
-                        summary=f"No EC2 instances found."
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No EC2 instances found."
                     )
                 )
-                #report.message = "No EC2 instances found."
-                return report
+            else:
+                report.status = CheckStatus.FAILED if has_non_compliant else CheckStatus.PASSED
 
-            # Loop through instances
-            for reservation in reservations:
-                for instance in reservation['Instances']:
-                    instance_id = instance['InstanceId']
-                    instance_arn = instance['IamInstanceProfile']['Arn']
-                    metadata_options = instance.get('MetadataOptions', {})
-
-                    # Check if IMDSv2 is enabled (HttpTokens == 'required')
-                    if metadata_options.get('HttpTokens') == 'required':
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                resource=AwsResource(Arn=instance_arn),
-                                status=CheckStatus.PASSED,
-                                summary=f"Instance {instance_id} has IMDSv2 enabled."
-                            )
-                        )
-                    else:
-                        report.status = CheckStatus.FAILED
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                resource=AwsResource(Arn=instance_arn),
-                                status=CheckStatus.FAILED,
-                                summary=f"EC2 Instance {instance_id} does not have IMDSv2 enabled (HttpTokens set to {metadata_options.get('HttpTokens')})."
-                            )
-                        )
-                        #report.message = f"EC2 Instance {instance_id} does not have IMDSv2 enabled (HttpTokens set to {metadata_options.get('HttpTokens')})."
-        except Exception as e:
-            # In case of an error, mark the check as failed and log the error
-            report.status = CheckStatus.FAILED
+        except (BotoCoreError, ClientError) as e:
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
-                    status=CheckStatus.PASSED,
-                    summary=f"Error while fetching EC2 instance metadata:",
+                    status=CheckStatus.UNKNOWN,
+                    summary="Error retrieving EC2 instance metadata options.",
                     exception=str(e)
                 )
             )
-            #report.message = f"Error while fetching EC2 instance metadata: {str(e)}"
-        
+
         return report
