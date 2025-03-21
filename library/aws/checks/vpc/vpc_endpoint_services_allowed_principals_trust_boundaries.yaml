@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: vpc_endpoint_services_allowed_principals_trust_boundaries
-CheckTitle: Check if VPC Endpoint Services only allow principals from trusted AWS accounts.
+CheckTitle: Ensure VPC Endpoint Services only allow principals from trusted AWS accounts.
 CheckType: []
 ServiceName: ec2
 SubServiceName: ""

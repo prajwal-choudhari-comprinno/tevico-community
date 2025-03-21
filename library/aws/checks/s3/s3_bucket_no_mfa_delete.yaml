@@ -1,6 +1,6 @@
 Provider: "aws"
 CheckID: "s3_bucket_no_mfa_delete"
-CheckTitle: "Check if S3 bucket MFA Delete is not enabled."
+CheckTitle: "Ensure S3 bucket MFA Delete is enabled."
 CheckType:
   - "Logging and Monitoring"
 ServiceName: "s3"
@@ -8,7 +8,7 @@ SubServiceName: ""
 ResourceIdTemplate: "arn:partition:s3:::bucket_name"
 Severity: medium
 ResourceType: "AwsS3Bucket"
-Description: "Check if S3 bucket MFA Delete is not enabled."
+Description: "Ensure S3 bucket MFA Delete is enabled."
 Risk: "Your security credentials are compromised or unauthorized access is granted."
 RelatedUrl: ""
 Remediation:

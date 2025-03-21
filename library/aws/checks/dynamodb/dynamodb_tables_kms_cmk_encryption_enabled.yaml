@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: dynamodb_tables_kms_cmk_encryption_enabled
-CheckTitle: Check if DynamoDB table has encryption at rest enabled using CMK KMS
+CheckTitle: Ensure DynamoDB table has encryption at rest enabled using CMK KMS
 CheckType: [Infrastructure Protection]
 ServiceName: dynamodb
 SubServiceName: ""

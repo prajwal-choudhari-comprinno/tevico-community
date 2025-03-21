@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: inspector_lambda_standard_scan_enabled
-CheckTitle: Ensure Amazon Inspector Lambda Standard Scanning is Enabled
+CheckTitle: Ensure Amazon Inspector Lambda standard scanning is enabled
 CheckType: [Vulnerability Management]
 ServiceName: inspector2
 SubServiceName: ""

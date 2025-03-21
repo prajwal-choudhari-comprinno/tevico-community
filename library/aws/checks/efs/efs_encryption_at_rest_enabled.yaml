@@ -1,13 +1,13 @@
 Provider: aws
 CheckID: efs_encryption_at_rest_enabled
-CheckTitle: Check if EFS protects sensitive data with encryption at rest.
+CheckTitle: Ensure EFS has encryption at rest enabled.
 CheckType: [Infrastructure Protection]
 ServiceName: efs
 SubServiceName: ""
 ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 Severity: medium
 ResourceType: AwsEfsFileSystem
-Description: Check if EFS protects sensitive data with encryption at rest.
+Description: Ensure that EFS has encryption at rest enabled.
 Risk: EFS should be encrypted at rest to prevent exposure of sensitive data to bad actors.
 RelatedUrl: https://docs.aws.amazon.com/efs/latest/ug/encryption.html
 Remediation: 
