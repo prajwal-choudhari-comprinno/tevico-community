@@ -21,7 +21,7 @@ class ec2_ebs_default_encryption(Check):
 
         try:
             response = ec2_client.get_ebs_encryption_by_default()
-            print(response)
+
             encryption_enabled = response.get('EbsEncryptionByDefault', False)
 
             if encryption_enabled:
