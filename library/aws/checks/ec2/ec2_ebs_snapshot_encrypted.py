@@ -4,62 +4,68 @@ DATE: 10-10-2024
 """
 
 import boto3
-
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
+from botocore.exceptions import BotoCoreError, ClientError
+from tevico.engine.entities.report.check_model import (
+    CheckReport, CheckStatus, GeneralResource, ResourceStatus
+)
 from tevico.engine.entities.check.check import Check
 
 
 class ec2_ebs_snapshot_encrypted(Check):
-
     def execute(self, connection: boto3.Session) -> CheckReport:
-
-        # Initialize EC2 client
-        client = connection.client('ec2')
-
+        ec2_client = connection.client('ec2')
         report = CheckReport(name=__name__)
-
-        # Initialize report status
-        report.status = CheckStatus.PASSED  # Assume passed unless we find an unencrypted snapshot
         report.resource_ids_status = []
+        has_unencrypted = False  # Track failed status
+        next_token = None
 
         try:
-            # Fetch all snapshots
-            res = client.describe_snapshots(OwnerIds=['self'])
-            snapshots = res['Snapshots']
+            while True:
+                response = ec2_client.describe_snapshots(OwnerIds=['self'], NextToken=next_token) if next_token else ec2_client.describe_snapshots(OwnerIds=['self'])
+                snapshots = response.get('Snapshots', [])
+                next_token = response.get('NextToken', None)  # Ensure we handle missing NextToken
 
-            if not snapshots:
-                report.resource_ids_status.append(
-                    ResourceStatus(
-                        resource=GeneralResource(name=""),
-                        status=CheckStatus.SKIPPED,
-                        summary=f"No Snapshots found"
-                    )
-                )
+                if not snapshots:
+                    if next_token is None:  # If no snapshots and no pagination, mark as NOT_APPLICABLE
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(name="EBS Snapshots"),
+                                status=CheckStatus.NOT_APPLICABLE,
+                                summary="No EBS snapshots found."
+                            )
+                        )
+                        return report
+                    continue  # If NextToken exists, continue pagination
 
-            for snapshot in snapshots:
-                snapshot_id = snapshot['SnapshotId']
-                encrypted = snapshot.get('Encrypted', False)
+                for snapshot in snapshots:
+                    snapshot_id = snapshot['SnapshotId']
+                    encrypted = snapshot.get('Encrypted', False)
 
-                # Log the encryption status of each snapshot
-                # Snapshot only has Snapshot Id and no arn
-                if not encrypted:
-                    report.status = CheckStatus.FAILED
+                    status = CheckStatus.PASSED if encrypted else CheckStatus.FAILED
+                    summary = f"EBS snapshot {snapshot_id} is {'encrypted' if encrypted else 'not encrypted'}."
+
+                    if not encrypted:
+                        has_unencrypted = True  # Track failed status
+
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=GeneralResource(name=snapshot_id),
-                            status=CheckStatus.FAILED,
-                            summary=f"Snapshot {snapshot_id} is not Encrypted."
+                            status=status,
+                            summary=summary
                         )
                     )
 
+                if not next_token:  # Exit loop if there are no more pages
+                    break
 
-        except Exception as e:
-            report.status = CheckStatus.FAILED
+            report.status = CheckStatus.FAILED if has_unencrypted else CheckStatus.PASSED
+
+        except (BotoCoreError, ClientError) as e:
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name=""),
-                    status=CheckStatus.FAILED,
-                    summary=f"Error in reading snapshots",
+                    resource=GeneralResource(name="EBS Snapshots"),
+                    status=CheckStatus.UNKNOWN,
+                    summary="Error retrieving EBS snapshot encryption status.",
                     exception=str(e)
                 )
             )
