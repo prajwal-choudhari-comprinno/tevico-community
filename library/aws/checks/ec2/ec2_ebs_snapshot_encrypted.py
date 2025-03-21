@@ -16,26 +16,16 @@ class ec2_ebs_snapshot_encrypted(Check):
         ec2_client = connection.client('ec2')
         report = CheckReport(name=__name__)
         report.resource_ids_status = []
-        has_unencrypted = False  # Track failed status
-        next_token = None
+        has_unencrypted = False  # Track unencrypted snapshots
 
         try:
-            while True:
-                response = ec2_client.describe_snapshots(OwnerIds=['self'], NextToken=next_token) if next_token else ec2_client.describe_snapshots(OwnerIds=['self'])
-                snapshots = response.get('Snapshots', [])
-                next_token = response.get('NextToken', None)  # Ensure we handle missing NextToken
+            paginator = ec2_client.get_paginator('describe_snapshots')
 
-                if not snapshots:
-                    if next_token is None:  # If no snapshots and no pagination, mark as NOT_APPLICABLE
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                resource=GeneralResource(name="EBS Snapshots"),
-                                status=CheckStatus.NOT_APPLICABLE,
-                                summary="No EBS snapshots found."
-                            )
-                        )
-                        return report
-                    continue  # If NextToken exists, continue pagination
+            for page in paginator.paginate(OwnerIds=['self']):  # Paginate automatically
+                snapshots = page.get('Snapshots', [])
+
+                if not snapshots:  # If empty page and no previous snapshots
+                    continue
 
                 for snapshot in snapshots:
                     snapshot_id = snapshot['SnapshotId']
@@ -45,7 +35,7 @@ class ec2_ebs_snapshot_encrypted(Check):
                     summary = f"EBS snapshot {snapshot_id} is {'encrypted' if encrypted else 'not encrypted'}."
 
                     if not encrypted:
-                        has_unencrypted = True  # Track failed status
+                        has_unencrypted = True  # Track unencrypted snapshots
 
                     report.resource_ids_status.append(
                         ResourceStatus(
@@ -55,15 +45,23 @@ class ec2_ebs_snapshot_encrypted(Check):
                         )
                     )
 
-                if not next_token:  # Exit loop if there are no more pages
-                    break
-
-            report.status = CheckStatus.FAILED if has_unencrypted else CheckStatus.PASSED
+            if not report.resource_ids_status:  # If no snapshots exist
+                report.status = CheckStatus.NOT_APPLICABLE
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No EBS snapshots found."
+                    )
+                )
+            else:
+                report.status = CheckStatus.FAILED if has_unencrypted else CheckStatus.PASSED
 
         except (BotoCoreError, ClientError) as e:
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name="EBS Snapshots"),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
                     summary="Error retrieving EBS snapshot encryption status.",
                     exception=str(e)
