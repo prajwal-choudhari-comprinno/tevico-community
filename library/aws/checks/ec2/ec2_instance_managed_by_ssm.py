@@ -1,84 +1,93 @@
 """
 AUTHOR: Sheikh Aafaq Rashid
-DATE: 10-10-2024
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-15
 """
 
 import boto3
-
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, ResourceStatus, AwsResource, GeneralResource
+from botocore.exceptions import BotoCoreError, ClientError
+from tevico.engine.entities.report.check_model import (
+    CheckReport, CheckStatus, GeneralResource, ResourceStatus
+)
 from tevico.engine.entities.check.check import Check
 
 
 class ec2_instance_managed_by_ssm(Check):
-
     def execute(self, connection: boto3.Session) -> CheckReport:
-        # Initialize clients for EC2 and SSM
         ec2_client = connection.client('ec2')
         ssm_client = connection.client('ssm')
-
         report = CheckReport(name=__name__)
-        report.status = CheckStatus.PASSED  # Assume passed unless we find an unmanaged instance
         report.resource_ids_status = []
+        has_non_compliant = False  # Track non-managed instances
 
-        # Fetch all EC2 instances
         try:
-            instances_response = ec2_client.describe_instances()
-            instances = [i for r in instances_response['Reservations'] for i in r['Instances']]
-        except Exception as e:
-            report.status = CheckStatus.FAILED
-            return report
+            # Get all running EC2 instances (exclude pending, terminated, stopped)
+            paginator = ec2_client.get_paginator('describe_instances')
+            instance_ids = []
 
-        # Remove instances in states ["pending", "terminated", "stopped"]
-        instances = [
-            instance for instance in instances 
-            if instance['State']['Name'] not in ["pending", "terminated", "stopped"]
-        ]
+            for page in paginator.paginate():
+                reservations = page.get('Reservations', [])
+                if not reservations:
+                    continue
 
-        # Check if there are instances
-        if not instances:
-            report.status = CheckStatus.FAILED
-            report.resource_ids_status.append(
-                    ResourceStatus(
-                        resource=GeneralResource(name=""),
-                        status=CheckStatus.NOT_APPLICABLE,
-                        summary="No instances available."
-                    )
-            )
-            return report
+                for reservation in reservations:
+                    for instance in reservation.get('Instances', []):
+                        state = instance.get('State', {}).get('Name', '').lower()
+                        if state in ["pending", "terminated", "stopped"]:
+                            continue  # Skip these states
 
-        for instance in instances:
-            instance_id = instance['InstanceId']
-            report.resource_ids_status.append(
-                ResourceStatus(
-                    resource=GeneralResource(name=instance_id),
-                    status=CheckStatus.PASSED,
-                    summary=''
-                )
-            )
+                        instance_id = instance['InstanceId']
+                        instance_ids.append(instance_id)
 
-            # Check if the instance is managed by SSM
-            try:
-                managed_instances_response = ssm_client.describe_instance_information()
-                managed_instances = managed_instances_response['InstanceInformationList']
-                managed_instance_ids = {m['InstanceId'] for m in managed_instances}
-
-                if instance_id not in managed_instance_ids:
-                    report.status = CheckStatus.FAILED
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=""),
-                            status=CheckStatus.FAILED,
-                            summary=f"EC2 instance {instance_id} is not managed by SSM."
-                        )
-                    )
-            except Exception as e:
-                report.status = CheckStatus.FAILED
+            if not instance_ids:  # No valid EC2 instances found
+                report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(name=""),
-                        status=CheckStatus.FAILED,
-                        summary=f"Error in getting instance details."
+                        resource=GeneralResource(name="EC2 Instances"),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No running EC2 instances found."
                     )
                 )
+                return report
+
+            # Get list of SSM-managed instances
+            managed_instances = set()
+            ssm_paginator = ssm_client.get_paginator('describe_instance_information')
+
+            for page in ssm_paginator.paginate():
+                for instance in page.get('InstanceInformationList', []):
+                    managed_instances.add(instance['InstanceId'])
+
+            # Compare and classify instances
+            for instance_id in instance_ids:
+                if instance_id in managed_instances:
+                    status = CheckStatus.PASSED
+                    summary = f"EC2 instance {instance_id} is managed by SSM."
+                else:
+                    status = CheckStatus.FAILED
+                    summary = f"EC2 instance {instance_id} is NOT managed by SSM."
+                    has_non_compliant = True
+
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=instance_id),
+                        status=status,
+                        summary=summary
+                    )
+                )
+
+            # Final status: If any instance is non-compliant, set FAILED
+            report.status = CheckStatus.FAILED if has_non_compliant else CheckStatus.PASSED
+
+        except (BotoCoreError, ClientError) as e:
+            report.status = CheckStatus.UNKNOWN
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name="EC2 Instances"),
+                    status=CheckStatus.UNKNOWN,
+                    summary="Error retrieving EC2 SSM management status.",
+                    exception=str(e)
+                )
+            )
 
         return report
