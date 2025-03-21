@@ -47,13 +47,13 @@ class cloudformation_stacks_termination_protection_enabled(Check):
             for stack in stacks:
                 stack_name = stack["StackName"]
                 stack_status = stack["StackStatus"]
+                 # **Ignore stacks that are deleted (`DELETE_COMPLETE`)**
+                if stack_status == "DELETE_COMPLETE":
+                    continue  
+
                 stack_details = client.describe_stacks(StackName=stack_name)["Stacks"][0]
                 stack_arn = stack_details.get("StackId")
 
-                # **Ignore stacks that are deleted (`DELETE_COMPLETE`)**
-                if stack_status == "DELETE_COMPLETE":
-                    continue  
-                
                 try:
                     termination_protection = stack_details.get("EnableTerminationProtection", False)
 
