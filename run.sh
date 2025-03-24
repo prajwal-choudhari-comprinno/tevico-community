@@ -29,4 +29,4 @@ echo -ne '#######################   (100%)\r'
 echo -ne '\n'
 
 echo -ne 'Running the application...\n'
-/tmp/tevico-community/main run
+/tmp/tevico-community/.venv/bin/python3 /tmp/tevico-community/main run
