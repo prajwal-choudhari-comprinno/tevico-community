@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 
 echo -ne 'Setup in progress...\n'
@@ -5,8 +6,11 @@ echo -ne 'Cleaning up previous builds...\n'
 cd /tmp
 rm -rf tevico-community
 
+# If a branch name is passed then use that, otherwise use the default branch name
+branch_name="${1:-"main"}"
+
 echo -ne 'Cloning the repository...\n'
-git clone -b dev https://github.com/comprinnotech/tevico-community.git > /dev/null 2> /dev/null
+git clone -b $branch_name https://github.com/comprinnotech/tevico-community.git > /dev/null 2> /dev/null
 cd tevico-community
 
 echo -ne 'Setting up virtual environment...\n'
