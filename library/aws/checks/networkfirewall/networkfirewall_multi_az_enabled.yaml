@@ -1,6 +1,6 @@
 Provider: "aws"
 CheckID: "networkfirewall_multi_az_enabled"
-CheckTitle: "Ensure all Network Firewall Firewalls are deployed across multiple AZ."
+CheckTitle: "Ensure all Network Firewalls are deployed across multiple AZ."
 CheckType:
   - "Software and Configuration Checks/Industry and Regulatory Standards/NIST 800-53 Controls"
 ServiceName: "network-firewall"
@@ -8,7 +8,7 @@ SubServiceName: ""
 ResourceIdTemplate: "arn:partition:network-firewall::account-id:firewall/firewall-name"
 Severity: "medium"
 ResourceType: "AwsNetworkFirewallFirewall"
-Description: "Ensure all Network Firewall Firewalls are deployed in at least 2 Availability Zones."
+Description: "Ensure all Network Firewalls are deployed in at least 2 Availability Zones."
 Risk: "Deploying a Network Firewall in a single Availability Zone increases the risk of service disruption if that AZ experiences an outage, potentially leaving your network vulnerable to attacks or downtime."
 RelatedUrl: "https://docs.aws.amazon.com/network-firewall/latest/developerguide/arch-two-zone-igw.html"
 Remediation:

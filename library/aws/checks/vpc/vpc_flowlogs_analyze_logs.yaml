@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: vpc_flowlogs_analyze_logs
-CheckTitle: Check if VPC Flow Logs are being analyzed in CloudWatch Logs.
+CheckTitle: Ensure VPC Flow Logs are being analyzed in CloudWatch Logs.
 CheckType: []
 ServiceName: ec2
 SubServiceName: ""

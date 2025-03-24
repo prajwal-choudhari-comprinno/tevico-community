@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: acm_certificates_expiration_check
-CheckTitle: Ensure ACM Certificates Are Not Expiring Soon
+CheckTitle: Ensure ACM certificates are not expiring soon
 CheckType: [Data Protection]
 ServiceName: acm
 SubServiceName: ""

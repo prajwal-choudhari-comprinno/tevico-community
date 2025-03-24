@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: securityhub_enabled
-CheckTitle: Check if Security Hub is enabled and its standard subscriptions.
+CheckTitle: Ensure Security Hub is enabled and has standard subscriptions.
 CheckType:
   - Logging and Monitoring
 ServiceName: securityhub
@@ -8,7 +8,7 @@ SubServiceName: ""
 ResourceIdTemplate: arn:partition:securityhub:region:account-id:hub/hub-id
 Severity: medium
 ResourceType: Other
-Description: Check if Security Hub is enabled and its standard subscriptions.
+Description: Check if Security Hub is enabled and has standard subscriptions.
 Risk: AWS Security Hub gives you a comprehensive view of your security alerts and security posture across your AWS accounts.
 RelatedUrl: https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-standards-enable-disable.html
 Remediation:
@@ -18,7 +18,7 @@ Remediation:
     Other: ""
     Terraform: ""
   Recommendation:
-    Text: Security Hub is Regional. When you enable or disable a security standard, it is enabled or disabled only in the current Region or in the Region that you specify.
+    Text: Security Hub is Regional. When you enable or disable a security standard, it is enabled or disabled only in the current Region or in the Region that you specify. Also you need to enable the standards that are relevant to your business needs, industry, or use case.
     Url: https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-standards-enable-disable.html
 Categories: []
 DependsOn: []
