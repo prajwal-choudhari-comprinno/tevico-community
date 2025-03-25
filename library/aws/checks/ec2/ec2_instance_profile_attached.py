@@ -1,58 +1,78 @@
 """
 AUTHOR: Sheikh Aafaq Rashid
-DATE: 10-10-2024
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-15
 """
 
 import boto3
-
-from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
+from botocore.exceptions import BotoCoreError, ClientError
+from tevico.engine.entities.report.check_model import (
+    CheckReport, CheckStatus, GeneralResource, ResourceStatus
+)
 from tevico.engine.entities.check.check import Check
 
 
 class ec2_instance_profile_attached(Check):
-
     def execute(self, connection: boto3.Session) -> CheckReport:
         ec2_client = connection.client('ec2')
         report = CheckReport(name=__name__)
-        report.status = CheckStatus.PASSED  # Start assuming all instances have profiles
         report.resource_ids_status = []
 
         try:
-            # Fetch all EC2 instances
-            response = ec2_client.describe_instances()
-            reservations = response.get('Reservations', [])
-        except Exception as e:
-            report.status = CheckStatus.FAILED
-            #report.message = f"Error fetching EC2 instances: {str(e)}"
-            return report
+            # Get all running EC2 instances (exclude pending, terminated)
+            paginator = ec2_client.get_paginator('describe_instances')
+            has_running_instances = False
 
-        if not reservations:
-            report.status = CheckStatus.FAILED
-            #report.message = "No EC2 instances found."
-            return report
+            for page in paginator.paginate():
+                reservations = page.get('Reservations', [])
+                if reservations:
+                    has_running_instances = True
+                
+                for reservation in reservations:
+                    for instance in reservation.get('Instances', []):
+                        state = instance.get('State', {}).get('Name', '').lower()
+                        if state in ["pending", "terminated"]:
+                            continue  # Skip these states
 
-        for reservation in reservations:
-            for instance in reservation.get('Instances', []):
-                instance_id = instance.get('InstanceId')
-                instance_profile = instance.get('IamInstanceProfile', None)
+                        instance_id = instance['InstanceId']
+                        iam_instance_profile = instance.get('IamInstanceProfile')
 
-                if instance_profile:
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=instance_id),
-                            status=CheckStatus.PASSED,
-                            summary=''
+                        if iam_instance_profile:
+                            status = CheckStatus.PASSED
+                            summary = f"EC2 instance {instance_id} has an instance profile attached."
+                        else:
+                            status = CheckStatus.FAILED
+                            summary = f"EC2 instance {instance_id} does NOT have an instance profile attached."
+
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=GeneralResource(name=instance_id),
+                                status=status,
+                                summary=summary
+                            )
                         )
+
+            # If no running EC2 instances were found, return NOT_APPLICABLE
+            if not has_running_instances:
+                report.status = CheckStatus.NOT_APPLICABLE
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No running EC2 instances found."
                     )
-                else:
-                    report.status = CheckStatus.FAILED
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=instance_id),
-                            status=CheckStatus.FAILED,
-                            summary=''
-                        )
-                    )
-                    #report.message = f"EC2 Instance {instance_id} does not have an IAM instance profile attached."
+                )
+                return report
+
+        except (BotoCoreError, ClientError) as e:
+            report.status = CheckStatus.UNKNOWN
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name=""),
+                    status=CheckStatus.UNKNOWN,
+                    summary="Error retrieving EC2 instance profile information.",
+                    exception=str(e)
+                )
+            )
 
         return report
