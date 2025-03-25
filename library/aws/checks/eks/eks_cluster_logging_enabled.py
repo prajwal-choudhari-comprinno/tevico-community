@@ -44,11 +44,12 @@ class eks_cluster_logging_enabled(Check):
                 return report 
 
             for cluster in clusters:
-                try:
-                    cluster_desc = client.describe_cluster(name=cluster)["cluster"]
-                    cluster_arn = cluster_desc.get("arn", f"arn:aws:eks:{region}:{account_id}:cluster/{cluster}")
-                    resource = AwsResource(arn=cluster_arn)
+                cluster_desc = client.describe_cluster(name=cluster)["cluster"]
+                cluster_arn = cluster_desc.get("arn", f"arn:aws:eks:{region}:{account_id}:cluster/{cluster}")
+                resource = AwsResource(arn=cluster_arn)
 
+                try:
+                    
                     # Check logging configuration
                     logging_config = cluster_desc.get("logging", {}).get("clusterLogging", [])
                     logging_enabled = any(log.get("enabled", False) for log in logging_config)
