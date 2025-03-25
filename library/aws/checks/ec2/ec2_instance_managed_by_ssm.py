@@ -18,18 +18,19 @@ class ec2_instance_managed_by_ssm(Check):
         ssm_client = connection.client('ssm')
         report = CheckReport(name=__name__)
         report.resource_ids_status = []
-        has_non_compliant = False  # Track non-managed instances
 
         try:
             # Get all running EC2 instances (exclude pending, terminated, stopped)
             paginator = ec2_client.get_paginator('describe_instances')
             instance_ids = []
+            has_running_instances = False
 
             for page in paginator.paginate():
                 reservations = page.get('Reservations', [])
-                if not reservations:
-                    continue
-
+                # If there are any reservations, mark that we found running instances
+                if reservations:
+                    has_running_instances = True
+                
                 for reservation in reservations:
                     for instance in reservation.get('Instances', []):
                         state = instance.get('State', {}).get('Name', '').lower()
@@ -39,11 +40,12 @@ class ec2_instance_managed_by_ssm(Check):
                         instance_id = instance['InstanceId']
                         instance_ids.append(instance_id)
 
-            if not instance_ids:  # No valid EC2 instances found
+            # If no EC2 instances were found, return NOT_APPLICABLE
+            if not has_running_instances:
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(name="EC2 Instances"),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No running EC2 instances found."
                     )
@@ -66,7 +68,7 @@ class ec2_instance_managed_by_ssm(Check):
                 else:
                     status = CheckStatus.FAILED
                     summary = f"EC2 instance {instance_id} is NOT managed by SSM."
-                    has_non_compliant = True
+                   
 
                 report.resource_ids_status.append(
                     ResourceStatus(
@@ -76,14 +78,12 @@ class ec2_instance_managed_by_ssm(Check):
                     )
                 )
 
-            # Final status: If any instance is non-compliant, set FAILED
-            report.status = CheckStatus.FAILED if has_non_compliant else CheckStatus.PASSED
 
         except (BotoCoreError, ClientError) as e:
             report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name="EC2 Instances"),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
                     summary="Error retrieving EC2 SSM management status.",
                     exception=str(e)
