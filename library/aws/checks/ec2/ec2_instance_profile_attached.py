@@ -39,7 +39,7 @@ class ec2_instance_profile_attached(Check):
 
                         if iam_instance_profile:
                             status = CheckStatus.PASSED
-                            summary = f"EC2 instance {instance_id} has an instance profile attached."
+                            summary = f"EC2 instance {instance_id} has an instance profile '{iam_instance_profile.get("Arn").split("/")[-1]}' attached."
                         else:
                             status = CheckStatus.FAILED
                             summary = f"EC2 instance {instance_id} does NOT have an instance profile attached."
