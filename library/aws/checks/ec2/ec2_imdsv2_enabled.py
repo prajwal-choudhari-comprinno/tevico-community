@@ -17,34 +17,48 @@ class ec2_imdsv2_enabled(Check):
         ec2_client = connection.client('ec2')
         report = CheckReport(name=__name__)
         report.resource_ids_status = []
-        has_non_compliant = False  # Track instances that fail the check
 
         try:
+            # Get all running EC2 instances
             paginator = ec2_client.get_paginator('describe_instances')
 
             for page in paginator.paginate():
                 reservations = page.get('Reservations', [])
 
-                if not reservations:
-                    continue
+                if not reservations:  # No running EC2 instances found
+                    report.status = CheckStatus.NOT_APPLICABLE
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=""),
+                            status=CheckStatus.NOT_APPLICABLE,
+                            summary="No running EC2 instances found."
+                        )
+                    )
+                    return report  # Exit early
 
                 for reservation in reservations:
                     for instance in reservation.get('Instances', []):
+                        state = instance.get('State', {}).get('Name', '').lower()
+                        if state in ["pending", "terminated"]:
+                            continue  # Skip instances in pending/terminated states
+
                         instance_id = instance['InstanceId']
 
-                        # Fetch Metadata Options
+                        # Get instance metadata options with default values
                         metadata_options = instance.get('MetadataOptions', {})
-                        http_tokens = metadata_options.get('HttpTokens', 'optional')  # Default is 'optional'
-                        http_endpoint = metadata_options.get('HttpEndpoint', 'disabled')  # Default is 'disabled'
+                        http_tokens = metadata_options.get('HttpTokens', 'optional').lower()
+                        http_endpoint = metadata_options.get('HttpEndpoint', 'disabled').lower()
 
-                        # Determine compliance level
-                        if http_endpoint.lower() == 'disabled' or http_tokens.lower() == 'optional':
-                            status = CheckStatus.FAILED
-                            summary = f"EC2 instance {instance_id} does not enforce IMDSv2."
-                            has_non_compliant = True
-                        elif http_tokens == 'required':
+                        # Check if IMDSv2 is fully enabled
+                        if http_tokens == "required" and http_endpoint == "enabled":
                             status = CheckStatus.PASSED
-                            summary = f"EC2 instance {instance_id} enforces IMDSv2."
+                            summary = f"EC2 instance {instance_id} has IMDSv2 fully enabled."
+                        else:
+                            status = CheckStatus.FAILED
+                            summary = (
+                                f"EC2 instance {instance_id} does NOT fully enforce IMDSv2. "
+                                f"HttpTokens: {http_tokens}, HttpEndpoint: {http_endpoint}."
+                            )
 
                         report.resource_ids_status.append(
                             ResourceStatus(
@@ -54,23 +68,13 @@ class ec2_imdsv2_enabled(Check):
                             )
                         )
 
-            if not report.resource_ids_status:  # If no instances exist
-                report.resource_ids_status.append(
-                    ResourceStatus(
-                        resource=GeneralResource(name=""),
-                        status=CheckStatus.NOT_APPLICABLE,
-                        summary="No EC2 instances found."
-                    )
-                )
-            else:
-                report.status = CheckStatus.FAILED if has_non_compliant else CheckStatus.PASSED
-
         except (BotoCoreError, ClientError) as e:
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
-                    summary="Error retrieving EC2 instance metadata options.",
+                    summary="Error retrieving EC2 metadata service configuration.",
                     exception=str(e)
                 )
             )
