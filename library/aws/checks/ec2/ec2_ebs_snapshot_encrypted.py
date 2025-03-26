@@ -1,9 +1,8 @@
 """
 AUTHOR: Sheikh Aafaq Rashid
 EMAIL: aafaq.rashid@comprinno.net
-DATE: 2025-01-10
+DATE: 2025-01-15
 """
-
 
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
@@ -18,26 +17,33 @@ class ec2_ebs_snapshot_encrypted(Check):
         ec2_client = connection.client('ec2')
         report = CheckReport(name=__name__)
         report.resource_ids_status = []
-        has_unencrypted = False  # Track unencrypted snapshots
 
         try:
+            # Get all EBS snapshots owned by the account
             paginator = ec2_client.get_paginator('describe_snapshots')
 
-            for page in paginator.paginate(OwnerIds=['self']):  # Paginate automatically
+            for page in paginator.paginate(OwnerIds=['self']):  # Fetch only self-owned snapshots
                 snapshots = page.get('Snapshots', [])
 
-                if not snapshots:  # If empty page and no previous snapshots
-                    continue
+                if not snapshots:
+                    report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No EBS snapshots found."
+                    )
+                )
 
                 for snapshot in snapshots:
                     snapshot_id = snapshot['SnapshotId']
                     encrypted = snapshot.get('Encrypted', False)
 
                     status = CheckStatus.PASSED if encrypted else CheckStatus.FAILED
-                    summary = f"EBS snapshot {snapshot_id} is {'encrypted' if encrypted else 'not encrypted'}."
-
-                    if not encrypted:
-                        has_unencrypted = True  # Track unencrypted snapshots
+                    summary = (
+                        f"EBS snapshot {snapshot_id} is encrypted."
+                        if encrypted
+                        else f"EBS snapshot {snapshot_id} is NOT encrypted."
+                    )
 
                     report.resource_ids_status.append(
                         ResourceStatus(
@@ -46,18 +52,6 @@ class ec2_ebs_snapshot_encrypted(Check):
                             summary=summary
                         )
                     )
-
-            if not report.resource_ids_status:  # If no snapshots exist
-                report.status = CheckStatus.NOT_APPLICABLE
-                report.resource_ids_status.append(
-                    ResourceStatus(
-                        resource=GeneralResource(name=""),
-                        status=CheckStatus.NOT_APPLICABLE,
-                        summary="No EBS snapshots found."
-                    )
-                )
-            else:
-                report.status = CheckStatus.FAILED if has_unencrypted else CheckStatus.PASSED
 
         except (BotoCoreError, ClientError) as e:
             report.status = CheckStatus.UNKNOWN
