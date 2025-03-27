@@ -21,37 +21,39 @@ class ec2_ebs_snapshot_encrypted(Check):
         try:
             # Get all EBS snapshots owned by the account
             paginator = ec2_client.get_paginator('describe_snapshots')
+            snapshots = []
 
             for page in paginator.paginate(OwnerIds=['self']):  # Fetch only self-owned snapshots
-                snapshots = page.get('Snapshots', [])
+                snapshots.extend(page.get('Snapshots', []))
 
-                if not snapshots:
-                    report.resource_ids_status.append(
+            if not snapshots:
+                report.resource_ids_status.append(
                     ResourceStatus(
                         resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No EBS snapshots found."
                     )
                 )
+                return report
 
-                for snapshot in snapshots:
-                    snapshot_id = snapshot['SnapshotId']
-                    encrypted = snapshot.get('Encrypted', False)
+            for snapshot in snapshots:
+                snapshot_id = snapshot['SnapshotId']
+                encrypted = snapshot.get('Encrypted', False)
 
-                    status = CheckStatus.PASSED if encrypted else CheckStatus.FAILED
-                    summary = (
-                        f"EBS snapshot {snapshot_id} is encrypted."
-                        if encrypted
-                        else f"EBS snapshot {snapshot_id} is NOT encrypted."
+                status = CheckStatus.PASSED if encrypted else CheckStatus.FAILED
+                summary = (
+                    f"EBS snapshot {snapshot_id} is encrypted."
+                    if encrypted
+                    else f"EBS snapshot {snapshot_id} is NOT encrypted."
+                )
+
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=snapshot_id),
+                        status=status,
+                        summary=summary
                     )
-
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=snapshot_id),
-                            status=status,
-                            summary=summary
-                        )
-                    )
+                )
 
         except (BotoCoreError, ClientError) as e:
             report.status = CheckStatus.UNKNOWN
