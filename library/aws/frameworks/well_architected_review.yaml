@@ -244,6 +244,7 @@ sections:
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
           - dynamodb_tables_pitr_enabled
+          - rds_instance_backup_enabled
           - rds_instance_minor_version_upgrade_enabled
       - name: Change Management
         description: |
