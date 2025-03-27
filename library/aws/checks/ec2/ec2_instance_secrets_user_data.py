@@ -24,8 +24,10 @@ class ec2_instance_secrets_user_data(Check):
         sensitive_keywords = [
             'password', 'secret', 'token', 'api_key', 'aws_secret_access_key',
             'aws_access_key_id', 'client_secret', 'username', 'credential', 
-            'db_password', 'mysql_pass', 'postgres_pass', 'mongodb_pass'
+            'db_password', 'mysql_pass', 'postgres_pass', 'mongodb_pass',
+            'key', 'pin', 'connection', 'auth', 'authentication', 'api'
         ]
+        
 
         # Regular expressions for matching patterns
         regex_patterns = [
