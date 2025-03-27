@@ -21,41 +21,39 @@ class ec2_ebs_volume_encryption(Check):
         try:
             # Get all EBS volumes
             paginator = ec2_client.get_paginator('describe_volumes')
-            volumes_found = False
+            volumes = []
 
             for page in paginator.paginate():
-                volumes = page.get('Volumes', [])
+                volumes.extend(page.get('Volumes', []))
 
-                if not volumes:
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=""),
-                            status=CheckStatus.NOT_APPLICABLE,
-                            summary="No EBS volumes found."
-                        )
+            if not volumes:
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No EBS volumes found."
                     )
-                    return report
-                    
+                )
+                return report
 
-                for volume in volumes:
-                    volume_id = volume['VolumeId']
-                    encrypted = volume.get('Encrypted', False)
+            for volume in volumes:
+                volume_id = volume['VolumeId']
+                encrypted = volume.get('Encrypted', False)
 
-                    status = CheckStatus.PASSED if encrypted else CheckStatus.FAILED
-                    summary = (
-                        f"EBS volume {volume_id} is encrypted."
-                        if encrypted
-                        else f"EBS volume {volume_id} is NOT encrypted."
+                status = CheckStatus.PASSED if encrypted else CheckStatus.FAILED
+                summary = (
+                    f"EBS volume {volume_id} is encrypted."
+                    if encrypted
+                    else f"EBS volume {volume_id} is NOT encrypted."
+                )
+
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=volume_id),
+                        status=status,
+                        summary=summary
                     )
-
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=volume_id),
-                            status=status,
-                            summary=summary
-                        )
-                    )
-
+                )
 
         except (BotoCoreError, ClientError) as e:
             report.status = CheckStatus.UNKNOWN
