@@ -43,7 +43,6 @@ class route53_domains_privacy_protection_enabled(Check):
             
             # Check privacy protection for each domain
             for domain_info in domains:
-                print(domain_info)
                 domain_name = domain_info['DomainName']
                 domain_arn = f"arn:aws:route53domains:::{domain_name}"
                 
