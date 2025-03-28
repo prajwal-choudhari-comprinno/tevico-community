@@ -13,7 +13,6 @@ class iam_policy_attached_to_only_group_or_roles(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         report = CheckReport(name=__name__)
         client = connection.client('iam')
-        overall_status = CheckStatus.PASSED  # Default to PASSED, update if failures are found
         policies_found = False  # Track if any policies exist
 
         try:
@@ -43,14 +42,20 @@ class iam_policy_attached_to_only_group_or_roles(Check):
                                 user_arn = user_info["User"]["Arn"]
                                 user_arns.append(user_arn)
                             except (BotoCoreError, ClientError) as e:
-                                user_arns.append(f"Error fetching ARN for {user['UserName']}: {str(e)}")
+                                report.resource_ids_status.append(
+                                    ResourceStatus(
+                                        resource=GeneralResource(name=f"IAMUser:{user['UserName']}"),
+                                        status=CheckStatus.UNKNOWN,
+                                        summary=f"Failed to retrieve ARN for user {user['UserName']}.",
+                                        exception=str(e)
+                                    )
+                                )
 
                         summary = (
                             f"IAM policy '{policy_name}' is attached directly to users. "
                             f"User ARNs: {', '.join(user_arns)}."
                         )
                         status = CheckStatus.FAILED
-                        overall_status = CheckStatus.FAILED  # Ensure the final report reflects failure
                     else:
                         summary = f"IAM policy '{policy_name}' is only attached to groups or roles."
                         status = CheckStatus.PASSED
@@ -68,7 +73,7 @@ class iam_policy_attached_to_only_group_or_roles(Check):
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(name="IAMPolicies"),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
                         summary="No IAM policies found in the account."
                     )
@@ -77,15 +82,13 @@ class iam_policy_attached_to_only_group_or_roles(Check):
 
         except (BotoCoreError, ClientError) as e:
             # Handle API failures
-            overall_status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name="IAMPolicies"),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
                     summary="Failed to retrieve IAM policies or their attachments.",
                     exception=str(e)
                 )
             )
 
-        report.status = overall_status  # Set final report status
         return report

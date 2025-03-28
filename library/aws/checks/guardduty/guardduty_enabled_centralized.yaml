@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: guardduty_enabled_centralized
-CheckTitle: Ensure GuardDuty is Enabled and Centralized
+CheckTitle: Ensure GuardDuty is enabled and is centralized
 CheckType: [Infrastructure Protection]
 ServiceName: guardduty
 SubServiceName: ""
