@@ -1,3 +1,9 @@
+"""
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-13
+"""
+
 import boto3
 import re
 from botocore.exceptions import BotoCoreError, ClientError
