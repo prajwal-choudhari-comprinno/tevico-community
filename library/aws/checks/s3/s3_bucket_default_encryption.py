@@ -1,5 +1,7 @@
 """
-Check if S3 buckets have default encryption enabled.
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-01-15
 """
 
 import boto3
