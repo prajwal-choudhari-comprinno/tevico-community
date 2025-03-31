@@ -1,13 +1,13 @@
 Provider: aws
 CheckID: rds_instance_multi_az
-CheckTitle: Check if RDS instances have multi-AZ enabled.
+CheckTitle: Ensure RDS instances have multi-AZ enabled.
 CheckType: []
 ServiceName: rds
 SubServiceName: ""
 ResourceIdTemplate: arn:aws:rds:region:account-id:db-instance
 Severity: medium
 ResourceType: AwsRdsDbInstance
-Description: Check if RDS instances have multi-AZ enabled.
+Description: Ensure RDS instances have multi-AZ enabled.
 Risk:
   In case of failure, with a single-AZ deployment configuration, should an availability
   zone specific database failure occur, Amazon RDS can not automatically fail over

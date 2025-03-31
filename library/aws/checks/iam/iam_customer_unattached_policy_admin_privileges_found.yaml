@@ -19,7 +19,7 @@ Severity: high
 
 ResourceType: AwsIamPolicy
 
-Description: Ensure IAM policies that allow full "*:*" administrative privileges are not created, may be eventual consistent if an ephemeral resource is using it.
+Description: Ensure IAM policies that allow full "*:*" administrative privileges are not created.
 
 Risk: |
   IAM policies are the means by which privileges are granted to users, groups, or roles. 

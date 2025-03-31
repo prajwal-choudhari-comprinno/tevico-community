@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: networkfirewall_logging_enabled
-CheckTitle: Ensure logging is enabled for AWS Network Firewall firewalls.
+CheckTitle: Ensure logging is enabled for AWS Network Firewall.
 CheckType: [Detective Control]
 ServiceName: network-firewall
 SubServiceName: ""

@@ -86,6 +86,7 @@ sections:
           - dynamodb_tables_kms_cmk_encryption_enabled
           - rds_instance_storage_encrypted
           - s3_bucket_default_encryption
+          - s3_bucket_secure_transport_policy
           - sns_topics_kms_encryption_at_rest_enabled
           - secrets_manager_automatic_rotation_enabled
           - kms_cmk_rotation_enabled
@@ -111,6 +112,7 @@ sections:
           - apigateway_rest_api_client_certificate_enabled
           - apigateway_waf_protection_enabled
           - cloudfront_distributions_https_enabled
+          - cloudfront_distributions_using_deprecated_ssl_protocols
           - ec2_network_acl_allow_ingress_any_port
           - ec2_network_acl_allow_ingress_tcp_port_22
           - ec2_security_group_default_restrict_traffic
@@ -181,6 +183,7 @@ sections:
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
           - networkfirewall_multi_az_enabled
+          - rds_instance_multi_az
           - dynamodb_tables_pitr_enabled
       - name: Recovery Planning
         description: |
@@ -214,6 +217,7 @@ sections:
           - eks_cluster_logging_enabled
           - elb_v2_logging_enabled
           - rds_instance_integration_cloudwatch_logging_enabled
+          - rds_instance_enhanced_monitoring_enabled
           - vpc_flowlogs_enable_logging
           - vpc_flowlogs_analyze_logs
           - cloudtrail_s3_bucket_access_logging_enabled
@@ -241,6 +245,7 @@ sections:
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
           - dynamodb_tables_pitr_enabled
+          - rds_instance_backup_enabled
           - rds_instance_minor_version_upgrade_enabled
       - name: Change Management
         description: |
@@ -250,3 +255,4 @@ sections:
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
           - cloudformation_stacks_termination_protection_enabled
+          - rds_instance_deletion_protection

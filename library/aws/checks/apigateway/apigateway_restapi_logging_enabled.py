@@ -1,56 +1,114 @@
+"""
+AUTHOR: deepak-puri-comprinno
+EMAIL: deepak.puri@comprinno.net
+DATE: 2025-01-13
+"""
+
 import boto3
-from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
+from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, AwsResource, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
 class apigateway_restapi_logging_enabled(Check):
+
     def execute(self, connection: boto3.Session) -> CheckReport:
+
+        # Initialize API Gateway client and check report
+        client = connection.client("apigateway")
+        region = connection.region_name
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
         report.resource_ids_status = []
 
         try:
-            client = connection.client('apigateway')
-            apis = client.get_rest_apis().get('items', [])
-            region = connection.client('sts').get_caller_identity().get('Arn').split(':')[3]
+            # Custom pagination for fetching REST APIs
+            apis = []
+            next_token = None
 
+            while True:
+                response = client.get_rest_apis(position=next_token) if next_token else client.get_rest_apis()
+                apis.extend(response.get("items", []))
+                next_token = response.get("position")
+
+                if not next_token:
+                    break
+
+            #Flag to track if any API Gateway has stages
+            has_stages = False
+
+            # Check each API and its stages for logging configuration
             for api in apis:
-                api_name = api.get('name', 'Unnamed API')
-                api_id = api['id']
-                api_arn = f"arn:aws:apigateway:{region}::/restapis/{api_id}"
-                resource = AwsResource(arn=api_arn)
+                api_id = api.get("id")
+                api_name = api.get("name", "Unnamed API")
+                resource_arn = f"arn:aws:apigateway:{region}::/restapis/{api_id}"
 
                 try:
-                    logging_types = api.get('endpointConfiguration', {}).get('types', [])
-                    logging_enabled = 'REGIONAL' in logging_types
-
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=resource,
-                            status=CheckStatus.PASSED if logging_enabled else CheckStatus.FAILED,
-                            summary=f"Logging {'enabled' if logging_enabled else 'not enabled'} for API {api_name}."
+                    # Fetch stages for the current API
+                    stages = client.get_stages(restApiId=api_id).get("item", [])
+                    
+                    if not stages:
+                        # If no stages are present, mark as failed
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=AwsResource(arn=resource_arn),
+                                status=CheckStatus.SKIPPED,
+                                summary=f"API {api_name} has no stages.",
+                            )
                         )
-                    )
+                        continue
 
-                    if not logging_enabled:
-                        report.status = CheckStatus.FAILED
+                    has_stages = True
+
+                    for stage in stages:
+                        stage_name = stage.get("stageName")
+
+                        # Check method settings for logging
+                        method_settings = stage.get("methodSettings", {})
+                        default_method = method_settings.get("*/*", {})
+                        logging_level = default_method.get("loggingLevel")
+
+                        # Determine logging status
+                        if logging_level in ["ERROR", "INFO"]:
+                            summary = f"Logging is enabled for stage {stage_name} of API {api_name}."
+                            status = CheckStatus.PASSED
+                        else:
+                            summary = f"Logging is disabled for stage {stage_name} of API {api_name}."
+                            status = CheckStatus.FAILED
+                            report.status = CheckStatus.FAILED
+
+                        # Append result to report
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=AwsResource(arn=resource_arn),
+                                status=status,
+                                summary=summary
+                            )
+                        )
+
                 except Exception as e:
-                    report.status = CheckStatus.FAILED
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=resource,
-                            status=CheckStatus.FAILED,
-                            summary=f"Error checking logging for API {api_name}: {str(e)}"
+                            resource=AwsResource(arn=resource_arn),
+                            status=CheckStatus.UNKNOWN,
+                            summary=f"Error fetching stages for API {api_name}: {str(e)}",
+                            exception=str(e)
                         )
                     )
+                    report.status = CheckStatus.UNKNOWN
+            
+            # If no stages are present in any API, mark as skipped
+            if not has_stages:
+                report.status = CheckStatus.SKIPPED
+
         except Exception as e:
-            report.status = CheckStatus.FAILED
+            # Handle API listing errors
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
-                    status=CheckStatus.FAILED,
-                    summary=f"Error accessing API Gateway: {str(e)}"
+                    status=CheckStatus.UNKNOWN,
+                    summary=f"API Gateway listing error: {str(e)}",
+                    exception=str(e),
                 )
             )
-
+            report.status = CheckStatus.UNKNOWN
         return report

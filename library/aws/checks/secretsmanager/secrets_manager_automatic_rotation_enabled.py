@@ -1,15 +1,16 @@
 """
 AUTHOR: deepak-puri-comprinno
 EMAIL: deepak.puri@comprinno.net
-DATE: 2025-03-18
+DATE: 2025-03-20
 """
+
 
 import boto3
 from tevico.engine.entities.report.check_model import AwsResource, CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
 
-class rds_instance_enhanced_monitoring_enabled(Check):
+class secrets_manager_automatic_rotation_enabled(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
         # Initialize report
         report = CheckReport(name=__name__)
@@ -17,49 +18,50 @@ class rds_instance_enhanced_monitoring_enabled(Check):
         report.resource_ids_status = []
 
         try:
-            client = connection.client("rds")
-            # Pagination for listing all RDS instances
-            instances = []
+            client = connection.client("secretsmanager")
+
+            # Pagination for listing all secrets
+            secrets = []
             next_token = None
 
             while True:
-                response = client.describe_db_instances(Marker=next_token) if next_token else client.describe_db_instances()
-                instances.extend(response.get("DBInstances", []))
-                next_token = response.get("Marker")
+                response = client.list_secrets(NextToken=next_token) if next_token else client.list_secrets()
+                secrets.extend(response.get("SecretList", []))
+                next_token = response.get("NextToken")
 
                 if not next_token:
                     break
 
-            # If no RDS instances exist, mark as NOT_APPLICABLE
-            if not instances:
+            # If no secrets exist, mark as NOT_APPLICABLE
+            if not secrets:
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
                         resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
-                        summary="No RDS instances found.",
+                        summary="No secrets found in Secrets Manager.",
                     )
                 )
                 return report
 
-            # Check each RDS instance for Enhanced Monitoring
-            for instance in instances:
-                instance_name = instance["DBInstanceIdentifier"]
-                instance_arn = instance["DBInstanceArn"]
+            # Check each secret for automatic rotation
+            for secret in secrets:
+                secret_arn = secret["ARN"]
                 try:
-                    enhanced_monitoring = instance.get("EnhancedMonitoringResourceArn")
+                    secret_name = secret.get("Name", "Unknown Secret")
+                    rotation_enabled = secret.get("RotationEnabled", False)
 
-                    if enhanced_monitoring:
-                        summary = f"Enhanced monitoring is enabled for RDS instance {instance_name}."
+                    if rotation_enabled:
+                        summary = f"Automatic rotation is enabled for secret: {secret_name}."
                         status = CheckStatus.PASSED
                     else:
-                        summary = f"Enhanced monitoring is NOT enabled for RDS instance {instance_name}."
+                        summary = f"Automatic rotation is NOT enabled for secret: {secret_name}."
                         status = CheckStatus.FAILED
-                        report.status = CheckStatus.FAILED  # At least one instance is non-compliant
+                        report.status = CheckStatus.FAILED  # At least one secret is non-compliant
 
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=AwsResource(arn=instance_arn),
+                            resource=AwsResource(arn=secret_arn),
                             status=status,
                             summary=summary,
                         )
@@ -69,10 +71,10 @@ class rds_instance_enhanced_monitoring_enabled(Check):
                     report.status = CheckStatus.UNKNOWN
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=AwsResource(arn=instance_arn),
+                            resource=AwsResource(arn=secret_arn),
                             status=CheckStatus.UNKNOWN,
-                            summary=f"Error retrieving Enhanced Monitoring status for {instance_name}: {str(e)}",
-                            exception=str(e)
+                            summary=f"Error retrieving secrets from Secrets Manager: {str(e)}",
+                            exception=str(e),
                         )
                     )
 
@@ -83,7 +85,7 @@ class rds_instance_enhanced_monitoring_enabled(Check):
                 ResourceStatus(
                     resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
-                    summary="Error retrieving RDS instance details.",
+                    summary=f"Error retrieving secrets from Secrets Manager: {str(e)}",
                     exception=str(e),
                 )
             )
