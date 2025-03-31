@@ -23,13 +23,13 @@ class kms_cmk_rotation_enabled(Check):
             keys = []
             next_token = None
 
-            # Fetch all KMS CMKs with pagination
+            # Fetch all KMS keys with pagination
             while True:
                 response = client.list_keys(Marker=next_token) if next_token else client.list_keys()
                 keys.extend(response.get("Keys", []))
                 next_token = response.get("NextMarker")
                 if not next_token:
-                    break  # Exit loop when no more pages
+                    break  # Exit loop when no more pagestus
 
             if not keys:
                 # No customer-managed CMKs found, mark as NOT_APPLICABLE
