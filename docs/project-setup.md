@@ -1,14 +1,8 @@
 # Project Setup
 
-The Tevico Community project is designed to run seamlessly on cloud service providers like AWS CloudShell. To get started quickly, copy and execute the following command in your CloudShell terminal:
+If you are kneen on configuring the project and manually generating the report then you're at the right place.
 
-```bash title="Execute this in your Cloudshell"
-curl https://raw.githubusercontent.com/comprinnotech/tevico-community/refs/heads/main/run.sh?ts=$(date +%s) | bash
-```
-
-This command will download and execute the setup script, allowing you to get up and running with minimal effort.
-
-For more customization options, you can use various CLI parameters. To take full advantage of these options, you will need to **set up the project** locally.
+Before you make any required changes to the project and follow along the CLI Params to execute it, you will first need to **set up the project** locally.
 
 ---
 
