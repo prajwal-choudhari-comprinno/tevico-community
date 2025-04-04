@@ -119,7 +119,7 @@ sections:
           - eks_control_plane_endpoint_access_restricted
           - elb_ssl_listeners_enabled
           # @deepak.puri - Fix ARN issue for WAF ACL
-          - elb_waf_acl_attached
+          - elb_v2_waf_acl_attached
           - lambda_function_not_publicly_accessible
           - networkfirewall_multi_az_enabled
           - vpc_default_security_group_closed
