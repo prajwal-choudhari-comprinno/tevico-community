@@ -52,7 +52,8 @@ nav:
       - CLI Params: cli-params.md
     - Additional Resources:
         - Help with Tevico Community: help.md
-        - Project Status & Support: project-status.md
+        - Project Status: project-status.md
+        - Contribute to the Project: contribute.md
     - Generated Report:
       - Overview: report/overview.md
       - Structure: report/structure.md
@@ -68,9 +69,6 @@ nav:
           - Framework: developer/entities/framework.md
           # - Channel: developer/entities/channel.md
       - File Structure: developer/concepts/file-structure.md
-    - Provider:
-      - AWS:
-        - Dev Setup: developer/provider/aws-dev-setup.md
 
 plugins:
   - search

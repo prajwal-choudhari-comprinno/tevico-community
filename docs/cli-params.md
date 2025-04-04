@@ -29,7 +29,7 @@ Specifies the [Profile](developer/entities/profile.md) that you would like to ru
 
 ### --aws_config (optional)
 
-If you wish to run this project locally, follow the guide provided in the [AWS Dev Setup](developer/provider/aws-dev-setup.md) and use this CLI parameter. The value for this parameter is a comma-separated string that holds key-value pairs separated by `:`.
+The value for this parameter is a comma-separated string that holds key-value pairs separated by `:`.
 
 ```bash title="Run the project with AWS config"
 ./main run --aws_config=profile:comprinno

@@ -15,10 +15,6 @@ The developer documentation is organized into the following sections:
         - **[Provider](entities/provider.md)**: Understand the Provider entity and its functionality.
         - **[Profile](entities/profile.md)**: Learn about Profiles and their usage.
         - **[Framework](entities/framework.md)**: Dive into the framework entity and its purpose.
-        - **[Channel](entities/channel.md)**: Understand Channels and their integration.
     - **[File Structure](concepts/file-structure.md)**: Understand the file structure of the project.
-- **Provider**:
-    - **AWS**:
-        - **[Dev Setup](provider/aws-dev-setup.md)**: Set up your development environment for AWS.
 
 Refer to these sections to gain a comprehensive understanding of the developer tools and concepts.
