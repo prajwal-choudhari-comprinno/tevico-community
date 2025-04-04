@@ -52,8 +52,6 @@ class opensearch_service_domains_cloudwatch_logging_enabled(Check):
 
                 try:
                     log_options = domain_status.get("LogPublishingOptions", {})
-                    print(log_options)
-
                     # Check if any log type is enabled
                     any_logging_enabled = any(
                         log_config.get("Enabled", False) for log_config in log_options.values()
