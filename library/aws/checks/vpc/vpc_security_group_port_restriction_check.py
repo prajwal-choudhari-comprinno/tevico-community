@@ -8,25 +8,35 @@ import boto3
 from tevico.engine.entities.report.check_model import AwsResource, GeneralResource, CheckReport, CheckStatus, ResourceStatus
 from tevico.engine.entities.check.check import Check
 
-# Define the check class for VPC Security Group Port Restrictions
 class vpc_security_group_port_restriction_check(Check):
-    # This method performs the check and returns a report.
     def execute(self, connection: boto3.Session) -> CheckReport:
-        # Initialize the check report with a default status of PASSED.
+        # -------------------------------------------------------------------
+        # Initialize the check report.
+        # -------------------------------------------------------------------
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
         report.resource_ids_status = []
 
         try:
-            # Initialize AWS clients for EC2 and STS
+            # -------------------------------------------------------------------
+            # Sets up AWS clients for EC2 and STS.
+            # EC2 client: to retrieve VPCs and flow logs.
+            # STS client: to retrieve account information.
+            # -------------------------------------------------------------------
             ec2_client = connection.client('ec2')
             sts_client = connection.client('sts')
             
-            # Retrieve the AWS account ID and region for constructing valid ARNs
+            # -------------------------------------------------------------------
+            # Retrieves AWS Account and Region Information.
+            # This information is used to construct a valid ARN for each security group.
+            # -------------------------------------------------------------------
             account_id = sts_client.get_caller_identity()['Account']
             region = ec2_client.meta.region_name
 
-            # Retrieve all security groups using pagination
+            # -------------------------------------------------------------------
+            # Retrieves All Security Groups Using Pagination.
+            # Initializes an empty list for security groups.
+            # -------------------------------------------------------------------
             security_groups = []
             next_token = None
             while True:
@@ -39,7 +49,10 @@ class vpc_security_group_port_restriction_check(Check):
                 if not next_token:
                     break
 
-            # If no security groups are found, mark the check as NOT_APPLICABLE and return the report.
+            # -------------------------------------------------------------------
+            # Handles Case Where No Security Groups Are Found.
+            # If the security_groups list is empty, marks the check as NOT_APPLICABLE,
+            # -------------------------------------------------------------------
             if not security_groups:
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
@@ -51,42 +64,62 @@ class vpc_security_group_port_restriction_check(Check):
                 )
                 return report
 
-            # Define the set of sensitive ports to check (SSH, HTTP, HTTPS)
+            # -------------------------------------------------------------------
+            # These are the ports to check for unrestricted (public) access.
+            # -------------------------------------------------------------------
             restricted_ports = {22, 80, 443}
 
-            # Iterate over each security group to evaluate its rules
+            # -------------------------------------------------------------------
+            # Iterates Over Each Security Group to Evaluate Its Rules.
+            # For each security group:
+            #   - Construct a valid ARN using account, region, and GroupId.
+            #   - Create an AwsResource object.
+            #   - Evaluate inbound and outbound rules for sensitive ports with open access.
+            # -------------------------------------------------------------------
             for sg in security_groups:
                 group_id = sg.get("GroupId")
-                # Construct a valid ARN for the security group
                 sg_arn = f"arn:aws:ec2:{region}:{account_id}:security-group/{group_id}"
                 resource = AwsResource(arn=sg_arn)
 
                 try:
-                    # Retrieve inbound and outbound rules
+                    # -------------------------------------------------------------------
+                    # Retrieves Inbound and Outbound Rules.
+                    # Get the list of inbound rules (IpPermissions) and outbound rules (IpPermissionsEgress).
+                    # Combines both lists into a single list for easier processing.
+                    # -------------------------------------------------------------------
                     inbound = sg.get("IpPermissions", [])
                     outbound = sg.get("IpPermissionsEgress", [])
                     all_rules = inbound + outbound
                     failed = False
                     summary = ""
 
-                    # Loop through each rule to check for unrestricted access on sensitive ports
+                    # -------------------------------------------------------------------
+                    # Loops Through Each Rule to Check for Unrestricted Access.
+                    # For each rule, checks if the FromPort or ToPort matches any sensitive port.
+                    # Then, checks the IP ranges for a public CIDR (0.0.0.0/0 for IPv4 or ::/0 for IPv6).
+                    # If found, marks the rule as failed and build a summary message.
+                    # -------------------------------------------------------------------
                     for rule in all_rules:
                         from_port = rule.get("FromPort")
                         to_port = rule.get("ToPort")
-                        # Check if the rule targets one of the sensitive ports
+                        # Checks if the rule targets one of the sensitive ports.
                         if (from_port in restricted_ports) or (to_port in restricted_ports):
                             ip_ranges = rule.get("IpRanges", [])
                             ipv6_ranges = rule.get("Ipv6Ranges", [])
-                            # If the rule allows access from any IPv4 or IPv6 address, flag it as a failure
+                            # If the rule allows open access (all IPv4 or IPv6), flag it as a failure.
                             if any(r.get("CidrIp") == "0.0.0.0/0" for r in ip_ranges) or \
                                any(r.get("CidrIpv6") == "::/0" for r in ipv6_ranges):
                                 failed = True
-                                # Choose the port that is restricted
+                                # Chooses the restricted port that triggered the failure.
                                 port = from_port if from_port in restricted_ports else to_port
                                 summary = f"Security group {group_id} has open access on restricted port {port}."
                                 break
 
-                    # Update the report based on the result for this security group
+                    # -------------------------------------------------------------------
+                    # Records the Evaluation Result for This Security Group.
+                    # If a violation is found, mark as FAILED; otherwise, mark as PASSED.
+                    # Also updates the overall report status if any group fails.
+                    # -------------------------------------------------------------------
                     if failed:
                         report.status = CheckStatus.FAILED
                         report.resource_ids_status.append(
@@ -105,7 +138,11 @@ class vpc_security_group_port_restriction_check(Check):
                             )
                         )
                 except Exception as e:
-                    # If an error occurs while processing a security group, mark its status as UNKNOWN
+                    # -------------------------------------------------------------------
+                    # Handles Exceptions for Individual Security Group Processing.
+                    # If an error occurs while processing a specific security group,
+                    # marks its status as UNKNOWN and record the error details.
+                    # -------------------------------------------------------------------
                     report.status = CheckStatus.UNKNOWN
                     report.resource_ids_status.append(
                         ResourceStatus(
@@ -116,7 +153,11 @@ class vpc_security_group_port_restriction_check(Check):
                         )
                     )
         except Exception as e:
-            # If an error occurs while listing security groups, mark the overall check as UNKNOWN
+            # -------------------------------------------------------------------
+            # Global Exception Handling.
+            # If an error occurs during the retrieval of security groups,
+            # marks the overall check status as UNKNOWN and log the error.
+            # -------------------------------------------------------------------
             report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
@@ -127,5 +168,4 @@ class vpc_security_group_port_restriction_check(Check):
                 )
             )
 
-        # Return the final report after processing all security groups.
         return report

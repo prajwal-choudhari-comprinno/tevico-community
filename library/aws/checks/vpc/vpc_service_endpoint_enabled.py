@@ -10,24 +10,48 @@ from tevico.engine.entities.check.check import Check
 
 class vpc_service_endpoint_enabled(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
-        # Initialize the report with a default PASSED status.
+        # -------------------------------------------------------------------
+        # Initializes the check report.
+        # -------------------------------------------------------------------
         report = CheckReport(name=__name__)
         report.status = CheckStatus.PASSED
         report.resource_ids_status = []
         
         try:
-            # Create AWS clients for EC2 and STS.
+            # -------------------------------------------------------------------
+            # Set up AWS clients for EC2 and STS.
+            # EC2 client: to retrieve VPCs and flow logs.
+            # STS client: to retrieve account information.
+            # -------------------------------------------------------------------
             ec2_client = connection.client('ec2')
             sts_client = connection.client('sts')
             
-            # Retrieve account and region information.
+            # -------------------------------------------------------------------
+            # Retrieves AWS Account ID and Region.
+            # These values are used for constructing valid ARNs for resources.
+            # -------------------------------------------------------------------
             account_id = sts_client.get_caller_identity()['Account']
             region = ec2_client.meta.region_name
             
-            # Retrieve all VPCs.
-            vpcs_response = ec2_client.describe_vpcs()
-            vpcs = vpcs_response.get("Vpcs", [])
+            # -------------------------------------------------------------------
+            # Retrieves All VPCs Using Pagination.
+            # Initializes an empty list to store VPCs.
+            # -------------------------------------------------------------------
+            vpcs = []
+            next_token = None
+            while True:
+                if next_token:
+                    response = ec2_client.describe_vpcs(NextToken=next_token)
+                else:
+                    response = ec2_client.describe_vpcs()
+                vpcs.extend(response.get("Vpcs", []))
+                next_token = response.get("NextToken")
+                if not next_token:
+                    break
             
+            # -------------------------------------------------------------------
+            # If the VPCs list is empty, marks the check as NOT_APPLICABLE,
+            # -------------------------------------------------------------------
             if not vpcs:
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
@@ -39,7 +63,10 @@ class vpc_service_endpoint_enabled(Check):
                 )
                 return report
 
-            # Retrieve all VPC endpoints using pagination.
+            # -------------------------------------------------------------------
+            # Retrieves All VPC Endpoints Using Pagination.
+            # Initializes an empty list for VPC endpoints.
+            # -------------------------------------------------------------------
             vpc_endpoints = []
             next_token = None
             while True:
@@ -52,23 +79,37 @@ class vpc_service_endpoint_enabled(Check):
                 if not next_token:
                     break
 
-            # Group endpoints by VPC ID for faster lookup.
+            # -------------------------------------------------------------------
+            # Groups VPC Endpoints by VPC ID.
+            # This creates a dictionary where each key is a VPC ID and its value
+            # is a list of endpoints associated with that VPC.
+            # -------------------------------------------------------------------
             endpoints_by_vpc = {}
             for endpoint in vpc_endpoints:
                 vpc_id = endpoint.get("VpcId")
                 if vpc_id:
                     endpoints_by_vpc.setdefault(vpc_id, []).append(endpoint)
 
-            # Evaluate each VPC: Check if at least one associated endpoint is in "available" state.
+            # -------------------------------------------------------------------
+            # Evaluates Each VPC.
+            # For each VPC, checks if there is at least one associated endpoint that
+            # is in the "available" state.
+            # -------------------------------------------------------------------
             for vpc in vpcs:
                 vpc_id = vpc.get("VpcId")
-                # Construct a proper VPC ARN: arn:aws:ec2:<region>:<account-id>:vpc/<vpc-id>
                 vpc_arn = f"arn:aws:ec2:{region}:{account_id}:vpc/{vpc_id}"
                 resource = AwsResource(arn=vpc_arn, resource_id=vpc_id)
                 
+                # Retrieves the list of endpoints for this VPC from the grouped dictionary.
                 endpoints = endpoints_by_vpc.get(vpc_id, [])
+                # Filter the endpoints to include only those with state "available".
                 available_endpoints = [ep for ep in endpoints if ep.get("State", "").lower() == "available"]
                 
+                # -------------------------------------------------------------------
+                # Determine the Result and Construct a Summary Message.
+                # If there are available endpoints, mark the VPC as PASSED.
+                # Otherwise, marks it as FAILED and updates the overall report status.
+                # -------------------------------------------------------------------
                 if available_endpoints:
                     summary = (
                         f"VPC {vpc_id} has {len(available_endpoints)} service endpoint(s) "
@@ -81,9 +122,12 @@ class vpc_service_endpoint_enabled(Check):
                         "At least one available endpoint is required."
                     )
                     status = CheckStatus.FAILED
-                    # Update overall report status if any VPC fails.
                     report.status = CheckStatus.FAILED
 
+                # -------------------------------------------------------------------
+                # Appends the Evaluation Result for the VPC to the Report.
+                # Each result includes the resource, its status, and a summary.
+                # -------------------------------------------------------------------
                 report.resource_ids_status.append(
                     ResourceStatus(
                         resource=resource,
@@ -93,7 +137,11 @@ class vpc_service_endpoint_enabled(Check):
                 )
 
         except Exception as e:
-            # Global error handling: If an error occurs, mark the check as UNKNOWN.
+            # -------------------------------------------------------------------
+            # Global Exception Handling.
+            # If an error occurs during the process, mark the overall check as UNKNOWN
+            # and record the error details.
+            # -------------------------------------------------------------------
             report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
@@ -104,5 +152,4 @@ class vpc_service_endpoint_enabled(Check):
                 )
             )
             
-        # Return the final report.
         return report
