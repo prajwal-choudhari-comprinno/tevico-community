@@ -19,15 +19,12 @@ class cloudwatch_log_metric_filter_policy_changes(Check):
     def get_alarm_names(self, cloudwatch_client, metric_name, namespace):
         """Retrieve associated alarm names for a given metric name and namespace."""
         try:
-            alarm_names = []
-            paginator = cloudwatch_client.get_paginator('describe_alarms_for_metric')
-            for page in paginator.paginate(
+            response = cloudwatch_client.describe_alarms_for_metric(
                 MetricName=metric_name,
                 Namespace=namespace
-            ):
-                alarms = page.get("MetricAlarms", [])
-                alarm_names.extend([alarm["AlarmName"] for alarm in alarms])
-            return alarm_names
+            )
+            alarms = response.get("MetricAlarms", [])
+            return [alarm["AlarmName"] for alarm in alarms]
         except Exception as e:
             return []
 
@@ -40,7 +37,7 @@ class cloudwatch_log_metric_filter_policy_changes(Check):
         try:
             # Define the IAM policy changes event pattern
             pattern = re.compile(r"\$\.eventName\s*=\s*.?DeleteGroupPolicy.+\$\.eventName\s*=\s*.?DeleteRolePolicy.+\$\.eventName\s*=\s*.?DeleteUserPolicy.+\$\.eventName\s*=\s*.?PutGroupPolicy.+\$\.eventName\s*=\s*.?PutRolePolicy.+\$\.eventName\s*=\s*.?PutUserPolicy.+\$\.eventName\s*=\s*.?CreatePolicy.+\$\.eventName\s*=\s*.?DeletePolicy.+\$\.eventName\s*=\s*.?CreatePolicyVersion.+\$\.eventName\s*=\s*.?DeletePolicyVersion.+\$\.eventName\s*=\s*.?AttachRolePolicy.+\$\.eventName\s*=\s*.?DetachRolePolicy.+\$\.eventName\s*=\s*.?AttachUserPolicy.+\$\.eventName\s*=\s*.?DetachUserPolicy.+\$\.eventName\s*=\s*.?AttachGroupPolicy.+\$\.eventName\s*=\s*.?DetachGroupPolicy.?")
-
+            
             # Fetch all metric filters with pagination
             metric_filters = []
             paginator = logs_client.get_paginator('describe_metric_filters')
