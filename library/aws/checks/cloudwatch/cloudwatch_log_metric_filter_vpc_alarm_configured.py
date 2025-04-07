@@ -19,12 +19,15 @@ class cloudwatch_log_metric_filter_vpc_alarm_configured(Check):
     def get_alarm_names(self, cloudwatch_client, metric_name, namespace):
         """Retrieve associated alarm names for a given metric name and namespace."""
         try:
-            response = cloudwatch_client.describe_alarms_for_metric(
+            alarm_names = []
+            paginator = cloudwatch_client.get_paginator('describe_alarms_for_metric')
+            for page in paginator.paginate(
                 MetricName=metric_name,
                 Namespace=namespace
-            )
-            alarms = response.get("MetricAlarms", [])
-            return [alarm["AlarmName"] for alarm in alarms]
+            ):
+                alarms = page.get("MetricAlarms", [])
+                alarm_names.extend([alarm["AlarmName"] for alarm in alarms])
+            return alarm_names
         except Exception as e:
             return []
 
@@ -38,8 +41,11 @@ class cloudwatch_log_metric_filter_vpc_alarm_configured(Check):
             # Define the VPC-related event pattern
             pattern = re.compile(r"\$\.eventName\s*=\s*.?CreateVpc.+\$\.eventName\s*=\s*.?DeleteVpc.+\$\.eventName\s*=\s*.?ModifyVpcAttribute.+\$\.eventName\s*=\s*.?AcceptVpcPeeringConnection.+\$\.eventName\s*=\s*.?CreateVpcPeeringConnection.+\$\.eventName\s*=\s*.?DeleteVpcPeeringConnection.+\$\.eventName\s*=\s*.?RejectVpcPeeringConnection.+\$\.eventName\s*=\s*.?AttachClassicLinkVpc.+\$\.eventName\s*=\s*.?DetachClassicLinkVpc.+\$\.eventName\s*=\s*.?DisableVpcClassicLink.+\$\.eventName\s*=\s*.?EnableVpcClassicLink.?")
 
-            # Fetch all metric filters
-            metric_filters = logs_client.describe_metric_filters().get('metricFilters', [])
+            # Fetch all metric filters with pagination
+            metric_filters = []
+            paginator = logs_client.get_paginator('describe_metric_filters')
+            for page in paginator.paginate():
+                metric_filters.extend(page.get('metricFilters', []))
 
             # Filter metric filters that match the VPC pattern
             filtered_metric_filters = [f for f in metric_filters if re.search(pattern, f.get("filterPattern", ""))]
@@ -56,9 +62,13 @@ class cloudwatch_log_metric_filter_vpc_alarm_configured(Check):
                 )
                 return report  # Early exit
 
-            # Fetch all log groups dynamically (to get ARNs)
-            log_groups = logs_client.describe_log_groups().get('logGroups', [])
-            log_group_arns = {lg["logGroupName"]: lg["arn"][:-2] for lg in log_groups}
+            # Fetch all log groups dynamically with pagination (to get ARNs)
+            log_groups = []
+            paginator = logs_client.get_paginator('describe_log_groups')
+            for page in paginator.paginate():
+                log_groups.extend(page.get('logGroups', []))
+            
+            log_group_arns = {lg["logGroupName"]: lg["arn"][0:-2] for lg in log_groups}
 
             # Iterate over log groups with VPC metric filters
             for metric_filter in filtered_metric_filters:
