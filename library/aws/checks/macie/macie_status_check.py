@@ -43,7 +43,7 @@ class macie_status_check(Check):
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
-                    status=CheckStatus.FAILED,
+                    status=CheckStatus.UNKNOWN,
                     summary="Access denied while checking Amazon Macie status."
                 )
             )
