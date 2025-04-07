@@ -38,12 +38,12 @@ class macie_auto_sensitive_data_discovery_check(Check):
                 )
         
         except client.exceptions.AccessDeniedException:
-            report.status = CheckStatus.FAILED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
-                    status=CheckStatus.FAILED,
-                    summary="Macie automated sensitive data discovery is disabled."
+                    status=CheckStatus.UNKNOWN,
+                    summary="Access denied while checking Amazon Macie status."
                 )
             )
         except Exception as e:
