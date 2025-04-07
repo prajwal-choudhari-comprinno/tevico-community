@@ -34,17 +34,17 @@ class macie_status_check(Check):
                     ResourceStatus(
                         resource=GeneralResource(name=""),
                         status=CheckStatus.FAILED,
-                        summary="Amazon Macie is disabled."
+                        summary="Amazon Macie activities are paused or suspended."
                     )
                 )
         
         except client.exceptions.AccessDeniedException:
-            report.status = CheckStatus.FAILED
+            report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name=""),
                     status=CheckStatus.FAILED,
-                    summary="Amazon Macie is disabled."
+                    summary="Access denied while checking Amazon Macie status."
                 )
             )
         except Exception as e:
