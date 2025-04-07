@@ -20,8 +20,8 @@ class vpc_service_endpoint_enabled(Check):
         try:
             # -------------------------------------------------------------------
             # Set up AWS clients for EC2 and STS.
-            # EC2 client: to retrieve VPCs and flow logs.
-            # STS client: to retrieve account information.
+            # EC2 client: used to retrieve VPCs and VPC endpoints.
+            # STS client: used to retrieve account information.
             # -------------------------------------------------------------------
             ec2_client = connection.client('ec2')
             sts_client = connection.client('sts')
@@ -34,8 +34,7 @@ class vpc_service_endpoint_enabled(Check):
             region = ec2_client.meta.region_name
             
             # -------------------------------------------------------------------
-            # Retrieves All VPCs Using Pagination.
-            # Initializes an empty list to store VPCs.
+            # Retrieves all VPCs using pagination.
             # -------------------------------------------------------------------
             vpcs = []
             next_token = None
@@ -50,7 +49,8 @@ class vpc_service_endpoint_enabled(Check):
                     break
             
             # -------------------------------------------------------------------
-            # If the VPCs list is empty, marks the check as NOT_APPLICABLE,
+            # If the VPCs list is empty, mark the check as NOT_APPLICABLE.
+            # Appends a corresponding ResourceStatus and return the report.
             # -------------------------------------------------------------------
             if not vpcs:
                 report.status = CheckStatus.NOT_APPLICABLE
@@ -64,7 +64,7 @@ class vpc_service_endpoint_enabled(Check):
                 return report
 
             # -------------------------------------------------------------------
-            # Retrieves All VPC Endpoints Using Pagination.
+            # Retrieves all VPC endpoints using pagination.
             # Initializes an empty list for VPC endpoints.
             # -------------------------------------------------------------------
             vpc_endpoints = []
@@ -80,8 +80,8 @@ class vpc_service_endpoint_enabled(Check):
                     break
 
             # -------------------------------------------------------------------
-            # Groups VPC Endpoints by VPC ID.
-            # This creates a dictionary where each key is a VPC ID and its value
+            # Group VPC endpoints by VPC ID.
+            # Creates a dictionary where each key is a VPC ID and its value
             # is a list of endpoints associated with that VPC.
             # -------------------------------------------------------------------
             endpoints_by_vpc = {}
@@ -91,24 +91,24 @@ class vpc_service_endpoint_enabled(Check):
                     endpoints_by_vpc.setdefault(vpc_id, []).append(endpoint)
 
             # -------------------------------------------------------------------
-            # Evaluates Each VPC.
-            # For each VPC, checks if there is at least one associated endpoint that
+            # Evaluates each VPC.
+            # For each VPC, check if there is at least one associated endpoint that
             # is in the "available" state.
             # -------------------------------------------------------------------
             for vpc in vpcs:
                 vpc_id = vpc.get("VpcId")
                 vpc_arn = f"arn:aws:ec2:{region}:{account_id}:vpc/{vpc_id}"
-                resource = AwsResource(arn=vpc_arn, resource_id=vpc_id)
-                
-                # Retrieves the list of endpoints for this VPC from the grouped dictionary.
+                resource = AwsResource(arn=vpc_arn) 
+
+                # Retrieve the list of endpoints for this VPC from the grouped dictionary.
                 endpoints = endpoints_by_vpc.get(vpc_id, [])
                 # Filter the endpoints to include only those with state "available".
                 available_endpoints = [ep for ep in endpoints if ep.get("State", "").lower() == "available"]
                 
                 # -------------------------------------------------------------------
-                # Determine the Result and Construct a Summary Message.
+                # Determines the result and construct a summary message.
                 # If there are available endpoints, mark the VPC as PASSED.
-                # Otherwise, marks it as FAILED and updates the overall report status.
+                # Otherwise, mark it as FAILED and update the overall report status.
                 # -------------------------------------------------------------------
                 if available_endpoints:
                     summary = (
@@ -125,7 +125,7 @@ class vpc_service_endpoint_enabled(Check):
                     report.status = CheckStatus.FAILED
 
                 # -------------------------------------------------------------------
-                # Appends the Evaluation Result for the VPC to the Report.
+                # Appends the evaluation result for the VPC to the report.
                 # Each result includes the resource, its status, and a summary.
                 # -------------------------------------------------------------------
                 report.resource_ids_status.append(
@@ -138,8 +138,8 @@ class vpc_service_endpoint_enabled(Check):
 
         except Exception as e:
             # -------------------------------------------------------------------
-            # Global Exception Handling.
-            # If an error occurs during the process, mark the overall check as UNKNOWN
+            # Global exception handling.
+            # If an error occurs during processing, mark the overall check as UNKNOWN
             # and record the error details.
             # -------------------------------------------------------------------
             report.status = CheckStatus.UNKNOWN
