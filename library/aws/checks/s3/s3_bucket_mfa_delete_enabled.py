@@ -49,37 +49,24 @@ class s3_bucket_mfa_delete_enabled(Check):
                     
                     # Check if MFA Delete is enabled
                     mfa_delete = versioning_response.get('MFADelete', 'Disabled')
-                    versioning_status = versioning_response.get('Status', 'Disabled')
                     
-                    # MFA Delete requires versioning to be enabled
                     if mfa_delete == 'Enabled':
                         report.resource_ids_status.append(
                             ResourceStatus(
                                 resource=AwsResource(arn=bucket_arn),
                                 status=CheckStatus.PASSED,
-                                summary=f"S3 bucket {bucket_name} has MFA Delete enabled, providing additional protection against accidental deletion."
+                                summary=f"S3 bucket {bucket_name} has MFA Delete enabled."
                             )
                         )
                     else:
-                        # If versioning is not enabled, MFA Delete cannot be enabled
-                        if versioning_status != 'Enabled':
-                            report.status = CheckStatus.FAILED
-                            report.resource_ids_status.append(
-                                ResourceStatus(
-                                    resource=AwsResource(arn=bucket_arn),
-                                    status=CheckStatus.FAILED,
-                                    summary=f"S3 bucket {bucket_name} does not have versioning enabled, which is required for MFA Delete."
-                                )
+                        report.status = CheckStatus.FAILED
+                        report.resource_ids_status.append(
+                            ResourceStatus(
+                                resource=AwsResource(arn=bucket_arn),
+                                status=CheckStatus.FAILED,
+                                summary=f"S3 bucket {bucket_name} does not have MFA Delete enabled."
                             )
-                        else:
-                            report.status = CheckStatus.FAILED
-                            report.resource_ids_status.append(
-                                ResourceStatus(
-                                    resource=AwsResource(arn=bucket_arn),
-                                    status=CheckStatus.FAILED,
-                                    summary=f"S3 bucket {bucket_name} has versioning enabled but MFA Delete is not enabled."
-                                )
-                            )
+                        )
                 
                 except (BotoCoreError, ClientError) as e:
                     report.status = CheckStatus.UNKNOWN
