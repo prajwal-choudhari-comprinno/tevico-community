@@ -32,7 +32,7 @@ class ec2_image_builder_enabled(Check):
                 report.status = CheckStatus.FAILED
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(name="EC2 Image Builder"),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.FAILED,
                         summary="No EC2 Image Builder pipelines found."
                     )
@@ -51,7 +51,7 @@ class ec2_image_builder_enabled(Check):
 
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name="EC2 Image Builder"),
+                    resource=GeneralResource(name=""),
                     status=report.status,
                     summary=summary
                 )
