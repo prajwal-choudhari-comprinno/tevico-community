@@ -1,8 +1,7 @@
 """
-AUTHOR: SUPRIYO BHAKAT
-EMAIL: supriyo.bhakat@comprinno.net
-DATE: 2024-11-12
-UPDATED: 2025-04-09
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
+DATE: 2025-04-09
 """
 
 import boto3
