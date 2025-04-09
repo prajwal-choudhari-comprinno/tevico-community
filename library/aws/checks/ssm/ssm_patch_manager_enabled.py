@@ -35,13 +35,17 @@ class ssm_patch_manager_enabled(Check):
                     )
                     return report  # Exit early if no instances exist
 
-                # Get all instances that are not in pending or terminated state
+                # Get all running instances
                 instance_data = []
                 for reservation in reservations:
                     for instance in reservation.get("Instances", []):
-                        if instance.get("State", {}).get("Name", "").lower() not in ["pending", "terminated"]:
+                        state = instance.get("State", {}).get("Name", "").lower()
+                        if state == "running":
                             instance_id = instance["InstanceId"]
-                            instance_name = next((tag["Value"] for tag in instance.get("Tags", []) if tag["Key"] == "Name"), "Unnamed")
+                            instance_name = next(
+                                (tag["Value"] for tag in instance.get("Tags", []) if tag["Key"] == "Name"),
+                                "Unnamed"
+                            )
                             instance_data.append({"id": instance_id, "name": instance_name})
 
                 if not instance_data:
@@ -50,7 +54,7 @@ class ssm_patch_manager_enabled(Check):
                         ResourceStatus(
                             resource=GeneralResource(name=""),
                             status=CheckStatus.NOT_APPLICABLE,
-                            summary="No active EC2 instances found.",
+                            summary="No running EC2 instances found.",
                         )
                     )
                     return report
