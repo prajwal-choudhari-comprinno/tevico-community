@@ -24,7 +24,19 @@ class ssm_managed_compliant_patching(Check):
             instance_data = []
 
             for page in paginator.paginate():
-                for reservation in page.get("Reservations", []):
+                reservations = page.get("Reservations", [])
+                if not reservations:
+                    report.status = CheckStatus.NOT_APPLICABLE
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=GeneralResource(name=""),
+                            status=CheckStatus.NOT_APPLICABLE,
+                            summary="No EC2 instances found.",
+                        )
+                    )
+                    return report  # Exit early if no instances exist
+                
+                for reservation in reservations:
                     for instance in reservation.get("Instances", []):
                         state = instance.get("State", {}).get("Name", "").lower()
                         if state == "running":
