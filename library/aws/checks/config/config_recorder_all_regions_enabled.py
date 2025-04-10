@@ -64,7 +64,7 @@ class config_recorder_all_regions_enabled(Check):
                         ResourceStatus(
                             resource=GeneralResource(name=region),
                             status=CheckStatus.UNKNOWN,  # Status unknown due to error
-                            summary=f"Error checking AWS Config recorder in region {region}.",
+                            summary=f"Failed to check AWS Config recorder status in region {region}.",
                             exception=str(e)  # Store exception details
                         )
                     )
@@ -89,13 +89,23 @@ class config_recorder_all_regions_enabled(Check):
                     )
                 )
 
+        except (BotoCoreError, ClientError) as e:
+            # Handle AWS API errors when retrieving regions
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name="AWS Regions"),
+                    status=CheckStatus.UNKNOWN,  # Status unknown due to error
+                    summary="Failed to retrieve the list of AWS regions.",
+                    exception=str(e)  # Store exception details
+                )
+            )
         except Exception as e:
-            # Catch unexpected errors and report them as UNKNOWN
+            # Catch other unexpected errors and report them as UNKNOWN
             report.resource_ids_status.append(
                 ResourceStatus(
                     resource=GeneralResource(name="AWS Config"),
                     status=CheckStatus.UNKNOWN,  # General failure status
-                    summary="Encountered an error while retrieving AWS Config recorder status.",
+                    summary="Unexpected error during AWS Config recorder check execution.",
                     exception=str(e)  # Store exception details
                 )
             )
