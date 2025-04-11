@@ -1,6 +1,6 @@
 """
-AUTHOR: SUPRIYO BHAKAT
-EMAIL: supriyo.bhakat@comprinno.net
+AUTHOR: Sheikh Aafaq Rashid
+EMAIL: aafaq.rashid@comprinno.net
 DATE: 2024-11-12
 """
 
