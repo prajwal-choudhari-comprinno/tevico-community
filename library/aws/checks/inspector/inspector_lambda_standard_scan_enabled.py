@@ -29,13 +29,13 @@ class inspector_lambda_standard_scan_enabled(Check):
 
             if lambda_status == "ENABLED":
                 status = CheckStatus.PASSED
-                summary = "Inspector Lambda standard scan is enabled for this account."
+                summary = "Inspector Lambda standard scan is enabled."
             elif lambda_status == "DISABLED":
                 status = CheckStatus.FAILED
-                summary = "Inspector Lambda standard scan is not enabled for this account."
+                summary = "Inspector Lambda standard scan is not enabled."
             elif lambda_status == "SUSPENDED":
                 status = CheckStatus.FAILED
-                summary = "Inspector Lambda standard scan is suspended for this account."
+                summary = "Inspector Lambda standard scan is suspended."
             else:
                 status = CheckStatus.UNKNOWN
                 summary = f"Inspector Lambda standard scan is in transitional state: {lambda_status}."
