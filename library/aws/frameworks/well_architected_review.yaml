@@ -145,6 +145,7 @@ sections:
           - ecr_image_private_image_scanning_enabled
           - ecr_repository_scan_images_on_push_enabled
           - ecr_repository_scan_vulnerabilities_in_latest_image
+          - wellarchitected_workload_no_high_or_medium_risks
 
   - name: Performance Efficiency
     description: |
