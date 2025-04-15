@@ -14,16 +14,17 @@ class inspector_ec2_scan_enabled(Check):
         report.status = CheckStatus.FAILED
         report.resource_ids_status = []
 
+        #Initialize the boto3 client for Inspector2 and STS
+        client = connection.client("inspector2")
+        sts = connection.client("sts")
+
         try:
-            client = connection.client("inspector2")
-            sts = connection.client("sts")
+            
             account_id = sts.get_caller_identity()["Account"]
 
             # Call batch_get_account_status with the current account ID
             response = client.batch_get_account_status(accountIds=[account_id])
             accounts = response.get("accounts", [])
-
-
             account_status = accounts[0]
             ec2_status = account_status.get("resourceState", {}).get("ec2", {}).get("status")
 
