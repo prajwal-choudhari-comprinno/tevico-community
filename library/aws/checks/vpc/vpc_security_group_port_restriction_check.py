@@ -47,8 +47,27 @@ class vpc_security_group_port_restriction_check(Check):
 
             
             # These are the ports to check for unrestricted (public) access.
-            
-            restricted_ports = {22, 80, 443}
+            restricted_ports = {
+                            20, 21,  # FTP
+                            22,      # SSH
+                            23,      # Telnet
+                            25,      # SMTP
+                            110,     # POP3
+                            135,     # RPC
+                            143,     # IMAP
+                            445,     # SMB
+                            1433, 1434,  # SQL Server
+                            3000,    # Development servers
+                            3306,    # MySQL
+                            3389,    # RDP
+                            4333,
+                            5000,    # Various applications
+                            5432,    # PostgreSQL
+                            5500,
+                            5601,    # Kibana
+                            8080, 8088, 8888,  # Alternative HTTP ports
+                            9200, 9300  # Elasticsearch
+                        }
 
             
             # Iterates Over Each Security Group to Evaluate Its Rules.
