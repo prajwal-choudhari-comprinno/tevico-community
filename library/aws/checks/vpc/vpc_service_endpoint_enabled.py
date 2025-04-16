@@ -38,19 +38,6 @@ class vpc_service_endpoint_enabled(Check):
                 )
                 return report
 
-            # Retrieve all VPC endpoints using pagination.
-            vpc_endpoints = []
-            paginator = ec2_client.get_paginator('describe_vpc_endpoints')
-            for page in paginator.paginate():
-                vpc_endpoints.extend(page.get("VpcEndpoints", []))
-
-            # Group VPC endpoints by VPC ID.
-            endpoints_by_vpc = {}
-            for endpoint in vpc_endpoints:
-                vpc_id = endpoint.get("VpcId")
-                if vpc_id:
-                    endpoints_by_vpc.setdefault(vpc_id, []).append(endpoint)
-
             # Define critical services that should have endpoints
             critical_services = ["s3"]  # At minimum, S3 is required
 
@@ -63,8 +50,13 @@ class vpc_service_endpoint_enabled(Check):
                 # VPCs don't have traditional ARNs, use the ID as resource identifier
                 resource = GeneralResource(name=vpc_id)
 
-                # Get endpoints for this VPC and filter for available ones
-                endpoints = endpoints_by_vpc.get(vpc_id, [])
+                # Get endpoints for this specific VPC using filters
+                endpoints = []
+                paginator = ec2_client.get_paginator('describe_vpc_endpoints')
+                for page in paginator.paginate(Filters=[{'Name': 'vpc-id', 'Values': [vpc_id]}]):
+                    endpoints.extend(page.get("VpcEndpoints", []))
+                
+                # Filter for available endpoints
                 available_endpoints = [ep for ep in endpoints if ep.get("State", "").lower() == "available"]
                 
                 # Extract service names from available endpoints
