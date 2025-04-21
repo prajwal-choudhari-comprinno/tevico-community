@@ -45,12 +45,12 @@ class opensearch_service_domains_audit_logging_enabled(Check):
             # Check each OpenSearch domain for audit logging
             for dn in domain_names:
                 domain_name = dn["DomainName"]
-                domain_status  = client.describe_domain(DomainName=domain_name)["DomainStatus"]
-                domain_arn = domain_status["ARN"]
-                resource = AwsResource(arn=domain_arn)
 
                 try:
-                    
+
+                    domain_status  = client.describe_domain(DomainName=domain_name)["DomainStatus"]
+                    domain_arn = domain_status["ARN"]
+                    resource = AwsResource(arn=domain_arn)
                     log_options = domain_status.get("LogPublishingOptions", {})
 
                     # Check if Audit Logging is enabled
@@ -73,7 +73,7 @@ class opensearch_service_domains_audit_logging_enabled(Check):
                     report.status = CheckStatus.UNKNOWN
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=resource,
+                            resource=GeneralResource(name=domain_name),
                             status=CheckStatus.UNKNOWN,
                             summary=f"Error retrieving audit logging status for {domain_name}: {str(e)}",
                             exception=str(e),
