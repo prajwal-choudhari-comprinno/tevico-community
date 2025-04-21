@@ -46,11 +46,11 @@ class opensearch_service_domains_cloudwatch_logging_enabled(Check):
             # Check each OpenSearch domain for any type of logging
             for dn in domain_names:
                 domain_name = dn["DomainName"]
-                domain_status = client.describe_domain(DomainName=domain_name)["DomainStatus"]
-                domain_arn = domain_status["ARN"]
-                resource = AwsResource(arn=domain_arn)
-
+                
                 try:
+                    domain_status = client.describe_domain(DomainName=domain_name)["DomainStatus"]
+                    domain_arn = domain_status["ARN"]
+                    resource = AwsResource(arn=domain_arn)
                     log_options = domain_status.get("LogPublishingOptions", {})
                     # Check if any log type is enabled
                     any_logging_enabled = any(
@@ -72,7 +72,7 @@ class opensearch_service_domains_cloudwatch_logging_enabled(Check):
                     report.status = CheckStatus.UNKNOWN
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=resource,
+                            resource=GeneralResource(name=domain_name),
                             status=CheckStatus.UNKNOWN,
                             summary=f"Error retrieving logging status for {domain_name}: {str(e)}",
                             exception=str(e),
