@@ -214,7 +214,6 @@ sections:
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
           - acm_certificates_transparency_logs_enabled
-          - apigateway_execution_logging_enabled
           - apigateway_restapi_logging_enabled
           - apigatewayv2_api_access_logging_enabled
           - cloudfront_access_logging_enabled
