@@ -216,7 +216,6 @@ sections:
           - apigateway_restapi_logging_enabled
           - apigatewayv2_api_access_logging_enabled
           - cloudfront_access_logging_enabled
-          - cloudfront_cloudwatch_logging_enabled
           - eks_cluster_logging_enabled
           - elb_v2_logging_enabled
           - rds_instance_integration_cloudwatch_logging_enabled
