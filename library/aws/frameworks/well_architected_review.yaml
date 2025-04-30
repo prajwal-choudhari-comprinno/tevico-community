@@ -32,7 +32,6 @@ sections:
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
           - ec2_instance_managed_by_ssm
-          - ec2_managed_instance_patch_compliance_status
           - ec2_microsoft_sql_server_end_of_support
           - ssm_managed_compliant_patching
           - ssm_patch_manager_enabled
