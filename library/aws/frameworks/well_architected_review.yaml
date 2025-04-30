@@ -74,6 +74,7 @@ sections:
           - iam_user_mfa_enabled_console_access
           - iam_user_multiple_active_access_keys
           - organizations_account_part_of_organizations
+          - ssm_document_secrets_present
       - name: Data Protection
         description: |
           The Data Protection section includes the ability to protect data at rest and in transit.
@@ -88,6 +89,7 @@ sections:
           - route53_domains_privacy_protection_enabled
           - s3_bucket_default_encryption
           - s3_bucket_acl_prohibited
+          - s3_bucket_mfa_delete_enabled
           - s3_bucket_object_versioning
           - s3_bucket_secure_transport_policy
           - sns_topics_kms_encryption_at_rest_enabled
@@ -146,6 +148,7 @@ sections:
           - ecr_image_private_image_scanning_enabled
           - ecr_repository_scan_images_on_push_enabled
           - ecr_repository_scan_vulnerabilities_in_latest_image
+          - wellarchitected_workload_no_high_or_medium_risks
 
   - name: Performance Efficiency
     description: |
