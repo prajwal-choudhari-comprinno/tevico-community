@@ -114,7 +114,6 @@ sections:
           - acl_bidirectional_traffic_restriction_check
           - apigateway_rest_api_waf_acl_attached
           - apigateway_rest_api_client_certificate_enabled
-          - apigateway_waf_protection_enabled
           - cloudfront_distributions_https_enabled
           - cloudfront_distributions_using_deprecated_ssl_protocols
           - ec2_network_acl_allow_ingress_any_port
