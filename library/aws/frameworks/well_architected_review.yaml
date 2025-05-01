@@ -239,6 +239,7 @@ sections:
           - opensearch_service_domains_audit_logging_enabled
           - opensearch_service_domains_cloudwatch_logging_enabled
           - elb_logging_enabled
+          - lambda_function_invoke_api_operations_cloudtrail_logging_enabled
       - name: Backup and Recovery
         description: |
           The Backup and Recovery section includes the ability to recover data and systems in the event of a failure or
