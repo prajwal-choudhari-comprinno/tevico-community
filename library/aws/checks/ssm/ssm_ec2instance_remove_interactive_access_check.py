@@ -5,7 +5,7 @@ DATE: 2024-11-12
 """
 
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, ConnectionError, EndpointConnectionError
 
 from tevico.engine.entities.report.check_model import CheckReport, CheckStatus, GeneralResource, ResourceStatus
 from tevico.engine.entities.check.check import Check
@@ -28,10 +28,12 @@ class ssm_ec2instance_remove_interactive_access_check(Check):
             ec2_client = connection.client('ec2')
             ssm_client = connection.client('ssm')
             
-            # Case 1: Check if any EC2 instances exist
+            # Get all running EC2 instances
+            all_running_instances = []
+            instance_details = {}
+            
             paginator = ec2_client.get_paginator("describe_instances")
-            found_any_instances = False
-
+            
             for page in paginator.paginate():
                 reservations = page.get("Reservations", [])
                 if not reservations:
@@ -44,30 +46,26 @@ class ssm_ec2instance_remove_interactive_access_check(Check):
                     )
                     return report
                 
-                
-            # Case 2: Check if any running instances exist
-                instance_ids = [
-                    instance["InstanceId"]
-                    for reservation in reservations
-                    for instance in reservation.get("Instances", [])
-                    if instance.get("State", {}).get("Name", "").lower() in ["running"]
-                ]
-
-                if not instance_ids:
-                    report.status = CheckStatus.NOT_APPLICABLE
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=""),
-                            status=CheckStatus.NOT_APPLICABLE,
-                            summary="No running EC2 instances found.",
-                        )
-                    )
-                    return report
-                
-            # Case 3: Process running instances with optimizations
+                for reservation in reservations:
+                    for instance in reservation.get("Instances", []):
+                        if instance.get("State", {}).get("Name", "").lower() == "running":
+                            instance_id = instance["InstanceId"]
+                            all_running_instances.append(instance_id)
+                            instance_details[instance_id] = instance
             
-            # Cache security groups to avoid repeated API calls
-            sg_cache = {}
+            # Case 1: No instances found
+            if not all_running_instances:
+                report.status = CheckStatus.NOT_APPLICABLE
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name=""),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No running EC2 instances found.",
+                    )
+                )
+                return report
+            
+            # Case 3: Process running instances
             
             # Get all SSM managed instances in one call
             ssm_managed_instances = set()
@@ -76,12 +74,19 @@ class ssm_ec2instance_remove_interactive_access_check(Check):
                 for page in ssm_paginator.paginate():
                     for instance in page.get('InstanceInformationList', []):
                         ssm_managed_instances.add(instance['InstanceId'])
-            except ClientError:
-                # Handle case where SSM is not configured
-                pass
+            except ClientError as e:
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name="SSM"),
+                        status=CheckStatus.UNKNOWN,
+                        summary="Error accessing SSM instance information.",
+                        exception=str(e)
+                    )
+                )
+                return report
                 
             # Process each instance
-            for instance_id in instance_ids:
+            for instance_id in all_running_instances:
                 
                 # Check if instance is managed by SSM
                 if instance_id not in ssm_managed_instances:
@@ -97,8 +102,11 @@ class ssm_ec2instance_remove_interactive_access_check(Check):
                 # Check for interactive access methods
                 access_methods = []
                 
-                # Check SSH access using cached security group info
-                if self._has_ssh_access(instance, ec2_client, sg_cache):
+                # Get instance details from our cached dictionary
+                instance = instance_details.get(instance_id, {})
+                
+                # Check SSH access directly (no caching)
+                if self._has_ssh_access(instance, ec2_client):
                     access_methods.append("SSH (port 22)")
                 
                 # Check for interactive shell access via SSM document associations
@@ -127,6 +135,24 @@ class ssm_ec2instance_remove_interactive_access_check(Check):
                         )
                     )
                     
+        except ClientError as e:
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name="AWS API"),
+                    status=CheckStatus.UNKNOWN,
+                    summary="AWS API error during interactive access check execution.",
+                    exception=str(e)
+                )
+            )
+        except ConnectionError as e:
+            report.resource_ids_status.append(
+                ResourceStatus(
+                    resource=GeneralResource(name="Network"),
+                    status=CheckStatus.UNKNOWN,
+                    summary="Network connection error during check execution.",
+                    exception=str(e)
+                )
+            )
         except Exception as e:
             report.resource_ids_status.append(
                 ResourceStatus(
@@ -139,23 +165,17 @@ class ssm_ec2instance_remove_interactive_access_check(Check):
             
         return report
     
-    def _has_ssh_access(self, instance, ec2_client, sg_cache=None):
+    def _has_ssh_access(self, instance, ec2_client):
         """
         Check if an instance has SSH access via security groups.
-        Uses a cache to avoid repeated API calls for the same security group.
         """
-        if sg_cache is None:
-            sg_cache = {}
-            
         for sg in instance.get('SecurityGroups', []):
             sg_id = sg['GroupId']
             
-            # Use cached security group details if available
-            if sg_id not in sg_cache:
-                sg_details = ec2_client.describe_security_groups(GroupIds=[sg_id])
-                sg_cache[sg_id] = sg_details.get('SecurityGroups', [])
+            # Get security group details directly (no caching)
+            sg_details = ec2_client.describe_security_groups(GroupIds=[sg_id])
             
-            for sg_detail in sg_cache[sg_id]:
+            for sg_detail in sg_details.get('SecurityGroups', []):
                 for rule in sg_detail.get('IpPermissions', []):
                     from_port = rule.get('FromPort', 0)
                     to_port = rule.get('ToPort', 0)
