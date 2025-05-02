@@ -19,9 +19,9 @@ Remediation:
     CLI:
       aws dynamodb update-continuous-backups --table-name <table_name> --point-in-time-recovery-specification
       PointInTimeRecoveryEnabled=true
-    NativeIaC: https://docs.prowler.com/checks/aws/general-policies/general_6#cloudformation--serverless
+    NativeIaC: ""
     Other: ""
-    Terraform: https://docs.prowler.com/checks/aws/general-policies/general_6#terraform
+    Terraform: ""
   Recommendation:
     Text: Enable point-in-time recovery, this is not enabled by default.
     Url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery_Howitworks.html

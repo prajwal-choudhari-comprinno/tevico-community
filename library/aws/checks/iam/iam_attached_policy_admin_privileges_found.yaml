@@ -41,8 +41,8 @@ Remediation:
     CLI: |
       aws iam detach-user-policy --user-name <user_name> --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
     NativeIaC: ""
-    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/iam/iam-users-no-admin-access.html
-    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-that-iam-users-do-not-have-administrator-access
+    Other: ""
+    Terraform: ""
   Recommendation:
     Text: |
       Review IAM users and roles, and detach any AdministratorAccess policies. 

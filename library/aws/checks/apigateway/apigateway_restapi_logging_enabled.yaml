@@ -21,7 +21,7 @@ Remediation:
     CLI: ""
     NativeIaC: ""
     Other: ""
-    Terraform: https://docs.prowler.com/checks/aws/logging-policies/ensure-api-gateway-stage-have-logging-level-defined-as-appropiate#terraform
+    Terraform: ""
   Recommendation:
     Text:
       Monitoring is an important part of maintaining the reliability, availability

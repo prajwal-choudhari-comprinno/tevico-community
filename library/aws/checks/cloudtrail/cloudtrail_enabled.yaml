@@ -19,7 +19,7 @@ Remediation:
     CLI:
       aws cloudtrail update-trail --name <trail_name> --is-logging
     NativeIaC: ""
-    Other: https://docs.prowler.com/checks/aws/logging-policies/logging_4#aws-console
+    Other: ""
     Terraform: ""
   Recommendation:
     Text:

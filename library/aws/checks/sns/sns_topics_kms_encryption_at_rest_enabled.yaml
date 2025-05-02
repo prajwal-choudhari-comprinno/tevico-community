@@ -13,8 +13,8 @@ RelatedUrl: https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption
 Remediation:
   Code:
     CLI: aws sns set-topic-attributes --topic-arn <TOPIC_ARN> --attribute-name 'KmsMasterKeyId' --attribute-value <KEY>
-    Other: https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/SNS/topic-encrypted-with-kms-customer-master-keys.html
-    Terraform: https://docs.prowler.com/checks/aws/general-policies/general_15#terraform
+    Other: ""
+    Terraform: ""
   Recommendation:
     Text: Use Amazon SNS with AWS KMS.
     Url: https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html

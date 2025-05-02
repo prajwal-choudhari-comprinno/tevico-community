@@ -15,8 +15,8 @@ Remediation:
   Code:
     CLI: aws ec2 enable-ebs-encryption-by-default
     NativeIaC: ""
-    Other: https://docs.prowler.com/checks/aws/general-policies/ensure-ebs-default-encryption-is-enabled#aws-console
-    Terraform: https://docs.prowler.com/checks/aws/general-policies/ensure-ebs-default-encryption-is-enabled#terraform
+    Other: ""
+    Terraform: ""
   Recommendation:
     Text: Enable Encryption. Use a CMK where possible. It will provide additional management and privacy benefits.
     Url: https://aws.amazon.com/premiumsupport/knowledge-center/ebs-automatic-encryption/

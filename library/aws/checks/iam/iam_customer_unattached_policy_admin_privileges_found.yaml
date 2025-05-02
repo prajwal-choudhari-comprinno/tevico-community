@@ -35,8 +35,8 @@ Remediation:
   Code:
     CLI: "aws iam list-policies --scope Local"
     NativeIaC: ""
-    Other: "https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/IAM/iam-unattached-policies.html"
-    Terraform: "https://docs.prowler.com/checks/aws/iam-policies/iam_47#terraform"
+    Other: ""
+    Terraform: ""
   Recommendation:
     Text: |
       It is more secure to start with a minimum set of permissions and grant additional permissions 
