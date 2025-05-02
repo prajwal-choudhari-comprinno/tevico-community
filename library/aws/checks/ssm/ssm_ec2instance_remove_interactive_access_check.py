@@ -77,7 +77,7 @@ class ssm_ec2instance_remove_interactive_access_check(Check):
             except ClientError as e:
                 report.resource_ids_status.append(
                     ResourceStatus(
-                        resource=GeneralResource(name="SSM"),
+                        resource=GeneralResource(name=""),
                         status=CheckStatus.UNKNOWN,
                         summary="Error accessing SSM instance information.",
                         exception=str(e)
@@ -138,7 +138,7 @@ class ssm_ec2instance_remove_interactive_access_check(Check):
         except ClientError as e:
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name="AWS API"),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
                     summary="AWS API error during interactive access check execution.",
                     exception=str(e)
@@ -147,7 +147,7 @@ class ssm_ec2instance_remove_interactive_access_check(Check):
         except ConnectionError as e:
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name="Network"),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
                     summary="Network connection error during check execution.",
                     exception=str(e)
@@ -156,7 +156,7 @@ class ssm_ec2instance_remove_interactive_access_check(Check):
         except Exception as e:
             report.resource_ids_status.append(
                 ResourceStatus(
-                    resource=GeneralResource(name="EC2"),
+                    resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
                     summary="Unexpected error during interactive access check execution.",
                     exception=str(e)
