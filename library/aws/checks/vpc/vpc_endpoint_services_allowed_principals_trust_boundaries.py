@@ -45,7 +45,7 @@ class vpc_endpoint_services_allowed_principals_trust_boundaries(Check):
 
             # Check each VPC endpoint service
             for service in vpc_endpoint_services:
-                try:
+                
                     service_name = service.get('ServiceName', 'Unknown')
                     service_id = service.get('ServiceId', 'Unknown')
                     
@@ -118,16 +118,6 @@ class vpc_endpoint_services_allowed_principals_trust_boundaries(Check):
                                 summary=f"VPC endpoint service {service_id} ({service_name}) only allows trusted principals."
                             )
                         )
-                except Exception as e:
-                    # Handle exceptions for individual services with UNKNOWN status
-                    report.resource_ids_status.append(
-                        ResourceStatus(
-                            resource=GeneralResource(name=service.get('ServiceName', 'Unknown')),
-                            status=CheckStatus.UNKNOWN,
-                            summary=f"Error processing VPC endpoint service: {str(e)}",
-                            exception=str(e)
-                        )
-                    )
 
         except (BotoCoreError, ClientError) as e:
             report.resource_ids_status.append(
