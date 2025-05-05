@@ -33,21 +33,46 @@ class ChartConfig {
     toolbar: { show: false },
     tooltip: {
       y: {
-        title: { formatter: () => "Count: " }
+        formatter: (val) => `${val}%`,
+        title: { formatter: () => "Percentage: " }
       }
     },
     plotOptions: {
       bar: {
         borderRadius: 4,
         horizontal: true,
-        dataLabels: { position: 'bottom' }
+        dataLabels: { position: 'bottom' },
+        distributed: true
       }
     },
     dataLabels: {
       enabled: true,
-      style: { colors: ['#fff'] },
       offsetX: 20,
-      formatter: val => `${Number(val).toFixed(2)} %`
+      style: {
+        fontSize: '12px',
+        fontWeight: 'bold',
+        colors: ['#555', '#ffffff']
+      },
+      formatter: (val, opts) => {
+        const value = parseFloat(val);
+        opts.w.globals.dataLabels.style.colors[opts.dataPointIndex] =
+          value === 0 ? '#555' : '#ffffff';
+        return value.toFixed(2) + ' %';
+      }
+    },
+    states: {
+      hover: {
+        filter: {
+          type: 'darken',
+          value: 0.9,
+        }
+      },
+      active: {
+        filter: {
+          type: 'darken',
+          value: 0.85,
+        }
+      }
     },
     xaxis: {
       axisBorder: { show: false },
@@ -115,6 +140,19 @@ class ChartBuilder {
   static createBarChart(elementId, data) {
     const status = elementId.startsWith(Status.PASSED) ? Status.PASSED : Status.FAILED;
     const metrics = DataProcessor.calculatePercentages(data, status);
+
+    const customColors = metrics.map(m => {
+
+      const colorMap = {
+        'Critical': '#ED495D',
+        'High': '#ED495D88',
+        'Medium': '#FCA90B',
+        'Low': '#FCA90B88'
+      };
+
+      return colorMap[m.name] || '#2196F3';
+    });
+
     return {
       series: [{ data: metrics.map(m => m.value) }],
       chart: {
@@ -123,6 +161,7 @@ class ChartBuilder {
         toolbar: ChartConfig.baseBarConfig.toolbar,
       },
       ...ChartConfig.baseBarConfig,
+      colors: customColors,
       xaxis: {
         ...ChartConfig.baseBarConfig.xaxis,
         categories: metrics.map(m => m.name)
@@ -153,7 +192,6 @@ class ChartManager {
 
   async initialize() {
     try {
-      // const data = await this.#fetchData();
       const data = check_analytics;
       await this.#renderCharts(data);
     } catch (error) {
