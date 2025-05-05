@@ -87,6 +87,15 @@ class ChartConfig {
   };
 
   static baseCircularConfig = {
+    tooltip: {
+      enabled: true,
+      y: {
+        formatter: (value) => value + ' checks',
+        title: {
+          formatter: (seriesName) => seriesName + ':'
+        }
+      }
+    },
     responsive: [{
       options: {
         legend: { position: 'bottom' }
