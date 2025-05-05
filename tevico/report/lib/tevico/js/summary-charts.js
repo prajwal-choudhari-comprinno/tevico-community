@@ -16,6 +16,8 @@ const Status = {
   PASSED: 'passed'
 };
 
+const severityOrder = ['critical', 'high', 'medium', 'low'];
+
 // Configuration
 class ChartConfig {
   static heights = {
@@ -82,12 +84,31 @@ class DataProcessor {
   }
 
   static calculatePercentages(data, status) {
-    return data.by_severities.map(item => ({
-      value: ((item.check_status[status] / item.check_status.total) * 100).toFixed(2),
-      name: item.name
-    }));
+
+    const severityMap = new Map();
+
+    severityOrder.forEach(severity => {
+      severityMap.set(severity, {
+        value: '0.00',
+        name: toTitleCase(severity)
+      });
+    });
+
+    data.by_severities.forEach(item => {
+      if (severityMap.has(item.name)) {
+        severityMap.set(item.name, {
+          value: ((item.check_status[status] / item.check_status.total) * 100).toFixed(2),
+          name: toTitleCase(item.name)
+        });
+      }
+    });
+
+    return severityOrder.map(severity => severityMap.get(severity));
   }
+
 }
+
+toTitleCase = (string) => string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 
 // Chart Builders
 class ChartBuilder {
@@ -140,14 +161,6 @@ class ChartManager {
       throw error;
     }
   }
-
-  // async #fetchData() {
-  //   const response = await fetch('./data/check_analytics.json');
-  //   if (!response.ok) {
-  //     throw new Error('Failed to fetch chart data');
-  //   }
-  //   return response.json();
-  // }
 
   async #renderCharts(data) {
     const renderTasks = [
