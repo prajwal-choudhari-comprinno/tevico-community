@@ -60,8 +60,9 @@ function updateUI(reportsData, analyticsData) {
         }
 
         const criticalChecksSubElement = document.getElementById('critical_checks_failing_subheading');
+        const criticalChecksFailingPer = (criticalChecksFailing / check_status.failed) * 100 || 0;
         if (criticalChecksSubElement) {
-            criticalChecksSubElement.innerText = `out of ${check_status.failed} i.e. ${((criticalChecksFailing / check_status.failed) * 100).toFixed(2)}%`;
+            criticalChecksSubElement.innerText = `out of ${check_status.failed} i.e. ${(criticalChecksFailingPer).toFixed(2)}%`;
         } else {
             console.warn(`Element with ID "${id}" not found`);
         }
