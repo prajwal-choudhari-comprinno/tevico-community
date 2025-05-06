@@ -76,43 +76,38 @@ class lambda_function_invoke_api_operations_cloudtrail_logging_enabled(Check):
             for function in lambda_functions:
                 function_name = function.get("FunctionName", "")
                 function_arn = function.get("FunctionArn", "")
-                function_logged = False
-                try: 
-                    for event_selectors in trail_event_selectors.values():
-                        for selector in event_selectors:
-                            # Check DataResources, if atleast one trail has the function ARN or wildcard, set function_logged to True
-                            data_resources = selector.get("DataResources", [])
-                            for resource in data_resources:
-                                if resource.get("Type") == "AWS::Lambda::Function":
-                                    for arn in resource.get("Values", []):
-                                        if arn == function_arn or arn.endswith("*"):
-                                            function_logged = True
-                                            break
-                                if function_logged:
-                                    break
-                            if function_logged:
-                                break
-                        if function_logged:
-                            break
+                try:
+                    # Check if logging is enabled for this fucntion
+                    function_logged = any(
+                        any(
+                            any(
+                                resource.get("Type") == "AWS::Lambda::Function" and
+                                any(arn == function_arn or arn.endswith("*") for arn in resource.get("Values", []))
+                                for resource in selector.get("DataResources", [])
+                            )
+                            for selector in event_selectors
+                        )
+                        for event_selectors in trail_event_selectors.values()
+                    )
                 
+                    status = CheckStatus.PASSED if function_logged else CheckStatus.FAILED
+                    summary = (
+                        "Lambda function invoke API operations are being recorded by CloudTrail."
+                        if function_logged
+                        else "Lambda function invoke API operations are NOT being recorded by CloudTrail."
+                    )
+                    
+                    # Update report status only if it's passing (to maintain FAILED status if any function fails)
                     if function_logged:
                         report.status = CheckStatus.PASSED
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                resource=AwsResource(arn=function_arn),
-                                status=CheckStatus.PASSED,
-                                summary="Lambda function invoke API operations are being recorded by CloudTrail."
-                            )
+                        
+                    report.resource_ids_status.append(
+                        ResourceStatus(
+                            resource=AwsResource(arn=function_arn),
+                            status=status,
+                            summary=summary
                         )
-                    else:
-                        report.status = CheckStatus.FAILED
-                        report.resource_ids_status.append(
-                            ResourceStatus(
-                                resource=AwsResource(arn=function_arn),
-                                status=CheckStatus.FAILED,
-                                summary="Lambda function invoke API operations are NOT being recorded by CloudTrail."
-                            )
-                        )
+                    )
                 except Exception as e:
                     report.resource_ids_status.append(
                         ResourceStatus(
