@@ -16,6 +16,8 @@ const Status = {
   PASSED: 'passed'
 };
 
+const severityOrder = ['critical', 'high', 'medium', 'low'];
+
 // Configuration
 class ChartConfig {
   static heights = {
@@ -31,21 +33,46 @@ class ChartConfig {
     toolbar: { show: false },
     tooltip: {
       y: {
-        title: { formatter: () => "Count: " }
+        formatter: (val) => `${val}%`,
+        title: { formatter: () => "Percentage: " }
       }
     },
     plotOptions: {
       bar: {
         borderRadius: 4,
         horizontal: true,
-        dataLabels: { position: 'bottom' }
+        dataLabels: { position: 'bottom' },
+        distributed: true
       }
     },
     dataLabels: {
       enabled: true,
-      style: { colors: ['#fff'] },
       offsetX: 20,
-      formatter: val => `${Number(val).toFixed(2)} %`
+      style: {
+        fontSize: '12px',
+        fontWeight: 'bold',
+        colors: ['#555', '#ffffff']
+      },
+      formatter: (val, opts) => {
+        const value = parseFloat(val);
+        opts.w.globals.dataLabels.style.colors[opts.dataPointIndex] =
+          value === 0 ? '#555' : '#ffffff';
+        return value.toFixed(2) + ' %';
+      }
+    },
+    states: {
+      hover: {
+        filter: {
+          type: 'darken',
+          value: 0.9,
+        }
+      },
+      active: {
+        filter: {
+          type: 'darken',
+          value: 0.85,
+        }
+      }
     },
     xaxis: {
       axisBorder: { show: false },
@@ -60,6 +87,15 @@ class ChartConfig {
   };
 
   static baseCircularConfig = {
+    tooltip: {
+      enabled: true,
+      y: {
+        formatter: (value) => value + ' checks',
+        title: {
+          formatter: (seriesName) => seriesName + ':'
+        }
+      }
+    },
     responsive: [{
       options: {
         legend: { position: 'bottom' }
@@ -82,18 +118,50 @@ class DataProcessor {
   }
 
   static calculatePercentages(data, status) {
-    return data.by_severities.map(item => ({
-      value: ((item.check_status[status] / item.check_status.total) * 100).toFixed(2),
-      name: item.name
-    }));
+
+    const severityMap = new Map();
+
+    severityOrder.forEach(severity => {
+      severityMap.set(severity, {
+        value: '0.00',
+        name: toTitleCase(severity)
+      });
+    });
+
+    data.by_severities.forEach(item => {
+      if (severityMap.has(item.name)) {
+        severityMap.set(item.name, {
+          value: ((item.check_status[status] / item.check_status.total) * 100).toFixed(2),
+          name: toTitleCase(item.name)
+        });
+      }
+    });
+
+    return severityOrder.map(severity => severityMap.get(severity));
   }
+
 }
+
+toTitleCase = (string) => string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 
 // Chart Builders
 class ChartBuilder {
   static createBarChart(elementId, data) {
     const status = elementId.startsWith(Status.PASSED) ? Status.PASSED : Status.FAILED;
     const metrics = DataProcessor.calculatePercentages(data, status);
+
+    const customColors = metrics.map(m => {
+
+      const colorMap = {
+        'Critical': '#ED495D',
+        'High': '#ED495D88',
+        'Medium': '#FCA90B',
+        'Low': '#FCA90B88'
+      };
+
+      return colorMap[m.name] || '#2196F3';
+    });
+
     return {
       series: [{ data: metrics.map(m => m.value) }],
       chart: {
@@ -102,6 +170,7 @@ class ChartBuilder {
         toolbar: ChartConfig.baseBarConfig.toolbar,
       },
       ...ChartConfig.baseBarConfig,
+      colors: customColors,
       xaxis: {
         ...ChartConfig.baseBarConfig.xaxis,
         categories: metrics.map(m => m.name)
@@ -132,7 +201,6 @@ class ChartManager {
 
   async initialize() {
     try {
-      // const data = await this.#fetchData();
       const data = check_analytics;
       await this.#renderCharts(data);
     } catch (error) {
@@ -140,14 +208,6 @@ class ChartManager {
       throw error;
     }
   }
-
-  // async #fetchData() {
-  //   const response = await fetch('./data/check_analytics.json');
-  //   if (!response.ok) {
-  //     throw new Error('Failed to fetch chart data');
-  //   }
-  //   return response.json();
-  // }
 
   async #renderCharts(data) {
     const renderTasks = [
