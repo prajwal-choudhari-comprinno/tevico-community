@@ -29,7 +29,7 @@ Severity: high
 ResourceType: AwsIAMUser
 
 # Description of the check
-Description: Ensures that no IAM user or role has an Administrator policy attached.
+Description: Ensures that no IAM user or role has an administrator policy attached.
 
 # Explanation of the risk associated with the check
 Risk: Attaching administrative privileges to users and roles increases the security risk.

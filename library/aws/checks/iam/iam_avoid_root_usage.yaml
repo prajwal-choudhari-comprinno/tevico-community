@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: iam_avoid_root_usage
-CheckTitle: Ensure Root Account usage is avoided
+CheckTitle: Ensure Root account usage is avoided
 CheckType: []
 ServiceName: iam
 SubServiceName: ''

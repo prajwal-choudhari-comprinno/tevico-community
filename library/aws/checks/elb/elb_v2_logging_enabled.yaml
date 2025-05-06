@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: elb_v2_logging_enabled
-CheckTitle: Ensure Access Logging is enabled for ELBv2 (ALB/NLB/GWLB)
+CheckTitle: Ensure access logging is enabled for ELBv2 (ALB/NLB/GWLB)
 CheckType: [Detective Control]
 ServiceName: elb
 SubServiceName: ""

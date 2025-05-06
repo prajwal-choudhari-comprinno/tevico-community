@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: ec2_ebs_default_encryption
-CheckTitle: Ensure EBS Default Encryption is activated.
+CheckTitle: Ensure EBS default encryption is activated.
 CheckType:
   - Data Protection
 ServiceName: ec2

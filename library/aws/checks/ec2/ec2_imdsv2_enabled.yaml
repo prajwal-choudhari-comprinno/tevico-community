@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: ec2_imdsv2_enabled
-CheckTitle: Ensure EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required.
+CheckTitle: Ensure EC2 instance Metadata Service Version 2 (IMDSv2) is enabled and required.
 CheckType:
   - Infrastructure Security
 ServiceName: ec2
@@ -8,7 +8,7 @@ SubServiceName: ""
 ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 Severity: medium
 ResourceType: AwsEc2Instance
-Description: Ensure that EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required.
+Description: Ensure that EC2 instance Metadata Service Version 2 (IMDSv2) is Enabled and Required.
 Risk: Using IMDSv2 will protect from misconfiguration and SSRF vulnerabilities. IMDSv1 will not.
 RelatedUrl: https://tevi.co
 Remediation:

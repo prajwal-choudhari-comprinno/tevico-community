@@ -1,6 +1,6 @@
 Provider: "aws"
 CheckID: "s3_bucket_mfa_delete_enabled"
-CheckTitle: "Ensure S3 bucket MFA Delete is enabled."
+CheckTitle: "Ensure S3 bucket MFA delete is enabled."
 CheckType:
   - "Logging and Monitoring"
   - "Data Protection"
@@ -9,7 +9,7 @@ SubServiceName: ""
 ResourceIdTemplate: "arn:partition:s3:::bucket_name"
 Severity: medium
 ResourceType: "AwsS3Bucket"
-Description: "Ensure S3 bucket MFA Delete is enabled to prevent accidental or malicious deletion of data."
+Description: "Ensure S3 bucket MFA delete is enabled to prevent accidental or malicious deletion of data."
 Risk: "Without MFA Delete enabled, your S3 bucket data is at risk of accidental deletion or unauthorized removal if security credentials are compromised."
 RelatedUrl: ""
 Remediation:

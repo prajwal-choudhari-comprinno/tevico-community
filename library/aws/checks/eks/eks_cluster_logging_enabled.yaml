@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: eks_cluster_logging_enabled
-CheckTitle: Ensure EKS cluster logging is enabled for Control Plane components
+CheckTitle: Ensure EKS cluster logging is enabled for control plane components
 CheckType: [Infrastructure Protection]
 ServiceName: eks
 SubServiceName: ""

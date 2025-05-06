@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: elb_logging_enabled
-CheckTitle: Ensure Access Logging is enabled for Classic LB
+CheckTitle: Ensure access logging is enabled for Classic Load Balancers
 CheckType: [Detective Control]
 ServiceName: elb
 SubServiceName: ""
