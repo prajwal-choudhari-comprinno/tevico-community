@@ -105,9 +105,10 @@ class config_recorder_all_regions_enabled(Check):
                 ResourceStatus(
                     resource=GeneralResource(name="AWS Config"),
                     status=CheckStatus.UNKNOWN,  # General failure status
-                    summary="Unexpected error during AWS Config recorder check execution.",
+                    summary="Unexpected error occurred while retrieving the list of AWS regions.",
                     exception=str(e)  # Store exception details
                 )
             )
+
 
         return report  # Return the final report with all region statuses
