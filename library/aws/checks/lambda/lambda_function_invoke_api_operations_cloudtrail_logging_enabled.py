@@ -92,15 +92,14 @@ class lambda_function_invoke_api_operations_cloudtrail_logging_enabled(Check):
                 
                     status = CheckStatus.PASSED if function_logged else CheckStatus.FAILED
                     summary = (
-                        "Lambda function invoke API operations are being recorded by CloudTrail."
+                        f"Lambda function invoke API operations are being recorded by CloudTrail for function {function_name}."
                         if function_logged
-                        else "Lambda function invoke API operations are NOT being recorded by CloudTrail."
+                        else f"Lambda function invoke API operations are NOT being recorded by CloudTrail for function {function_name}."
                     )
                     
                     # Update report status only if it's passing (to maintain FAILED status if any function fails)
-                    if function_logged:
-                        report.status = CheckStatus.PASSED
-                        
+
+                    report.status = status
                     report.resource_ids_status.append(
                         ResourceStatus(
                             resource=AwsResource(arn=function_arn),
