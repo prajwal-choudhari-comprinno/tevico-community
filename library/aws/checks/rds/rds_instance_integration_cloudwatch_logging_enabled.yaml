@@ -14,7 +14,7 @@ Remediation:
   Code:
     CLI: "aws rds modify-db-instance --db-instance-identifier <db_instance_id> --cloudwatch-logs-export-configuration <log_types>"
     NativeIaC: ""
-    Other: "https://www.trendmicro.com/cloudoneconformity/knowledge-base/aws/RDS/rds-cloudwatch-logs-enabled.html"
+    Other: ""
     Terraform: ""
   Recommendation:
     Text: "Enable CloudWatch logging for RDS instances to capture logs like error logs, general logs, and slow query logs."
