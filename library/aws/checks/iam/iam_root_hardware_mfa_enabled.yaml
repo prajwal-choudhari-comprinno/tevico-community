@@ -1,6 +1,6 @@
 Provider: aws
 CheckID: iam_root_hardware_mfa_enabled
-CheckTitle: Ensure only hardware MFA is enabled for the root account
+CheckTitle: Ensure hardware MFA is enabled for the root account
 CheckType: []
 ServiceName: iam
 SubServiceName: ""
@@ -10,7 +10,7 @@ ResourceType: AwsIamUser
 Description: AwsIamUser
 RelatedUrl: https://tevi.co
 Risk: >-
-  The root account is the most privileged user in an AWS account. MFA adds an extra layer of protection on top of a user name and password. With MFA enabled when a user signs in to an AWS website they will be prompted for their user name and password as well as for an authentication code from their AWS MFA device. For Level 2 it is recommended that the root account be protected with only a hardware MFA.
+  The root account is the most privileged user in an AWS account. MFA adds an extra layer of protection on top of a user name and password. With MFA enabled when a user signs in to an AWS website they will be prompted for their user name and password as well as for an authentication code from their AWS MFA device. For Level 2 it is recommended that the root account be protected with a hardware MFA.
 Remediation:
   Code:
     CLI: ""
