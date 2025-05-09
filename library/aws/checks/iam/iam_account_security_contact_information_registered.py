@@ -27,11 +27,6 @@ class iam_account_security_contact_information_registered(Check):
         try:
             security_contact = account_client.get_alternate_contact(AlternateContactType='SECURITY')
 
-            if 'AlternateContact' not in security_contact:
-                raise account_client.exceptions.ResourceNotFoundException(
-                    {"Error": {"Code": "ResourceNotFoundException"}}, "get_alternate_contact"
-                )
-
             contact_info = security_contact['AlternateContact']
             required_fields = ['Name', 'Title', 'EmailAddress', 'PhoneNumber']
             missing_fields = [field for field in required_fields if not contact_info.get(field)]
