@@ -1,15 +1,15 @@
 Provider: aws
 CheckID: vpc_security_group_port_restriction_check
-CheckTitle: Check if VPC Security Groups restrict access to specific ports.
+CheckTitle: Ensure VPC Security Groups restrict access to high-risk ports
 CheckType: []
 ServiceName: ec2
 SubServiceName: ""
 ResourceIdTemplate: arn:aws:ec2:region:account-id:security-group/security-group-id
 Severity: medium
 ResourceType: AwsSecurityGroup
-Description: Ensure VPC Security Groups restrict access to specific ports (e.g., SSH, HTTP, HTTPS).
-Risk: If security groups allow unrestricted access to sensitive ports like SSH, HTTP, or HTTPS, it could expose resources to unauthorized access, increasing the risk of exploitation.
-RelatedUrl: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html
+Description: Ensure VPC Security Groups restrict access to high-risk ports (e.g., SSH, FTP, RDP, database ports).
+Risk: If security groups allow unrestricted access to high-risk ports, it could expose resources to unauthorized access, increasing the risk of exploitation and potential data breaches.
+RelatedUrl: https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-19
 Remediation:
   Code:
     CLI:
@@ -18,9 +18,9 @@ Remediation:
     Other: https://aws.amazon.com/premiumsupport/knowledge-center/security-groups-best-practices/
   Recommendation:
     Text:
-      Ensure that VPC security groups restrict access to only the necessary ports. Avoid allowing public access to sensitive ports such as 22 (SSH), 80 (HTTP), or 443 (HTTPS) unless absolutely necessary.
-    Url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html
+      Ensure that VPC security groups restrict public access (0.0.0.0/0 or ::/0) to high-risk ports. These include ports for administrative access (22, 3389), database services (1433, 1434, 3306, 5432), and other sensitive services. Implement the principle of least privilege by only allowing access from specific IP ranges when necessary.
+    Url: https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-19
 Categories: [security]
 DependsOn: []
 RelatedTo: []
-Notes: "This check ensures that VPC Security Groups only allow necessary and restricted access to certain ports. Unrestricted access could lead to unauthorized entry or attacks on sensitive services."
+Notes: "This check aligns with AWS Security Hub control EC2.19, which identifies security groups that allow unrestricted access to high-risk ports. The check examines ports including 20-23, 25, 110, 135, 143, 445, 1433-1434, 3000, 3306, 3389, 4333, 5000, 5432, 5500, 5601, 8080, 8088, 8888, 9200, and 9300."
