@@ -20,11 +20,10 @@ class iam_attached_policy_admin_privileges_found(Check):
         report.status = CheckStatus.PASSED
         report.resource_ids_status = []
 
-        # Include both AdministratorAccess and PowerUserAccess policies
         ADMIN_POLICIES = {"AdministratorAccess", "PowerUserAccess"}
 
         try:
-            account_id = sts_client.get_caller_identity()["Account"]  # Get AWS Account ID
+            account_id = sts_client.get_caller_identity()["Account"]
         except (BotoCoreError, ClientError) as e:
             report.status = CheckStatus.UNKNOWN
             report.resource_ids_status.append(
@@ -35,10 +34,9 @@ class iam_attached_policy_admin_privileges_found(Check):
                     exception=str(e)
                 )
             )
-            return report  # Exit early since we cannot construct ARNs
+            return report
 
         def check_policies(entity_name, entity_type, list_policies_func):
-            """Helper function to check attached policies for a user, group, or role"""
             resource = AwsResource(arn=f"arn:aws:iam::{account_id}:{entity_type}/{entity_name}")
             
             try:
@@ -87,12 +85,16 @@ class iam_attached_policy_admin_privileges_found(Check):
                 )
 
         entities_checked = 0
+        users_checked = 0
+        roles_checked = 0
+        groups_checked = 0
         
         try:
             # Check IAM Users
             paginator = client.get_paginator('list_users')
             for page in paginator.paginate():
                 for user in page.get('Users', []):
+                    users_checked += 1
                     entities_checked += 1
                     try:
                         check_policies(user['UserName'], 'user', lambda: client.get_paginator('list_attached_user_policies').paginate(UserName=user['UserName']))
@@ -106,10 +108,20 @@ class iam_attached_policy_admin_privileges_found(Check):
                             )
                         )
 
+            if users_checked == 0:
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name="IAM Users"),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No IAM users found in the account."
+                    )
+                )
+
             # Check IAM Roles
             paginator = client.get_paginator('list_roles')
             for page in paginator.paginate():
                 for role in page.get('Roles', []):
+                    roles_checked += 1
                     entities_checked += 1
                     try:
                         check_policies(role['RoleName'], 'role', lambda: client.get_paginator('list_attached_role_policies').paginate(RoleName=role['RoleName']))
@@ -122,11 +134,21 @@ class iam_attached_policy_admin_privileges_found(Check):
                                 exception=str(e)
                             )
                         )
-            
+
+            if roles_checked == 0:
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name="IAM Roles"),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No IAM roles found in the account."
+                    )
+                )
+
             # Check IAM Groups
             paginator = client.get_paginator('list_groups')
             for page in paginator.paginate():
                 for group in page.get('Groups', []):
+                    groups_checked += 1
                     entities_checked += 1
                     try:
                         check_policies(group['GroupName'], 'group', lambda: client.get_paginator('list_attached_group_policies').paginate(GroupName=group['GroupName']))
@@ -139,6 +161,15 @@ class iam_attached_policy_admin_privileges_found(Check):
                                 exception=str(e)
                             )
                         )
+
+            if groups_checked == 0:
+                report.resource_ids_status.append(
+                    ResourceStatus(
+                        resource=GeneralResource(name="IAM Groups"),
+                        status=CheckStatus.NOT_APPLICABLE,
+                        summary="No IAM groups found in the account."
+                    )
+                )
 
             if entities_checked == 0:
                 report.status = CheckStatus.NOT_APPLICABLE
