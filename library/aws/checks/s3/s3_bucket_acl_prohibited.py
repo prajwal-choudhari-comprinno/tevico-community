@@ -60,8 +60,14 @@ class s3_bucket_acl_prohibited(Check):
                             continue  # Skip to next bucket as this one passes
                     except ClientError as e:
                         if e.response['Error']['Code'] == 'OwnershipControlsNotFoundError':
-                            # Ownership controls not set, continue to check ACLs
-                            pass
+                            report.resource_ids_status.append(
+                                ResourceStatus(
+                                    resource=AwsResource(arn=bucket_arn),
+                                    status=CheckStatus.ERRORED,
+                                    summary=f"S3 bucket {bucket_name} has no ownership controls set.",
+                                    exception=str(e)
+                                )
+                            )
                         else:
                             raise  # Re-raise if it's a different error
                     
