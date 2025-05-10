@@ -30,3 +30,25 @@ class AWSProvider(Provider):
     def metadata(self) -> Dict[str, str]:
         return {}
 
+    @property
+    def account_id(self) -> str:
+        try:
+            session = self.connect()
+            sts_client = session.client('sts')
+            account_id = sts_client.get_caller_identity()['Account']
+            return account_id
+        except Exception as e:
+            return "Unknown"
+
+
+    @property
+    def account_name(self) -> str:
+        try:
+            session = self.connect()
+            org_client = session.client('organizations')
+            response = org_client.describe_account(AccountId=self.account_id)
+            account_name = response['Account']['Name']
+            return account_name
+        except Exception as e:
+            return "Unknown"
+
