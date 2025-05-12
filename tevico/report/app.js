@@ -85,6 +85,7 @@ function updateUI(reportsData, analyticsData) {
         const impactedServiceNameElement = document.getElementById('impacted_service_name');
         if (impactedServiceNameElement) {
             impactedServiceNameElement.innerText = `${majorImpactService.name}`;
+            impactedServiceNameElement.href = `./browse.html?status=failed&service=${majorImpactService.name}`;
         } else {
             console.warn(`Element with ID "${id}" not found`);
         }
@@ -103,6 +104,7 @@ function updateUI(reportsData, analyticsData) {
         const areaOfFocusElement = document.getElementById('area_of_focus');
         if (areaOfFocusElement) {
             areaOfFocusElement.innerText = `${areaOfFocus.name}`;
+            areaOfFocusElement.href = `./browse.html?status=failed&section=${areaOfFocus.name}`;
         } else {
             console.warn(`Element with ID "${id}" not found`);
         }
