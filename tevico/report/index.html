@@ -119,7 +119,7 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Total Checks</h3>
-                  <div class="h1 mb-0 me-2" id="total_checks"></div>
+                  <a href="./browse.html?clear=true" class="h1 mb-0 me-2" id="total_checks"></a>
                   <div class="text-secondary">Successfully Executed</div>
                 </div>
               </div>
@@ -128,7 +128,7 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Passed</h3>
-                  <div class="h1 mb-0 me-2" id="passed_checks"></div>
+                  <a href="./browse.html?status=passed" class="h1 mb-0 me-2" id="passed_checks"></a>
                   <div class="text-secondary" id="passed"></div>
                 </div>
               </div>
@@ -137,7 +137,7 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Failed</h3>
-                  <div class="h1 mb-0 me-2" id="failed_checks"></div>
+                  <a href="./browse.html?status=failed" class="h1 mb-0 me-2" id="failed_checks"></a>
                   <div class="text-secondary" id="failed"></div>
                 </div>
               </div>
@@ -155,7 +155,8 @@
               <div class="card card-link card-link-pop">
                 <div class="card-body">
                   <h3 class="card-title">Critical Checks Failed</h3>
-                  <div class="h1 mb-0 me-2" id="critical_checks_failing"></div>
+                  <a href="./browse.html?status=failed&severity=critical" class="h1 mb-0 me-2"
+                    id="critical_checks_failing"></a>
                   <div class="text-secondary" id="critical_checks_failing_subheading"></div>
                 </div>
               </div>
@@ -163,8 +164,10 @@
             <div class="col-sm-6 col-lg-3">
               <div class="card card-link card-link-pop">
                 <div class="card-body">
-                  <h3 class="card-title">Major Impact On</h3>
-                  <div class="h1 mb-0 me-2" id="impacted_service_name"></div>
+                  <h3 class="card-title">
+                    Major Impact On
+                  </h3>
+                  <a class="h1 mb-0 me-2" id="impacted_service_name"></a>
                   <div class="text-secondary" id="impacted_service_count"></div>
                 </div>
               </div>
@@ -172,8 +175,10 @@
             <div class="col-sm-6 col-lg-3">
               <div class="card card-link card-link-pop">
                 <div class="card-body">
-                  <h3 class="card-title">Area of Focus</h3>
-                  <div class="h1 mb-0 me-2" id="area_of_focus"></div>
+                  <h3 class="card-title">
+                    Area of Focus
+                  </h3>
+                  <a class="h1 mb-0 me-2" id="area_of_focus"></a>
                   <div class="text-secondary" id="area_of_focus_count"></div>
                 </div>
               </div>
