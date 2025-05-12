@@ -124,7 +124,6 @@ sections:
           # @deepak.puri - Fix ARN issue for WAF ACL
           - elb_v2_waf_acl_attached
           - lambda_function_not_publicly_accessible
-          - networkfirewall_multi_az_enabled
           - vpc_default_security_group_closed
           - vpc_endpoint_services_allowed_principals_trust_boundaries
           - vpc_security_group_port_restriction_check
@@ -246,7 +245,6 @@ sections:
 
           This section checks for the presence of a Well Architected Review in the AWS account.
         checks:
-          - dynamodb_tables_pitr_enabled
           - rds_instance_backup_enabled
           - rds_instance_minor_version_upgrade_enabled
       - name: Change Management
