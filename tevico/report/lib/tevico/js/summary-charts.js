@@ -41,37 +41,20 @@ class ChartConfig {
       bar: {
         borderRadius: 4,
         horizontal: true,
-        dataLabels: { position: 'bottom' },
-        distributed: true
+        dataLabels: { position: 'top' }
       }
     },
     dataLabels: {
       enabled: true,
-      offsetX: 20,
+      offsetX: 40,
       style: {
         fontSize: '12px',
         fontWeight: 'bold',
-        colors: ['#555', '#ffffff']
+        colors: ['#333']
       },
-      formatter: (val, opts) => {
+      formatter: (val) => {
         const value = parseFloat(val);
-        opts.w.globals.dataLabels.style.colors[opts.dataPointIndex] =
-          value === 0 ? '#555' : '#ffffff';
         return value.toFixed(2) + ' %';
-      }
-    },
-    states: {
-      hover: {
-        filter: {
-          type: 'darken',
-          value: 0.9,
-        }
-      },
-      active: {
-        filter: {
-          type: 'darken',
-          value: 0.85,
-        }
       }
     },
     xaxis: {
@@ -128,10 +111,15 @@ class DataProcessor {
       });
     });
 
+    const totalByStatus = data.by_severities.reduce((acc, item) => {
+      acc += item.check_status[status];
+      return acc;
+    }, 0);
+
     data.by_severities.forEach(item => {
       if (severityMap.has(item.name)) {
         severityMap.set(item.name, {
-          value: ((item.check_status[status] / item.check_status.total) * 100).toFixed(2),
+          value: ((item.check_status[status] / totalByStatus) * 100).toFixed(2),
           name: toTitleCase(item.name)
         });
       }
@@ -144,23 +132,10 @@ class DataProcessor {
 
 toTitleCase = (string) => string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 
-// Chart Builders
 class ChartBuilder {
   static createBarChart(elementId, data) {
     const status = elementId.startsWith(Status.PASSED) ? Status.PASSED : Status.FAILED;
     const metrics = DataProcessor.calculatePercentages(data, status);
-
-    const customColors = metrics.map(m => {
-
-      const colorMap = {
-        'Critical': '#ED495D',
-        'High': '#ED495D88',
-        'Medium': '#FCA90B',
-        'Low': '#FCA90B88'
-      };
-
-      return colorMap[m.name] || '#2196F3';
-    });
 
     return {
       series: [{ data: metrics.map(m => m.value) }],
@@ -170,7 +145,6 @@ class ChartBuilder {
         toolbar: ChartConfig.baseBarConfig.toolbar,
       },
       ...ChartConfig.baseBarConfig,
-      colors: customColors,
       xaxis: {
         ...ChartConfig.baseBarConfig.xaxis,
         categories: metrics.map(m => m.name)
