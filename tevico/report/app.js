@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
     updateUI(check_reports, check_analytics);
     setActiveNavLink();
+    if (window.updateNavbarAccountInfo) {
+        window.updateNavbarAccountInfo(account_id, account_name);
+    }
 });
 
 function updateUI(reportsData, analyticsData) {

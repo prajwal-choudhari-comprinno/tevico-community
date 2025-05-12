@@ -252,6 +252,7 @@ function handlePaginationClick(e) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+
     const urlParams = new URLSearchParams(window.location.search);
     const shouldClear = urlParams.get('clear') === 'true';
 
@@ -283,6 +284,10 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.clear();
         }
     });
+
+    if (window.updateNavbarAccountInfo) {
+        window.updateNavbarAccountInfo(account_id, account_name);
+    }
 });
 
 function createDynamicTable({ reportsData }) {
