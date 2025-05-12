@@ -452,6 +452,8 @@ const createDropdownItem = (text, dropdownId, filterType) => {
 function applyDefaultFilters() {
     const severity = getQueryParam('severity');
     const status = getQueryParam('status');
+    const service = getQueryParam('service');
+    const section = getQueryParam('section');
 
     if (severity) {
         const severityDropdown = document.getElementById('severityDropdown');
@@ -478,6 +480,34 @@ function applyDefaultFilters() {
             dropdownToggle.textContent = statusItem.textContent;
             dropdownToggle.classList.add('active');
             statusItem.classList.add('active');
+        }
+    }
+
+    if (service) {
+        const serviceDropdown = document.getElementById('serviceDropdown');
+        const serviceItem = Array.from(serviceDropdown.querySelectorAll('.dropdown-item'))
+            .find(item => item.textContent.toLowerCase() === service.toLowerCase());
+        const dropdownToggle = serviceDropdown.closest('.dropdown').querySelector('.dropdown-toggle');
+
+        if (serviceItem) {
+            activeFilters.service = serviceItem.textContent;
+            dropdownToggle.textContent = serviceItem.textContent;
+            dropdownToggle.classList.add('active');
+            serviceItem.classList.add('active');
+        }
+    }
+
+    if (section) {
+        const sectionDropdown = document.getElementById('sectionDropdown');
+        const sectionItem = Array.from(sectionDropdown.querySelectorAll('.dropdown-item'))
+            .find(item => item.textContent.toLowerCase() === section.toLowerCase());
+        const dropdownToggle = sectionDropdown.closest('.dropdown').querySelector('.dropdown-toggle');
+
+        if (sectionItem) {
+            activeFilters.section = sectionItem.textContent;
+            dropdownToggle.textContent = sectionItem.textContent;
+            dropdownToggle.classList.add('active');
+            sectionItem.classList.add('active');
         }
     }
 
