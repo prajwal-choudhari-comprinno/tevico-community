@@ -2,7 +2,7 @@ Provider: aws
 
 CheckID: iam_customer_unattached_policy_admin_privileges_found
 
-CheckTitle: Ensure IAM policies that allow full "*:*" administrative privileges are not created
+CheckTitle: Check no unattached customer-managed policy grants admin-level privileges.
 
 CheckType: 
   - Software and Configuration Checks
@@ -19,7 +19,7 @@ Severity: high
 
 ResourceType: AwsIamPolicy
 
-Description: Ensure IAM policies that allow full "*:*" administrative privileges are not created.
+Description: Ensure customer managed policies that allow full "*:*" administrative privileges are not created.
 
 Risk: |
   IAM policies are the means by which privileges are granted to users, groups, or roles. 

@@ -29,7 +29,7 @@ Severity: medium
 ResourceType: AwsAccount
 
 # Description of the check
-Description: Ensures that no IAM user or role has an administrator policy attached.
+Description: Ensures that the AWS account has security contact information registered.
 
 # Explanation of the risk associated with the check
 Risk: AWS provides customers with the option of specifying the contact information for accounts security team. It is recommended that this information be provided. Specifying security-specific contact information will help ensure that security advisories sent by AWS reach the team in your organization that is best equipped to respond to them.
@@ -71,7 +71,7 @@ Categories: [infrastructure_protection, security]
 # Dependencies on other checks
 DependsOn: []
 
-# Related checks
+# Related checksthat
 RelatedTo: []
 
 # Side notes

@@ -4,7 +4,7 @@ Provider: aws
 CheckID: iam_attached_policy_admin_privileges_found
 
 # Short title/description of the check
-CheckTitle: "Ensure no IAM user, role or group has the AdministratorAccess policy attached"
+CheckTitle: "Ensure no IAM user, role or group has a policy with admin-level privileges attached"
 
 # Check Type
 CheckType: 
@@ -27,7 +27,7 @@ Severity: high
 ResourceType: AwsIamUser, AwsIamRole
 
 # Description of the check
-Description: "This check ensures that no IAM user, role or group has the AdministratorAccess policy attached, as such policies grant excessive privileges and can pose security risks."
+Description: "This check ensures that no IAM user, role or group has a policy with admin-level privileges attached, as such policies grant excessive privileges and can pose security risks."
 
 # Explanation of the risk associated with the check
 Risk: "Attaching the AdministratorAccess policy to IAM users, roles or groups grants full administrative privileges, increasing the risk of unintentional or malicious changes to your AWS account."

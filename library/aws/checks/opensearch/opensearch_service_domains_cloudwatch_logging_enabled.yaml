@@ -1,7 +1,7 @@
 Provider: aws
 CheckID: opensearch_service_domains_cloudwatch_logging_enabled
 CheckTitle:
-  Ensure Amazon OpenSearch Service domains have logging enabled
+  Ensure Amazon OpenSearch domains have logging enabled
 CheckType:
   - Identify
   - Logging
@@ -11,7 +11,7 @@ ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 Severity: medium
 ResourceType: AwsOpenSearchDomain
 Description:
-  Ensure that Amazon Opensearch Service domains have logging enabled
+  Ensure that Amazon Opensearch domains have logging enabled
 Risk:
   "Amazon ES exposes four Elasticsearch/Opensearch logs through Amazon CloudWatch
   Logs: error logs, search slow logs, index slow logs, and audit logs."

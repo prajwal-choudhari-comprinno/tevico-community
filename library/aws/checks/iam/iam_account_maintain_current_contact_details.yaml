@@ -2,7 +2,7 @@ Provider: aws
 
 CheckID: iam_account_maintain_current_contact_details
 
-CheckTitle: Verify AWS account contact details
+CheckTitle: Verify AWS account has all required contact details
 
 CheckType: [contact_information_check]
 

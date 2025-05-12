@@ -8,7 +8,7 @@ SubServiceName: ebs
 ResourceIdTemplate: arn:partition:service:region:account-id:resource-id
 Severity: medium
 ResourceType: Other
-Description: Ensure that EBS Default Encryption is activated.
+Description: Ensure that EBS default encryption is activated.
 Risk: If not enabled sensitive information at rest is not protected.
 RelatedUrl: https://tevi.co
 Remediation:
