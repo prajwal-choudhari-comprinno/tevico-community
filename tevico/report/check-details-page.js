@@ -1,5 +1,9 @@
 
 document.addEventListener('DOMContentLoaded', function () {
+    if (window.updateNavbarAccountInfo) {
+        window.updateNavbarAccountInfo(account_id, account_name);
+    }
+
     const source = getQueryParam('from');
     const id = getQueryParam('id');
 
