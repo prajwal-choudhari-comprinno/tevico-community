@@ -145,7 +145,52 @@
             <div class="col-sm-6 col-lg-3">
               <div class="card card-link card-link-pop">
                 <div class="card-body">
-                  <h3 class="card-title">Severity Score</h3>
+                  <h3 class="card-title">
+                    Severity Score
+                    <button type="button" class="btn p-0 border-0 ms-1 shadow-none" data-bs-toggle="modal"
+                      data-bs-target="#calculationModal">
+                      <span data-bs-toggle="tooltip" data-bs-placement="top" title="View Calculation">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle m-0">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+                          <path d="M12 9h.01" />
+                          <path d="M11 12h1v4h1" />
+                        </svg>
+                      </span>
+                    </button>
+                    <div class="modal modal-lg" id="calculationModal" tabindex="-1">
+                      <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Severity Score Calculation</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body fw-normal">
+                            The weightage of each severity level is as follows:
+                            <ul>
+                              <li>Critical: 4</li>
+                              <li>High: 3</li>
+                              <li>Medium: 2</li>
+                              <li>Low: 1</li>
+                            </ul>
+                            <div class="mb-3">
+                              <p class="mb-0">Severity Score is then calculated based on the following formula:</p>
+                              ( (Total score based on severity / Total number of checks executed) / 4) * 100
+                            </div>
+                            <p>For example, if you have 10 checks executed with 2 critical, 3 high, 2 medium and 3 low
+                              severity checks, the calculation would be:</p>
+                            <div class="text-center">
+                              <div class="h1 mb-0 me-2">( ( ( (2 * 4) + (3 * 3) + (2 * 2) + (3 * 1) ) / 10) / 4) * 100
+                              </div>
+                              <div class="text-secondary">= 60</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </h3>
                   <div class="h1 mb-0 me-2" id="severity_score"></div>
                   <div class="text-secondary">Lower the better!</div>
                 </div>
