@@ -41,17 +41,16 @@ class ChartConfig {
       bar: {
         borderRadius: 4,
         horizontal: true,
-        dataLabels: { position: 'bottom' },
-        distributed: true
+        dataLabels: { position: 'top' }
       }
     },
     dataLabels: {
       enabled: true,
-      offsetX: 20,
+      offsetX: 40,
       style: {
         fontSize: '12px',
         fontWeight: 'bold',
-        colors: ['#555', '#ffffff']
+        colors: ['#333']
       },
       formatter: (val) => {
         const value = parseFloat(val);
@@ -112,10 +111,15 @@ class DataProcessor {
       });
     });
 
+    const totalByStatus = data.by_severities.reduce((acc, item) => {
+      acc += item.check_status[status];
+      return acc;
+    }, 0);
+
     data.by_severities.forEach(item => {
       if (severityMap.has(item.name)) {
         severityMap.set(item.name, {
-          value: ((item.check_status[status] / item.check_status.total) * 100).toFixed(2),
+          value: ((item.check_status[status] / totalByStatus) * 100).toFixed(2),
           name: toTitleCase(item.name)
         });
       }
