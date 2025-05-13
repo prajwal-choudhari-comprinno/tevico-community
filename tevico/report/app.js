@@ -54,8 +54,16 @@ function calculateSeverityScore(reportsData) {
         low: 1,
     };
 
-    const totalScore = reportsData.reduce((acc, check) =>
-        acc + (scores[check.check_metadata.severity] || 0), 0);
+    const statusScores = {
+        passed: 0,
+        failed: 1,
+        skipped: 0,
+        not_applicable: 0,
+        unknown: 0,
+        errored: 0
+    }
+
+    const totalScore = reportsData.reduce((acc, check) => acc += ((scores[check.check_metadata.severity] * statusScores[check.status]) || 0), 0);
 
     const maxPossibleScore = 4;
     const normalizedScore = (totalScore / reportsData.length) / maxPossibleScore;
