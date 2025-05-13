@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-function updateUI(reportsData, analyticsData) {
+updateUI = (reportsData, analyticsData) => {
     try {
         if (!analyticsData?.check_status) {
             throw new Error('Invalid data structure');
@@ -32,7 +32,7 @@ function updateUI(reportsData, analyticsData) {
     }
 }
 
-function updateSummaryMetrics(reportsData, check_status) {
+updateSummaryMetrics = (reportsData, check_status) => {
     const elements = {
         total_checks: check_status.total,
         passed_checks: check_status.passed,
@@ -46,7 +46,7 @@ function updateSummaryMetrics(reportsData, check_status) {
     addTotalCountToElement('failed_checks', check_status.total);
 }
 
-function calculateSeverityScore(reportsData) {
+calculateSeverityScore = (reportsData) => {
     const scores = {
         critical: 4,
         high: 3,
@@ -71,7 +71,7 @@ function calculateSeverityScore(reportsData) {
     return `${(normalizedScore * 100).toFixed(2)}%`;
 }
 
-function updatePercentageSubtitles(check_status) {
+updatePercentageSubtitles = (check_status) => {
     const subtitle = {
         passed: `${((check_status.passed / check_status.total) * 100).toFixed(2)}%`,
         failed: `${((check_status.failed / check_status.total) * 100).toFixed(2)}%`
@@ -82,7 +82,7 @@ function updatePercentageSubtitles(check_status) {
     }
 }
 
-function updateCriticalChecksInfo(by_severities, check_status) {
+updateCriticalChecksInfo = (by_severities, check_status) => {
     const criticalChecksFailing = by_severities.find(ele => ele.name === 'critical')?.check_status.failed || 0;
 
     const criticalChecksElement = document.getElementById('critical_checks_failing');
@@ -96,7 +96,7 @@ function updateCriticalChecksInfo(by_severities, check_status) {
     updateElementText('critical_checks_failing_subheading', `i.e. ${criticalChecksFailingPer.toFixed(2)}%`);
 }
 
-function updateServiceImpactInfo(by_services) {
+updateServiceImpactInfo = (by_services) => {
     const majorImpactService = findMajorImpactService(by_services);
 
     const impactedServiceNameElement = document.getElementById('impacted_service_name');
@@ -110,7 +110,7 @@ function updateServiceImpactInfo(by_services) {
     updateElementText('impacted_service_count', `with ${majorImpactService.check_status.failed} failed checks`);
 }
 
-function findMajorImpactService(by_services) {
+findMajorImpactService = (by_services) => {
     return by_services.reduce((acc, item) => {
         const currFailed = item.check_status.failed || 0;
         if (!acc.check_status?.failed || (currFailed && currFailed > acc.check_status.failed)) {
@@ -120,7 +120,7 @@ function findMajorImpactService(by_services) {
     }, {});
 }
 
-function updateAreaOfFocusInfo(by_sections) {
+updateAreaOfFocusInfo = (by_sections) => {
 
     const [areaOfFocus] = [...by_sections].sort((a, b) => b.check_status.failed - a.check_status.failed);
 
@@ -135,13 +135,13 @@ function updateAreaOfFocusInfo(by_sections) {
     updateElementText('area_of_focus_count', `with ${areaOfFocus.check_status.failed} failed checks`);
 }
 
-function updateElements(elements) {
+updateElements = (elements) => {
     for (const [id, value] of Object.entries(elements)) {
         updateElementText(id, String(value || 0));
     }
 }
 
-function updateElementText(id, text) {
+updateElementText = (id, text) => {
     const element = document.getElementById(id);
     if (element) {
         element.innerText = text;
@@ -150,14 +150,14 @@ function updateElementText(id, text) {
     }
 }
 
-function addTotalCountToElement(id, total) {
+addTotalCountToElement = (id, total) => {
     const element = document.getElementById(id);
     if (element) {
         element.innerHTML = `${element.innerText}<span class="text-muted fs-5 fw-normal">/${total}</span>`;
     }
 }
 
-function createDynamicTable({ reportsData, status, limit, containerId }) {
+createDynamicTable = ({ reportsData, status, limit, containerId }) => {
     const criticalFailingChecks = reportsData.filter(d => d.check_metadata.severity === 'critical' && (d.status === status)).slice(0, limit);
     const headersArray = [{ label: 'section', key: 'section' }, { label: 'check', key: 'check_metadata.check_title' }, { label: 'severity', key: 'check_metadata.severity' }, { label: 'service', key: 'check_metadata.service_name' }]
 
