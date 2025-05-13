@@ -360,7 +360,7 @@ function createDynamicTable({ reportsData }) {
                             break;
                         case 'not_applicable':
                             td.setAttribute('data-status', 'Not Applicable');
-                            td.innerHTML = `<span class="badge bg-softer-info">Not Applicable</span>`;
+                            td.innerHTML = `<span class="badge bg-soft-info">Not Applicable</span>`;
                             break;
                         case 'unknown':
                             td.setAttribute('data-status', 'Unknown');
