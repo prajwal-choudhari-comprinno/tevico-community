@@ -40,16 +40,32 @@ class AWSProvider(Provider):
         except Exception as e:
             return "Unknown"
 
-
     @property
-    def account_name(self) -> str:
+def account_name(self) -> str:
+    try:
+        session = self.connect()
+        
+        # Try IAM account aliases first - works in most accounts with IAM permissions
         try:
-            session = self.connect()
+            iam_client = session.client('iam')
+            response = iam_client.list_account_aliases()
+            aliases = response.get('AccountAliases', [])
+            if aliases:
+                return aliases[0]
+        except Exception:
+            pass
+        
+        # Try Account API as fallback
+        try:
             account_client = session.client('account')
             response = account_client.get_account_information()
-            print(f'\n Account information: {response}')
-            # Assuming the account name is in the response
-            account_name = response['AccountName']
-            return account_name
-        except Exception as e:
-            return "Unknown"
+            account_name = response.get('AccountName')
+            if account_name:
+                return account_name
+        except Exception:
+            pass
+            
+        # If all else fails, return the account ID with a prefix
+        return f"AWS Account {self.account_id}"
+    except Exception:
+        return "Unknown"
