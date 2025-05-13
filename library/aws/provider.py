@@ -45,10 +45,9 @@ class AWSProvider(Provider):
     def account_name(self) -> str:
         try:
             session = self.connect()
-            org_client = session.client('organizations')
-            response = org_client.describe_account(AccountId=self.account_id)
-            account_name = response['Account']['Name']
+            account_client = session.client('account')
+            response = account_client.get_account_information()
+            account_name = response['AccountName']
             return account_name
         except Exception as e:
             return "Unknown"
-
