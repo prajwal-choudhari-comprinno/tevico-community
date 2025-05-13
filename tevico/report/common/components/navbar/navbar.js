@@ -1,28 +1,32 @@
 function loadNavbar() {
-  return fetch('./common/components/navbar/navbar.html')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to load navbar component');
-      }
-      return response.text();
-    })
-    .then(html => {
-      const pageWrapper = document.querySelector('.page-wrapper');
-      if (pageWrapper) {
-        pageWrapper.insertAdjacentHTML('afterbegin', html);
-        initNavbar();
-        return html;
-      } else {
-        throw new Error('Page wrapper element not found');
-      }
-    })
-    .catch(error => {
-      console.error('Error loading navbar:', error);
-    });
+  const navbarHtml = `<header class="navbar navbar-expand-md navbar-light d-print-none sticky-top bg-white border-bottom shadow-sm">
+    <div class="container-xl">
+      <div class="navbar-brand">
+        <div class="me-3">
+          <span class="fs-5 fw-normal">Account ID:</span>
+          <span id="accountId"></span>
+        </div>
+        <div>
+            <span class="fs-5 fw-normal">Account Name:</span>
+            <span id="accountName"></span>
+        </div>
+      </div>
+    </div>
+  </header>`;
+
+  const pageWrapper = document.querySelector('.page-wrapper');
+  if (pageWrapper) {
+    pageWrapper.insertAdjacentHTML('afterbegin', navbarHtml);
+    initNavbar();
+    return Promise.resolve(navbarHtml);
+  } else {
+    const error = new Error('Page wrapper element not found');
+    console.error('Error loading navbar:', error);
+    return Promise.reject(error);
+  }
 }
 
 function initNavbar() {
-
   const storedAccountId = localStorage.getItem('accountId');
   const storedAccountName = localStorage.getItem('accountName');
 
