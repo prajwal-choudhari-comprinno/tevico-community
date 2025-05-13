@@ -149,7 +149,7 @@
                     Severity Score
                     <button type="button" class="btn p-0 border-0 ms-1 shadow-none" data-bs-toggle="modal"
                       data-bs-target="#calculationModal">
-                      <span data-bs-toggle="tooltip" data-bs-placement="top" title="View Calculation">
+                      <span data-bs-toggle="tooltip" data-bs-placement="top" title="View Calculations">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                           class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle m-0">
@@ -167,24 +167,52 @@
                             <h5 class="modal-title">Severity Score Calculation</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
-                          <div class="modal-body fw-normal">
-                            The weightage of each severity level is as follows:
-                            <ul>
-                              <li>Critical: 4</li>
-                              <li>High: 3</li>
-                              <li>Medium: 2</li>
-                              <li>Low: 1</li>
-                            </ul>
+                          <div class="modal-body fw-normal" style="max-height: 25rem; overflow: auto;">
+                            <div class="mb-3">
+                              <p class="mb-0">
+                                The weightage of each severity level is as follows:
+                              </p>
+                              <ul class="m-0">
+                                <li>Critical: 4</li>
+                                <li>High: 3</li>
+                                <li>Medium: 2</li>
+                                <li>Low: 1</li>
+                              </ul>
+                            </div>
+                            <div class="mb-3">
+                              <p class="mb-0">And the weightage of each status is as follows:</p>
+                              <ul class="m-0">
+                                <li>Passed: 0</li>
+                                <li>Failed: 1</li>
+                                <li>Skipped: 0</li>
+                                <li>Not Applicable: 0</li>
+                                <li>Unknown: 0</li>
+                                <li>Errored: 0</li>
+                              </ul>
+                            </div>
+                            <div class="mb-3">
+                              Total score based on severity is calculated as follows:
+                              <ul class="m-0">
+                                <li>Critical: 4 * Critical Checks Failed</li>
+                                <li>High: 3 * High Checks Failed</li>
+                                <li>Medium: 2 * Medium Checks Failed</li>
+                                <li>Low: 1 * Low Checks Failed</li>
+                              </ul>
+                            </div>
                             <div class="mb-3">
                               <p class="mb-0">Severity Score is then calculated based on the following formula:</p>
-                              ( (Total score based on severity / Total number of checks executed) / 4) * 100
+                              <span>
+                                ( (Total score based on severity / Total number of checks executed) / 4) * 100
+                              </span>
                             </div>
-                            <p>For example, if you have 10 checks executed with 2 critical, 3 high, 2 medium and 3 low
-                              severity checks, the calculation would be:</p>
-                            <div class="text-center">
-                              <div class="h1 mb-0 me-2">( ( ( (2 * 4) + (3 * 3) + (2 * 2) + (3 * 1) ) / 10) / 4) * 100
+                            <p>
+                              For example, if you have 10 failed checks executed with 2 critical, 3 high, 2 medium and 3
+                              low severity checks, the calculation would be:
+                            </p>
+                            <div>
+                              <div class="mb-0 me-2">
+                                ( ( ( (2 * 4) + (3 * 3) + (2 * 2) + (3 * 1) ) / 10) / 4) * 100 = 60
                               </div>
-                              <div class="text-secondary">= 60</div>
                             </div>
                           </div>
                         </div>
