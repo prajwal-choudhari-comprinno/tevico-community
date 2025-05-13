@@ -286,8 +286,6 @@ class TevicoFramework():
         
         try:
             print(f'\n* Running checks for provider 🚀: {provider.name}')
-            print(f'\n* Running checks for account name 🚀: {provider.account_name}')
-            print(f'\n* Running checks for account id 🚀: {provider.account_id}')
             provider.connect()
             result = provider.start_execution()
             checks.extend(result)
