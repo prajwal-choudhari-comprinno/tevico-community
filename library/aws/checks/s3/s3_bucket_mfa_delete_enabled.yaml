@@ -11,7 +11,7 @@ Severity: medium
 ResourceType: "AwsS3Bucket"
 Description: "Ensure S3 bucket MFA delete is enabled to prevent accidental or malicious deletion of data."
 Risk: "Without MFA Delete enabled, your S3 bucket data is at risk of accidental deletion or unauthorized removal if security credentials are compromised."
-RelatedUrl: ""
+RelatedUrl: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/MultiFactorAuthenticationDelete.html"
 Remediation:
   Code:
     CLI: "aws s3api put-bucket-versioning --profile my-root-profile --bucket my-bucket-name --versioning-configuration Status=Enabled,MFADelete=Enabled --mfa 'arn:aws:iam::00000000:mfa/root-account-mfa-device 123456'"

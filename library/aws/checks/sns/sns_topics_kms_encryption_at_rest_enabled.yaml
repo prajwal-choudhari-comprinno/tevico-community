@@ -9,7 +9,7 @@ Severity: medium
 ResourceType: AwsSnsTopic
 Description: Ensure there are no SNS topics unencrypted
 Risk: If not enabled sensitive information at rest is not protected.
-RelatedUrl: https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html
+RelatedUrl: https://docs.aws.amazon.com/sns/latest/dg/sns-enable-encryption-for-topic.html
 Remediation:
   Code:
     CLI: aws sns set-topic-attributes --topic-arn <TOPIC_ARN> --attribute-name 'KmsMasterKeyId' --attribute-value <KEY>

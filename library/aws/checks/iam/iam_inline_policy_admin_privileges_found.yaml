@@ -22,7 +22,7 @@ Description: Ensure IAM inline policies with full administrative privileges (`*:
 Risk: > 
   Attaching full administrative privileges to IAM users exposes the account to significant risk, as the user can perform unrestricted actions across all AWS services.
 
-RelatedUrl: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
+RelatedUrl: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_controlling.html#access_controlling-policies
 
 Remediation:
   Code:

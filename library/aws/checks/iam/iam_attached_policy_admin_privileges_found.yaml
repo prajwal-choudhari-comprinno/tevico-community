@@ -33,7 +33,7 @@ Description: "This check ensures that no IAM user, role or group has a policy wi
 Risk: "Attaching the AdministratorAccess policy to IAM users, roles or groups grants full administrative privileges, increasing the risk of unintentional or malicious changes to your AWS account."
 
 # Related URL for the check
-RelatedUrl: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
+RelatedUrl: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege
 
 # Help section on how to fix the issue
 Remediation:

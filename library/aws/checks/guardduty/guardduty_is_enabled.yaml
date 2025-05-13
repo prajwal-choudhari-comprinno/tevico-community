@@ -9,7 +9,7 @@ Severity: high
 ResourceType: AwsGuardDutyDetector
 Description: Ensure that Amazon GuardDuty is enabled to ensure monitoring and threat detection capabilities.
 Risk: Without GuardDuty enabled, threats and unauthorized activities may go undetected, exposing the environment to risks.
-RelatedUrl: https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_detectors.html
+RelatedUrl: "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_settingup.html#guardduty_enable-gd"
 Remediation:
   Code:
     CLI: 

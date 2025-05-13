@@ -29,7 +29,7 @@ Risk: |
   allowing full administrative privileges. Providing full administrative privileges instead of 
   restricting to the minimum set of permissions exposes the resources to potentially unwanted actions.
 
-RelatedUrl: https://tevi.co
+RelatedUrl: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_controlling.html
 
 Remediation:
   Code:

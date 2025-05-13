@@ -35,7 +35,7 @@ Description: Ensures that the AWS account has security contact information regis
 Risk: AWS provides customers with the option of specifying the contact information for accounts security team. It is recommended that this information be provided. Specifying security-specific contact information will help ensure that security advisories sent by AWS reach the team in your organization that is best equipped to respond to them.
 
 # Related URL for the check
-RelatedUrl: https://tevi.co
+RelatedUrl: https://docs.aws.amazon.com/security-ir/latest/userguide/update-account-contact-info.html
 
 # Help section on how to fix the issue
 Remediation:

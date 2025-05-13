@@ -22,7 +22,7 @@ ResourceType: AwsIamUser
 Description: Ensure customer managed policies that allow full "*:*" administrative privileges are not attached to users, roles or groups.
 Risk: Attaching administrative privileges to users, roles or groups increases the security risk.
 
-RelatedUrl: https://tevi.co
+RelatedUrl: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_controlling.html
 
 Remediation:
   Code:

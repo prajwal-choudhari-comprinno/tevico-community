@@ -15,7 +15,7 @@ Description:
 Risk:
   "Amazon ES exposes four Elasticsearch/Opensearch logs through Amazon CloudWatch
   Logs: error logs, search slow logs, index slow logs, and audit logs."
-RelatedUrl: ""
+RelatedUrl: "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/createdomain-configure-slow-logs.html"
 Remediation:
   Code:
     CLI: ""

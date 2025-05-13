@@ -9,7 +9,7 @@ Severity: medium
 ResourceType: AwsDynamoDbTable
 Description: Ensure that DynamoDB tables have encryption at rest enabled using KMS CMK for enhanced data security.
 Risk: All user data stored in Amazon DynamoDB is fully encrypted at rest. This functionality helps reduce the operational burden and complexity involved in protecting sensitive data.
-RelatedUrl: https://docs.aws.amazon.com/amazondynamodbdb/latest/developerguide/EncryptionAtRest.html
+RelatedUrl: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/encryption.tutorial.html
 Remediation:
   Code: 
     CLI: ""

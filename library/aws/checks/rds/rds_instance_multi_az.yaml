@@ -12,7 +12,7 @@ Risk:
   In case of failure, with a single-AZ deployment configuration, should an availability
   zone specific database failure occur, Amazon RDS can not automatically fail over
   to the standby availability zone.
-RelatedUrl: https://aws.amazon.com/rds/features/multi-az/
+RelatedUrl: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html
 Remediation:
   Code:
     CLI:

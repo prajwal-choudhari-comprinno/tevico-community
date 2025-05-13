@@ -9,7 +9,7 @@ Severity: high
 ResourceType: AwsGuardDutyDetector
 Description: Ensure GuardDuty is enabled and findings are centralized to a master account for unified threat detection.
 Risk: Without centralized GuardDuty, it’s challenging to achieve unified visibility into potential threats across multiple accounts and regions, increasing the risk of undetected security incidents.
-RelatedUrl: ""
+RelatedUrl: "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_accounts.html"
 Remediation: 
   Code:
     CLI: aws guardduty create-detector --enable

@@ -10,7 +10,7 @@ Severity: medium
 ResourceType: AwsEc2Instance
 Description: Ensure that EC2 instance Metadata Service Version 2 (IMDSv2) is Enabled and Required.
 Risk: Using IMDSv2 will protect from misconfiguration and SSRF vulnerabilities. IMDSv1 will not.
-RelatedUrl: https://tevi.co
+RelatedUrl: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html
 Remediation:
   Code:
     CLI: aws ec2 modify-instance-metadata-options --instance-id <instance-id> --http-tokens required --http-endpoint enabled

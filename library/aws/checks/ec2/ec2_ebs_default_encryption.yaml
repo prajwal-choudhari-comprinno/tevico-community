@@ -10,7 +10,7 @@ Severity: medium
 ResourceType: Other
 Description: Ensure that EBS default encryption is activated.
 Risk: If not enabled sensitive information at rest is not protected.
-RelatedUrl: https://tevi.co
+RelatedUrl: https://docs.aws.amazon.com/ebs/latest/userguide/encryption-by-default.html
 Remediation:
   Code:
     CLI: aws ec2 enable-ebs-encryption-by-default
