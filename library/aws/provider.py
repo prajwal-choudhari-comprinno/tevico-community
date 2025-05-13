@@ -47,6 +47,8 @@ class AWSProvider(Provider):
             session = self.connect()
             account_client = session.client('account')
             response = account_client.get_account_information()
+            print(f'\n Account information: {response}')
+            # Assuming the account name is in the response
             account_name = response['AccountName']
             return account_name
         except Exception as e:
