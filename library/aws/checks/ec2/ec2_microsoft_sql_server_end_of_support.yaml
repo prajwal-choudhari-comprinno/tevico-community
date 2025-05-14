@@ -10,9 +10,9 @@ Severity: medium
 ResourceType: AwsEc2Instance
 Description: Ensure that no EC2 instance is using AMI with Microsoft SQL server that has reached end of support
 Risk: Running EC2 instances with unsupported SQL server versions can lead to security vulnerabilities, non-compliance with best practices, and lack of vendor support in case of issues. This could result in potential data breaches or disruptions in service
-RelatedUrl: https://tevi.co
-Remediation:
-  Code: 
+RelatedUrl: https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/sec_protect_compute_vulnerability_management.html
+Remediation: 
+  Code:
     CLI: ""
     NativeIaC: ""
     Other: ""
