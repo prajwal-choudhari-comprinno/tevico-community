@@ -34,7 +34,7 @@ Remediation:
   Recommendation:
     Text: 
       Create or Join an AWS Organization for effective account management.
-    Url: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_org_create.html
+    Url: https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_accounts_invites.html
 
 Categories: []
 

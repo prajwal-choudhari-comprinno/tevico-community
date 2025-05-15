@@ -60,10 +60,8 @@ Remediation:
 
   Recommendation:
     Text: |
-      Enable automated backup for production data. Define a retention period and
-      periodically test backup restoration. A Disaster Recovery process should be
-      in place to govern Data Protection approach.
-    Url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html
+      Register a dedicated security contact under your AWS account's alternate contacts. This ensures AWS can send security advisories directly to the responsible team in your organization. Update the information via the AWS Console or CLI and keep it current.
+    Url: https://docs.aws.amazon.com/security-ir/latest/userguide/update-account-contact-info.html
 
 # Categories for the check. Eg: forensics-ready, security, etc.
 Categories: [infrastructure_protection, security]

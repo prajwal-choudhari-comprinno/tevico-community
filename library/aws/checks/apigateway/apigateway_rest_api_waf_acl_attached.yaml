@@ -18,7 +18,7 @@ Remediation:
     Terraform: ""
   Recommendation:
     Text: Attach a WAF Web ACL to your API Gateway REST APIs to mitigate common web vulnerabilities.
-    Url: https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-web-acl.html
+    Url: https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-control-access-aws-waf.html
 Categories: [Infrastructure Protection]
 DependsOn: []
 RelatedTo: []

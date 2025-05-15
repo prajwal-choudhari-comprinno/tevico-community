@@ -18,7 +18,7 @@ Remediation:
     Terraform: ""
   Recommendation:
     Text: Enable automatic key rotation for CMKs in AWS KMS to enhance data protection.
-    Url: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
+    Url: https://docs.aws.amazon.com/kms/latest/developerguide/rotating-keys-enable.html
 Categories: [Data Protection]
 DependsOn: []
 RelatedTo: []

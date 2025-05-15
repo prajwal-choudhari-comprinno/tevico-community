@@ -19,7 +19,7 @@ Remediation:
   Recommendation:
     Text:
       Ensure that VPC endpoint services only allow principals from trusted AWS account IDs.
-    Url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-endpoints.html
+    Url: https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-access.html
 Categories: [security]
 DependsOn: []
 RelatedTo: []

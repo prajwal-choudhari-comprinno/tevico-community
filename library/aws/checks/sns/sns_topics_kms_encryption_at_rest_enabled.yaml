@@ -16,7 +16,7 @@ Remediation:
     Other: ""
     Terraform: ""
   Recommendation:
-    Text: Use Amazon SNS with AWS KMS.
+    Text: Enable server-side encryption (SSE) for your SNS topics using AWS KMS. This ensures that messages stored in SNS are encrypted at rest, protecting sensitive data from unauthorized access. You can configure encryption via the AWS Management Console or AWS CDK.
     Url: https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html
 Categories:
   - encryption

@@ -18,7 +18,7 @@ Remediation:
     Terraform: ""
   Recommendation:
     Text: Regularly monitor and renew expiring ACM certificates to avoid service disruptions.
-    Url: https://docs.aws.amazon.com/acm/latest/userguide/check-certificate-expiration.html
+    Url: https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html
 Categories: [Data Protection]
 DependsOn: []
 RelatedTo: []
