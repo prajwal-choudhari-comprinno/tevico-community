@@ -54,10 +54,10 @@ nav:
         - Help with Tevico Community: help.md
         - Project Status: project-status.md
         - Contribute to the Project: contribute.md
-    - Generated Report:
-      - Overview: report/overview.md
-      - Structure: report/structure.md
-      - Example: report/example.md
+    # - Generated Report:
+    #   - Overview: report/overview.md
+    #   - Structure: report/structure.md
+    #   - Example: report/example.md
   - Developer:
     - Get Started: developer/getting-started.md
     - Tevico:

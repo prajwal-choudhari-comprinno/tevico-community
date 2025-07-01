@@ -33,3 +33,32 @@ Eg:
 ```bash title="Using the --profile param"
 ./main run --profile=startup
 ```
+
+## Create new profile
+
+To create a new profile, follow these steps:
+
+1. Identify which provider the profile will target (e.g., AWS, Azure, GCP)
+2. Create a new YAML file in the appropriate directory:
+    - `library/<PROVIDER>/profiles/<PROFILE_NAME>.yaml`
+3. Define the following fields in your YAML file:
+
+```yaml
+name: Your Profile Name
+description: |
+  A detailed description of when and why this profile should be used.
+  You can include multiple lines to elaborate.
+include_checks:  # Optional - list of checks to explicitly include
+  - check_id_1
+  - check_id_2
+exclude_checks:  # Optional - list of checks to explicitly exclude
+  - check_id_3
+  - check_id_4
+```
+
+4. Ensure your profile has a meaningful name and a clear description
+5. Test your profile using the CLI with the `--profile` parameter:
+
+```bash
+./main run --profile=<PROFILE_NAME>
+```

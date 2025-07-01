@@ -21,7 +21,7 @@ Every provider must implement the abstract `connect()` method, which establishes
 
 The connection object is accessible via the `connection` property, which automatically calls the `connect()` method. The `is_connected` property can be used to verify if the connection was established successfully.
 
-## New Provider
+## Create New Provider
 
 Let us assume there exists a Cloud Provider called `tvc`. To create a new provider, you need to:
 
