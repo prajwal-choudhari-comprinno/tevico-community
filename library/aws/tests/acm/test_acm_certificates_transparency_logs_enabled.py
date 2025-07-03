@@ -1,20 +1,15 @@
 import pytest
 from unittest.mock import MagicMock
 from botocore.exceptions import ClientError
-from tevico.engine.entities.report.check_model import (
-    CheckStatus,
-    CheckMetadata,
-    Remediation,
-    RemediationCode,
-    RemediationRecommendation,
-)
+from tevico.engine.entities.report.check_model import CheckStatus, CheckMetadata, Remediation, RemediationCode, RemediationRecommendation
 from library.aws.checks.acm.acm_certificates_transparency_logs_enabled import acm_certificates_transparency_logs_enabled
+
 
 class TestAcmCertificatesTransparencyLogsEnabled:
     """Test cases for ACM Certificates Transparency Logs Enabled check."""
 
     def setup_method(self):
-        """Set up test method with mocks and check instance."""
+        """Set up test method."""
         self.metadata = CheckMetadata(
             Provider="AWS",
             CheckID="acm_certificates_transparency_logs_enabled",
@@ -42,7 +37,6 @@ class TestAcmCertificatesTransparencyLogsEnabled:
         self.mock_sts.get_caller_identity.return_value = {"Account": "123456789012"}
         self.mock_session.client.side_effect = lambda service: self.mock_acm if service == "acm" else self.mock_sts
 
-   
     def test_no_certificates(self):
         """Test when there are no ACM certificates."""
         self.mock_acm.list_certificates.return_value = {"CertificateSummaryList": []}
@@ -50,10 +44,10 @@ class TestAcmCertificatesTransparencyLogsEnabled:
         assert report.status == CheckStatus.NOT_APPLICABLE
         assert report.resource_ids_status[0].summary is not None
         assert "No ACM certificates found" in report.resource_ids_status[0].summary
-        assert report.resource_ids_status[0].resource.name == ""
-    
+        assert not hasattr(report.resource_ids_status[0].resource, "arn")
+
     def test_transparency_logs_enabled(self):
-        """Test when certificates have transparency logs enabled."""
+        """Test when all certificates have transparency logs enabled."""
         cert_arn = "arn:aws:acm:region:account:certificate/cert-1"
         self.mock_acm.list_certificates.return_value = {
             "CertificateSummaryList": [{"CertificateArn": cert_arn}]
@@ -90,4 +84,38 @@ class TestAcmCertificatesTransparencyLogsEnabled:
         report = self.check.execute(self.mock_session)
         assert report.status == CheckStatus.UNKNOWN
         assert report.resource_ids_status[0].summary is not None
-        assert report.resource_ids_status[0].resource.name == ""
+        assert not hasattr(report.resource_ids_status[0].resource, "arn")
+
+    def test_describe_certificate_error(self):
+        """Test error handling when describe_certificate raises ClientError."""
+        cert_arn = "arn:aws:acm:region:account:certificate/cert-3"
+        self.mock_acm.list_certificates.return_value = {
+            "CertificateSummaryList": [{"CertificateArn": cert_arn}]
+        }
+        self.mock_acm.describe_certificate.side_effect = ClientError(
+            {"Error": {"Code": "AccessDenied"}}, "DescribeCertificate"
+        )
+        report = self.check.execute(self.mock_session)
+        assert report.status == CheckStatus.FAILED
+        assert report.resource_ids_status[0].summary is not None
+        assert "Error describing certificate" in report.resource_ids_status[0].summary
+        assert report.resource_ids_status[0].resource.arn == cert_arn
+
+    def test_no_such_entity_exception(self):
+        """Test handling when describe_certificate raises NoSuchEntityException."""
+        cert_arn = "arn:aws:acm:region:account:certificate/missing"
+        self.mock_acm.list_certificates.return_value = {
+            "CertificateSummaryList": [{"CertificateArn": cert_arn}]
+        }
+
+        class NoSuchEntityException(Exception):
+            pass
+
+        self.mock_acm.exceptions = MagicMock()
+        self.mock_acm.exceptions.ResourceNotFoundException = NoSuchEntityException
+        self.mock_acm.describe_certificate.side_effect = NoSuchEntityException("No such certificate")
+        report = self.check.execute(self.mock_session)
+        assert report.status == CheckStatus.FAILED
+        assert report.resource_ids_status[0].summary is not None
+        assert "Error describing certificate" in report.resource_ids_status[0].summary
+        assert report.resource_ids_status[0].resource.arn == cert_arn
