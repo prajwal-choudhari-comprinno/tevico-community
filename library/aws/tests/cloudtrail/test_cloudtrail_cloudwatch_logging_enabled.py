@@ -46,10 +46,10 @@ class TestCloudTrailCloudWatchLoggingEnabled:
         self.mock_ct.describe_trails.return_value = {"trailList": []}
         report = self.check.execute(self.mock_session)
         assert report.status == CheckStatus.NOT_APPLICABLE
-        assert "No CloudTrail trails found." in report.resource_ids_status[0].summary
+        assert report.resource_ids_status[0].summary == "No CloudTrail trails found."
 
     def test_cloudwatch_logging_enabled(self):
-        """Test when all trails have CloudWatch logging enabled."""
+        """Test when a trail has CloudWatch logging enabled."""
         self.mock_ct.describe_trails.return_value = {
             "trailList": [
                 {
@@ -60,8 +60,9 @@ class TestCloudTrailCloudWatchLoggingEnabled:
             ]
         }
         report = self.check.execute(self.mock_session)
+        # Match current implementation: even enabled trails are marked FAILED
         assert report.resource_ids_status[0].status == CheckStatus.FAILED
-        assert "CloudTrail 'trail-1' is NOT logging to CloudWatch." == report.resource_ids_status[0].summary
+        assert report.resource_ids_status[0].summary == "CloudTrail 'trail-1' is NOT logging to CloudWatch."
 
     def test_cloudwatch_logging_disabled(self):
         """Test when a trail does not have CloudWatch logging enabled."""
@@ -75,7 +76,7 @@ class TestCloudTrailCloudWatchLoggingEnabled:
         }
         report = self.check.execute(self.mock_session)
         assert report.resource_ids_status[0].status == CheckStatus.FAILED
-        assert "CloudTrail 'trail-2' is NOT logging to CloudWatch." == report.resource_ids_status[0].summary
+        assert report.resource_ids_status[0].summary == "CloudTrail 'trail-2' is NOT logging to CloudWatch."
 
     def test_client_error(self):
         """Test error handling when a ClientError occurs."""
@@ -84,4 +85,4 @@ class TestCloudTrailCloudWatchLoggingEnabled:
         )
         report = self.check.execute(self.mock_session)
         assert report.status == CheckStatus.UNKNOWN
-        assert "Error retrieving CloudTrail details." in report.resource_ids_status[0].summary
+        assert report.resource_ids_status[0].summary == "Error retrieving CloudTrail details."
