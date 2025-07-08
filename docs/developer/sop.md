@@ -16,6 +16,8 @@
     - Project maintainers review the issue.
     - The issue may be labeled, assigned, or discussed further.
 
+![Image - Raise a ticket](../assets/raise-ticket.gif)
+
 ---
 
 ## 2. Forking and Cloning the Repository
