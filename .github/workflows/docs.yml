@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     # Deploy only if there are changes in the docs directory
     # if: contains(join(github.event.commits.*.modified, ' '), 'docs/') || 
@@ -29,7 +29,17 @@ jobs:
       - name: Build documentation
         run: mkdocs build --site-dir site
 
-      - name: Deploy to GitHub Pages
+      - name: Upload documentation artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./site
+  deploy:
+    runs-on: ubuntu-latest
+    environment: 
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
