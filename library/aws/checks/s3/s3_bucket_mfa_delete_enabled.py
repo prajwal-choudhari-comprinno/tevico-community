@@ -13,77 +13,68 @@ from tevico.engine.entities.report.check_model import (
 from tevico.engine.entities.check.check import Check
 
 
-class route53_domains_privacy_protection_enabled(Check):
-
+class s3_bucket_mfa_delete_enabled(Check):
     def execute(self, connection: boto3.Session) -> CheckReport:
+        s3_client = connection.client('s3')
         report = CheckReport(name=__name__)
         report.resource_ids_status = []
 
         try:
-            # Route53 Domains API is only available in us-east-1
-            route53domains_client = connection.client('route53domains', region_name="us-east-1")
-
-            # Get all domains
-            domains = []
-            paginator = route53domains_client.get_paginator('list_domains')
+            # Get all buckets
+            paginator = s3_client.get_paginator("list_buckets")
+            bucket_list = []
 
             for page in paginator.paginate():
-                domains.extend(page.get('Domains', []))
+                bucket_list.extend(page.get("Buckets", []))
 
-            if not domains:
+            if not bucket_list:
                 report.status = CheckStatus.NOT_APPLICABLE
                 report.resource_ids_status.append(
                     ResourceStatus(
                         resource=GeneralResource(name=""),
                         status=CheckStatus.NOT_APPLICABLE,
-                        summary="No Route53 domains found."
+                        summary="No S3 buckets found."
                     )
                 )
                 return report
 
-            # Check privacy protection for each domain
-            for domain_info in domains:
-                domain_name = domain_info['DomainName']
-                domain_arn = f"arn:aws:route53domains:::{domain_name}"
+            # Check MFA Delete for each bucket
+            for bucket in bucket_list:
+                bucket_name = bucket["Name"]
+                bucket_arn = f"arn:aws:s3:::{bucket_name}"
 
                 try:
-                    domain_detail = route53domains_client.get_domain_detail(DomainName=domain_name)
-
-                    # Privacy settings
-                    privacy_settings = {
-                        "Admin": domain_detail.get('AdminPrivacy', False),
-                        "Registrant": domain_detail.get('RegistrantPrivacy', False),
-                        "Technical": domain_detail.get('TechPrivacy', False)
-                    }
-
-                    # Find which are missing
-                    missing_privacy = [role for role, enabled in privacy_settings.items() if not enabled]
-
-                    if not missing_privacy:
+                    # Get bucket versioning configuration
+                    versioning_response = s3_client.get_bucket_versioning(Bucket=bucket_name)
+                    
+                    # Check if MFA Delete is enabled
+                    mfa_delete = versioning_response.get('MFADelete', 'Disabled')
+                    
+                    if mfa_delete == 'Enabled':
                         report.resource_ids_status.append(
                             ResourceStatus(
-                                resource=AwsResource(arn=domain_arn),
+                                resource=AwsResource(arn=bucket_arn),
                                 status=CheckStatus.PASSED,
-                                summary=f"Domain {domain_name} has complete privacy protection enabled."
+                                summary=f"S3 bucket {bucket_name} has MFA Delete enabled."
                             )
                         )
                     else:
                         report.status = CheckStatus.FAILED
                         report.resource_ids_status.append(
                             ResourceStatus(
-                                resource=AwsResource(arn=domain_arn),
+                                resource=AwsResource(arn=bucket_arn),
                                 status=CheckStatus.FAILED,
-                                summary=f"Domain {domain_name} is missing privacy protection for: {', '.join(missing_privacy)} contact information."
+                                summary=f"S3 bucket {bucket_name} does not have MFA Delete enabled."
                             )
                         )
-
+                
                 except (BotoCoreError, ClientError) as e:
                     report.status = CheckStatus.UNKNOWN
                     report.resource_ids_status.append(
                         ResourceStatus(
-                            resource=AwsResource(arn=domain_arn),
+                            resource=AwsResource(arn=bucket_arn),
                             status=CheckStatus.UNKNOWN,
-                            summary=f"Failed to retrieve privacy settings for domain {domain_name}.",
+                            summary=f"Failed to retrieve versioning settings for S3 bucket {bucket_name}.",
                             exception=str(e)
                         )
                     )
@@ -94,7 +85,7 @@ class route53_domains_privacy_protection_enabled(Check):
                 ResourceStatus(
                     resource=GeneralResource(name=""),
                     status=CheckStatus.UNKNOWN,
-                    summary="Encountered an error while retrieving Route53 domains.",
+                    summary="Encountered an error while retrieving S3 buckets.",
                     exception=str(e)
                 )
             )
