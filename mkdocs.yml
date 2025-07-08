@@ -69,6 +69,7 @@ nav:
           - Framework: developer/entities/framework.md
           # - Channel: developer/entities/channel.md
       - File Structure: developer/concepts/file-structure.md
+      - Standard Operating Procedure: developer/sop.md
 
 plugins:
   - search
