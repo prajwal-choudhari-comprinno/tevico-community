@@ -44,103 +44,97 @@ class TestCloudFrontDistributionsHTTPSEnabled:
 
     def test_no_distributions(self):
         """Test when there are no CloudFront distributions."""
-        self.mock_cf.list_distributions.return_value = {
-            "DistributionList": {"Items": []}
-        }
+        self.mock_cf.list_distributions.return_value = {"DistributionList": {"Items": []}}
         report = self.check.execute(self.mock_session)
-        assert report.status == CheckStatus.NOT_APPLICABLE
-        assert (
-            "No CloudFront distributions found."
-            in report.resource_ids_status[0].summary
-        )
 
-    def test_https_only_enabled(self):
-        """Test when all distributions require HTTPS."""
+        assert report.status == CheckStatus.NOT_APPLICABLE
+        assert len(report.resource_ids_status) == 1
+        assert report.resource_ids_status[0].status == CheckStatus.NOT_APPLICABLE
+        assert "No CloudFront distributions found." in report.resource_ids_status[0].summary
+
+    def test_https_only_enforced(self):
+        """Test when HTTPS is enforced via https-only."""
         self.mock_cf.list_distributions.return_value = {
             "DistributionList": {
                 "Items": [
                     {
                         "Id": "dist-1",
-                        "DomainName": "d1.cloudfront.net",
                         "ARN": "arn:aws:cloudfront::account:distribution/dist-1",
+                        "DefaultCacheBehavior": {"ViewerProtocolPolicy": "https-only"},
                     }
                 ]
             }
         }
-        self.mock_cf.get_distribution_config.return_value = {
-            "DistributionConfig": {
-                "DefaultCacheBehavior": {"ViewerProtocolPolicy": "https-only"}
-            }
-        }
         report = self.check.execute(self.mock_session)
-        assert report.status == CheckStatus.PASSED
-        assert (
-            "CloudFront distribution 'dist-1' does NOT enforce HTTPS (policy: allow-all)."
-            == report.resource_ids_status[0].summary
-        )
 
-    def test_https_not_enforced(self):
-        """Test when a distribution allows HTTP."""
+        assert report.status == CheckStatus.PASSED
+        assert report.resource_ids_status[0].status == CheckStatus.PASSED
+        assert "enforces HTTPS (https-only)" in report.resource_ids_status[0].summary
+
+    def test_https_redirect_enforced(self):
+        """Test when HTTPS is enforced via redirect-to-https."""
         self.mock_cf.list_distributions.return_value = {
             "DistributionList": {
                 "Items": [
                     {
                         "Id": "dist-2",
-                        "DomainName": "d2.cloudfront.net",
                         "ARN": "arn:aws:cloudfront::account:distribution/dist-2",
+                        "DefaultCacheBehavior": {"ViewerProtocolPolicy": "redirect-to-https"},
                     }
                 ]
             }
         }
-        self.mock_cf.get_distribution_config.return_value = {
-            "DistributionConfig": {
-                "DefaultCacheBehavior": {"ViewerProtocolPolicy": "allow-all"}
-            }
-        }
         report = self.check.execute(self.mock_session)
-        assert report.resource_ids_status[0].status == CheckStatus.FAILED
-        assert (
-            "CloudFront distribution 'dist-2' does NOT enforce HTTPS (policy: allow-all)."
-            == report.resource_ids_status[0].summary
-        )
 
-    def test_client_error(self):
-        """Test error handling when a ClientError occurs."""
-        self.mock_cf.list_distributions.side_effect = ClientError(
-            {"Error": {"Code": "AccessDenied"}}, "ListDistributions"
-        )
-        report = self.check.execute(self.mock_session)
-        assert report.status == CheckStatus.UNKNOWN
-        assert (
-            "Error retrieving CloudFront distributions."
-            in report.resource_ids_status[0].summary
-        )
+        assert report.status == CheckStatus.PASSED
+        assert report.resource_ids_status[0].status == CheckStatus.PASSED
+        assert "enforces HTTPS (redirect-to-https)" in report.resource_ids_status[0].summary
 
-    def test_https_policy_check(self):
-        """Test the enforcement of HTTPS policy on CloudFront distributions."""
+    def test_https_not_enforced(self):
+        """Test when HTTPS is not enforced (allow-all)."""
         self.mock_cf.list_distributions.return_value = {
             "DistributionList": {
                 "Items": [
                     {
                         "Id": "dist-3",
-                        "DomainName": "d3.cloudfront.net",
                         "ARN": "arn:aws:cloudfront::account:distribution/dist-3",
+                        "DefaultCacheBehavior": {"ViewerProtocolPolicy": "allow-all"},
                     }
                 ]
             }
         }
-        self.mock_cf.get_distribution_config.return_value = {
-            "DistributionConfig": {
-                "DefaultCacheBehavior": {"ViewerProtocolPolicy": "allow-list"}
+        report = self.check.execute(self.mock_session)
+
+        assert report.status == CheckStatus.PASSED  # Report status not downgraded for failed resources
+        assert report.resource_ids_status[0].status == CheckStatus.FAILED
+        assert "does NOT enforce HTTPS (policy: allow-all)" in report.resource_ids_status[0].summary
+
+    def test_missing_policy_defaults_to_allow_all(self):
+        """Test when ViewerProtocolPolicy is missing (defaults to allow-all)."""
+        self.mock_cf.list_distributions.return_value = {
+            "DistributionList": {
+                "Items": [
+                    {
+                        "Id": "dist-4",
+                        "ARN": "arn:aws:cloudfront::account:distribution/dist-4",
+                        "DefaultCacheBehavior": {},  # Missing ViewerProtocolPolicy
+                    }
+                ]
             }
         }
         report = self.check.execute(self.mock_session)
-        assert report.resource_ids_status[0].status == CheckStatus.FAILED
-        assert (
-            "CloudFront distribution 'dist-3' does NOT enforce HTTPS (policy: allow-all)."
-            == report.resource_ids_status[0].summary
-        )
-        assert (
-            len(report.resource_ids_status) == 1
-        )  # Ensure no duplicate entries are added
 
+        assert report.status == CheckStatus.PASSED
+        assert report.resource_ids_status[0].status == CheckStatus.FAILED
+        assert "does NOT enforce HTTPS (policy: allow-all)" in report.resource_ids_status[0].summary
+
+    def test_client_error_handling(self):
+        """Test when CloudFront throws a ClientError."""
+        self.mock_cf.list_distributions.side_effect = ClientError(
+            {"Error": {"Code": "AccessDenied"}}, "ListDistributions"
+        )
+        report = self.check.execute(self.mock_session)
+
+        assert report.status == CheckStatus.UNKNOWN
+        assert report.resource_ids_status[0].status == CheckStatus.UNKNOWN
+        assert "Error retrieving CloudFront distributions." in report.resource_ids_status[0].summary
