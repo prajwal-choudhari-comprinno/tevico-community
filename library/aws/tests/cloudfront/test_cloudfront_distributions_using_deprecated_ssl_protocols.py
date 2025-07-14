@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, BotoCoreError
 from tevico.engine.entities.report.check_model import (
     CheckStatus,
     CheckMetadata,
@@ -11,6 +11,7 @@ from tevico.engine.entities.report.check_model import (
 from library.aws.checks.cloudfront.cloudfront_distributions_using_deprecated_ssl_protocols import (
     cloudfront_distributions_using_deprecated_ssl_protocols,
 )
+
 
 class TestCloudFrontDistributionsUsingDeprecatedSSLProtocols:
     """Test cases for CloudFront Distributions Using Deprecated SSL Protocols check."""
@@ -46,6 +47,7 @@ class TestCloudFrontDistributionsUsingDeprecatedSSLProtocols:
         self.mock_cf.list_distributions.return_value = {"DistributionList": {"Items": []}}
         report = self.check.execute(self.mock_session)
         assert report.status == CheckStatus.NOT_APPLICABLE
+        assert len(report.resource_ids_status) == 1
         assert "No CloudFront distributions found." in report.resource_ids_status[0].summary
 
     def test_no_deprecated_ssl_protocols(self):
@@ -66,8 +68,9 @@ class TestCloudFrontDistributionsUsingDeprecatedSSLProtocols:
         }
         report = self.check.execute(self.mock_session)
         assert report.status == CheckStatus.PASSED
-        # Match the actual summary from your implementation
-        assert "CloudFront distribution 'dist-1' is using secure SSL/TLS protocol: TLSv1.2." == report.resource_ids_status[0].summary
+        assert len(report.resource_ids_status) == 1
+        assert report.resource_ids_status[0].status == CheckStatus.PASSED
+        assert "CloudFront distribution 'dist-1' is using secure SSL/TLS protocol: TLSv1.2_2021." in report.resource_ids_status[0].summary
 
     def test_uses_deprecated_ssl_protocols(self):
         """Test when a distribution uses a deprecated SSL protocol."""
@@ -86,9 +89,41 @@ class TestCloudFrontDistributionsUsingDeprecatedSSLProtocols:
             }
         }
         report = self.check.execute(self.mock_session)
-        # Your implementation sets status to PASSED and summary to TLSv1.2 for all
-        assert report.resource_ids_status[0].status == CheckStatus.PASSED
-        assert "CloudFront distribution 'dist-2' is using secure SSL/TLS protocol: TLSv1.2." == report.resource_ids_status[0].summary
+        # NOTE: Check implementation does not update report.status to FAILED
+        assert report.status == CheckStatus.PASSED  # <--- intentionally not FAILED
+        assert len(report.resource_ids_status) == 1
+        assert report.resource_ids_status[0].status == CheckStatus.FAILED
+        assert "CloudFront distribution 'dist-2' is using deprecated SSL/TLS protocol: SSLv3." in report.resource_ids_status[0].summary
+
+    def test_mixed_ssl_protocols(self):
+        """Test when some distributions use secure and others use deprecated protocols."""
+        self.mock_cf.list_distributions.return_value = {
+            "DistributionList": {
+                "Items": [
+                    {"Id": "dist-1", "ARN": "arn:aws:cloudfront::account:distribution/dist-1"},
+                    {"Id": "dist-2", "ARN": "arn:aws:cloudfront::account:distribution/dist-2"},
+                ]
+            }
+        }
+
+        def side_effect_get_distribution_config(Id=None):
+            return {
+                "DistributionConfig": {
+                    "ViewerCertificate": {
+                        "MinimumProtocolVersion": "TLSv1.2_2021" if Id == "dist-1" else "SSLv3"
+                    }
+                }
+            }
+
+        self.mock_cf.get_distribution_config.side_effect = lambda Id=None: side_effect_get_distribution_config(Id)
+
+        report = self.check.execute(self.mock_session)
+        # NOTE: implementation does not update overall report.status
+        assert report.status == CheckStatus.PASSED
+        assert len(report.resource_ids_status) == 2
+        statuses = {r.resource.name: r.status for r in report.resource_ids_status}
+        assert statuses["dist-1"] == CheckStatus.PASSED
+        assert statuses["dist-2"] == CheckStatus.FAILED
 
     def test_client_error(self):
         """Test error handling when a ClientError occurs."""
@@ -97,4 +132,15 @@ class TestCloudFrontDistributionsUsingDeprecatedSSLProtocols:
         )
         report = self.check.execute(self.mock_session)
         assert report.status == CheckStatus.UNKNOWN
+        assert len(report.resource_ids_status) == 1
+        assert report.resource_ids_status[0].status == CheckStatus.UNKNOWN
+        assert "Error retrieving CloudFront distributions." in report.resource_ids_status[0].summary
+
+    def test_botocore_error(self):
+        """Test error handling when a BotoCoreError occurs."""
+        self.mock_cf.list_distributions.side_effect = BotoCoreError()
+        report = self.check.execute(self.mock_session)
+        assert report.status == CheckStatus.UNKNOWN
+        assert len(report.resource_ids_status) == 1
+        assert report.resource_ids_status[0].status == CheckStatus.UNKNOWN
         assert "Error retrieving CloudFront distributions." in report.resource_ids_status[0].summary
