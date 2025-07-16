@@ -1,141 +1,158 @@
-"""
-Test for IAM password policy lowercase check.
-"""
-
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from botocore.exceptions import ClientError
+from tevico.engine.entities.report.check_model import (
+    CheckStatus,
+    CheckMetadata,
+    Remediation,
+    RemediationCode,
+    RemediationRecommendation,
+)
+from library.aws.checks.acm.acm_certificates_transparency_logs_enabled import (
+    acm_certificates_transparency_logs_enabled,
+)
 
-from library.aws.checks.iam.iam_password_policy_lowercase import iam_password_policy_lowercase
-from tevico.engine.entities.report.check_model import CheckStatus, CheckMetadata
-from tevico.engine.entities.report.check_model import Remediation, RemediationCode, RemediationRecommendation
 
-
-class TestIamPasswordPolicyLowercase:
-    """Test cases for IAM password policy lowercase check."""
+class TestAcmCertificatesTransparencyLogsEnabled:
+    """Test cases for ACM Certificates Transparency Logs Enabled check."""
 
     def setup_method(self):
         """Set up test method."""
-        # Create a mock metadata object for the check
-        metadata = CheckMetadata(
-            Provider="aws",
-            CheckID="iam_password_policy_lowercase",
-            CheckTitle="IAM Password Policy Requires Lowercase Characters",
-            CheckType=["security"],
-            ServiceName="iam",
-            SubServiceName="password-policy",
-            ResourceIdTemplate="arn:aws:iam::{account_id}:password-policy",
+        self.metadata = CheckMetadata(
+            Provider="AWS",
+            CheckID="acm_certificates_transparency_logs_enabled",
+            CheckTitle="Check ACM Certificates Transparency Logs Enabled",
+            CheckType=["Security"],
+            ServiceName="ACM",
+            SubServiceName="Certificate",
+            ResourceIdTemplate="arn:aws:acm:{region}:{account}:certificate/{certificate_id}",
             Severity="medium",
-            ResourceType="iam-password-policy",
-            Risk="Passwords without lowercase characters are easier to guess",
-            RelatedUrl="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html",
+            ResourceType="AWS::ACM::Certificate",
+            Risk="Certificates without transparency logs may not be trusted.",
+            Description="Checks if ACM certificates have transparency logging enabled.",
             Remediation=Remediation(
-                Code=RemediationCode(
-                    CLI="aws iam update-account-password-policy --require-lowercase-characters",
-                    Terraform="resource \"aws_iam_account_password_policy\" \"strict\" {\n  require_lowercase_characters = true\n}",
-                    NativeIaC=None,
-                    Other=None
-                ),
+                Code=RemediationCode(CLI="", NativeIaC="", Terraform=""),
                 Recommendation=RemediationRecommendation(
-                    Text="Configure IAM password policy to require at least one lowercase letter",
-                    Url="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html"
+                    Text="Enable certificate transparency logging for ACM certificates.",
+                    Url="https://docs.aws.amazon.com/acm/latest/userguide/acm-concepts.html#concept-transparency"
                 )
-            ),
-            Description="Checks if the IAM password policy requires at least one lowercase letter",
-            Categories=["security", "compliance"]
+            )
         )
-        
-        self.check = iam_password_policy_lowercase(metadata)
+        self.check = acm_certificates_transparency_logs_enabled(metadata=self.metadata)
         self.mock_session = MagicMock()
-        self.mock_client = MagicMock()
-        self.mock_session.client.return_value = self.mock_client
-        
-        # Set up the exceptions attribute on the mock client
-        self.mock_client.exceptions = MagicMock()
-        # Create a custom NoSuchEntityException for testing
+        self.mock_acm = MagicMock()
+        self.mock_session.client.return_value = self.mock_acm  # Simplified (removed STS)
+
+    def test_no_certificates(self):
+        """Test when there are no ACM certificates."""
+        self.mock_acm.list_certificates.return_value = {"CertificateSummaryList": []}
+        report = self.check.execute(self.mock_session)
+
+        assert report.status == CheckStatus.NOT_APPLICABLE
+        assert report.resource_ids_status[0].summary == "No ACM certificates found."
+        assert not hasattr(report.resource_ids_status[0].resource, "arn")
+
+    def test_transparency_logs_enabled(self):
+        """Test when all certificates have transparency logs enabled."""
+        cert_arn = "arn:aws:acm:region:account:certificate/cert-1"
+        self.mock_acm.list_certificates.return_value = {
+            "CertificateSummaryList": [{"CertificateArn": cert_arn}]
+        }
+        self.mock_acm.describe_certificate.return_value = {
+            "Certificate": {"Options": {"CertificateTransparencyLoggingPreference": "ENABLED"}}
+        }
+
+        report = self.check.execute(self.mock_session)
+
+        assert report.status == CheckStatus.PASSED
+        assert report.resource_ids_status[0].summary == f"Certificate {cert_arn} has transparency logging enabled."
+        assert report.resource_ids_status[0].resource.arn == cert_arn
+
+    def test_transparency_logs_disabled(self):
+        """Test when a certificate has transparency logs disabled."""
+        cert_arn = "arn:aws:acm:region:account:certificate/cert-2"
+        self.mock_acm.list_certificates.return_value = {
+            "CertificateSummaryList": [{"CertificateArn": cert_arn}]
+        }
+        self.mock_acm.describe_certificate.return_value = {
+            "Certificate": {"Options": {"CertificateTransparencyLoggingPreference": "DISABLED"}}
+        }
+
+        report = self.check.execute(self.mock_session)
+
+        assert report.status == CheckStatus.FAILED
+        assert report.resource_ids_status[0].summary == f"Certificate {cert_arn} has transparency logging disabled."
+        assert report.resource_ids_status[0].resource.arn == cert_arn
+
+    def test_client_error(self):
+        """Test error handling when list_certificates raises ClientError."""
+        self.mock_acm.list_certificates.side_effect = ClientError(
+            {"Error": {"Code": "AccessDenied"}}, "ListCertificates"
+        )
+
+        report = self.check.execute(self.mock_session)
+
+        assert report.status == CheckStatus.UNKNOWN
+        assert report.resource_ids_status[0].summary == "Error listing ACM certificates."
+        assert report.resource_ids_status[0].exception is not None
+        assert "AccessDenied" in report.resource_ids_status[0].exception
+
+    def test_describe_certificate_error(self):
+        """Test error handling when describe_certificate raises ClientError."""
+        cert_arn = "arn:aws:acm:region:account:certificate/cert-3"
+        self.mock_acm.list_certificates.return_value = {
+            "CertificateSummaryList": [{"CertificateArn": cert_arn}]
+        }
+        self.mock_acm.describe_certificate.side_effect = ClientError(
+            {"Error": {"Code": "AccessDenied"}}, "DescribeCertificate"
+        )
+
+        report = self.check.execute(self.mock_session)
+
+        assert report.status == CheckStatus.FAILED
+        assert report.resource_ids_status[0].summary == f"Error describing certificate {cert_arn}."
+        assert "AccessDenied" in report.resource_ids_status[0].exception
+        assert report.resource_ids_status[0].resource.arn == cert_arn
+
+    def test_no_such_entity_exception(self):
+        """Test handling when describe_certificate raises a ResourceNotFoundException."""
+        cert_arn = "arn:aws:acm:region:account:certificate/missing"
+        self.mock_acm.list_certificates.return_value = {
+            "CertificateSummaryList": [{"CertificateArn": cert_arn}]
+        }
+
         class NoSuchEntityException(Exception):
             pass
-        self.mock_client.exceptions.NoSuchEntityException = NoSuchEntityException
 
-    def test_password_policy_requires_lowercase(self):
-        """Test when password policy requires lowercase characters."""
-        # Mock the response for a policy that requires lowercase
-        self.mock_client.get_account_password_policy.return_value = {
-            'PasswordPolicy': {
-                'RequireLowercaseCharacters': True
-            }
-        }
+        self.mock_acm.exceptions = MagicMock()
+        self.mock_acm.exceptions.ResourceNotFoundException = NoSuchEntityException
+        self.mock_acm.describe_certificate.side_effect = NoSuchEntityException("No such certificate")
 
-        # Execute the check
         report = self.check.execute(self.mock_session)
 
-        # Verify the results
+        assert report.status == CheckStatus.FAILED
+        assert report.resource_ids_status[0].summary == f"Error describing certificate {cert_arn}."
+        assert "No such certificate" in report.resource_ids_status[0].exception
+        assert report.resource_ids_status[0].resource.arn == cert_arn
+
+    def test_paginated_certificates_list(self):
+        """Test paginated ACM certificate list."""
+        cert_arn_1 = "arn:aws:acm:region:account:certificate/cert-1"
+        cert_arn_2 = "arn:aws:acm:region:account:certificate/cert-2"
+
+        self.mock_acm.list_certificates.side_effect = [
+            {"CertificateSummaryList": [{"CertificateArn": cert_arn_1}], "NextToken": "token-1"},
+            {"CertificateSummaryList": [{"CertificateArn": cert_arn_2}]}
+        ]
+
+        self.mock_acm.describe_certificate.side_effect = lambda CertificateArn: {
+            "Certificate": {"Options": {"CertificateTransparencyLoggingPreference": "ENABLED"}}
+        }
+
+        report = self.check.execute(self.mock_session)
+
         assert report.status == CheckStatus.PASSED
-        assert len(report.resource_ids_status) == 1
-        assert report.resource_ids_status[0].status == CheckStatus.PASSED
-        assert "enforces the use of at least one lowercase letter" in report.resource_ids_status[0].summary
-
-    def test_password_policy_does_not_require_lowercase(self):
-        """Test when password policy does not require lowercase characters."""
-        # Mock the response for a policy that doesn't require lowercase
-        self.mock_client.get_account_password_policy.return_value = {
-            'PasswordPolicy': {
-                'RequireLowercaseCharacters': False
-            }
-        }
-
-        # Execute the check
-        report = self.check.execute(self.mock_session)
-
-        # Verify the results
-        assert report.status == CheckStatus.FAILED
-        assert len(report.resource_ids_status) == 1
-        assert report.resource_ids_status[0].status == CheckStatus.FAILED
-        assert "does not enforce the use of at least one lowercase letter" in report.resource_ids_status[0].summary
-
-    def test_password_policy_missing_lowercase_setting(self):
-        """Test when password policy exists but doesn't specify lowercase requirement."""
-        # Mock the response for a policy that doesn't specify lowercase requirement
-        self.mock_client.get_account_password_policy.return_value = {
-            'PasswordPolicy': {
-                # RequireLowercaseCharacters is missing
-            }
-        }
-
-        # Execute the check
-        report = self.check.execute(self.mock_session)
-
-        # Verify the results
-        assert report.status == CheckStatus.FAILED
-        assert len(report.resource_ids_status) == 1
-        assert report.resource_ids_status[0].status == CheckStatus.FAILED
-        assert "does not enforce the use of at least one lowercase letter" in report.resource_ids_status[0].summary
-
-    def test_no_password_policy_exists(self):
-        """Test when no password policy exists."""
-        # Set up the NoSuchEntityException
-        self.mock_client.get_account_password_policy.side_effect = self.mock_client.exceptions.NoSuchEntityException()
-
-        # Execute the check
-        report = self.check.execute(self.mock_session)
-
-        # Verify the results
-        assert report.status == CheckStatus.FAILED
-        assert len(report.resource_ids_status) == 1
-        assert report.resource_ids_status[0].status == CheckStatus.FAILED
-        assert "No custom IAM password policy is configured" in report.resource_ids_status[0].summary
-
-    def test_client_error_handling(self):
-        """Test error handling when a ClientError occurs."""
-        # Mock a ClientError with proper structure
-        error_response = {'Error': {'Code': 'SomeError', 'Message': 'An error occurred'}}
-        self.mock_client.get_account_password_policy.side_effect = ClientError(error_response, 'GetAccountPasswordPolicy')
-
-        # Execute the check
-        report = self.check.execute(self.mock_session)
-
-        # Verify the results
-        assert report.status == CheckStatus.UNKNOWN
-        assert len(report.resource_ids_status) == 1
-        assert report.resource_ids_status[0].status == CheckStatus.UNKNOWN
-        assert "An error occurred while retrieving the IAM password policy" in report.resource_ids_status[0].summary
+        assert len(report.resource_ids_status) == 2
+        assert all(r.status == CheckStatus.PASSED for r in report.resource_ids_status)
+        assert report.resource_ids_status[0].resource.arn == cert_arn_1
+        assert report.resource_ids_status[1].resource.arn == cert_arn_2
